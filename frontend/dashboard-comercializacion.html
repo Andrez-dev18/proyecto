@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Comercialización</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .table-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .table-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-hover-scale {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn-hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .slide-down {
+            animation: slideDown 0.4s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-6">
+        
+        <!-- Header Info -->
+        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl shadow-xl p-6 mb-6 slide-down">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <i class="fas fa-shopping-cart text-white text-3xl"></i>
+                </div>
+                <div class="text-white">
+                    <h1 class="text-3xl font-bold mb-1">Dashboard de Comercialización</h1>
+                    <p class="text-purple-100">Gestión de comercialización de pollo vivo</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selector de tipo de datos -->
+        <section class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-filter text-purple-600"></i>
+                Selecciona el tipo de datos
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="cargarDatos('vivo-aqp')" 
+                        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
+                    <i class="fas fa-city text-2xl mb-2"></i>
+                    <span class="block text-sm">Comercialización Vivo</span>
+                    <span class="block text-lg font-bold">Arequipa</span>
+                </button>
+                <button onclick="cargarDatos('vivo-provincia')" 
+                        class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
+                    <i class="fas fa-map-marked-alt text-2xl mb-2"></i>
+                    <span class="block text-sm">Comercialización Vivo</span>
+                    <span class="block text-lg font-bold">Provincias</span>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Filtros -->
+        <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="filterSection" style="display: none;">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-purple-600"></i>
+                    Filtros
+                </h2>
+                <button onclick="limpiarFiltros()" 
+                        class="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 text-sm">
+                    <i class="fas fa-times-circle"></i>
+                    Limpiar filtros
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha</label>
+                    <input type="date" id="filterFecha" onchange="aplicarFiltros()" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Mercado/Provincia</label>
+                    <select id="filterMercado" onchange="aplicarFiltros()" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
+                    <select id="filterProveedor" onchange="aplicarFiltros()" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Condición/Tipo</label>
+                    <select id="filterCondicion" onchange="aplicarFiltros()" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 text-sm text-gray-600 flex items-center gap-2">
+                <i class="fas fa-info-circle text-purple-600"></i>
+                <span id="filterInfo">Mostrando todos los registros</span>
+            </div>
+        </section>
+        
+        <!-- Botones de acción -->
+        <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="actionButtons" style="display: none;">
+            <div class="flex flex-wrap gap-3 justify-center items-center">
+                <div class="flex items-center gap-2 text-gray-700 font-semibold mr-4">
+                    <i class="fas fa-tools text-purple-600"></i>
+                    <span>Acciones:</span>
+                </div>
+                <button onclick="mostrarModalNuevo()" 
+                        class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                    <i class="fas fa-plus-circle"></i>
+                    Nuevo Registro
+                </button>
+                <button id="btnModificar" 
+                        onclick="editarSeleccionado()" 
+                        disabled 
+                        class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                    <i class="fas fa-edit"></i>
+                    Modificar
+                </button>
+                <button id="btnEliminar" 
+                        onclick="eliminarSeleccionado()" 
+                        disabled 
+                        class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                    <i class="fas fa-trash-alt"></i>
+                    Eliminar
+                </button>
+                <button id="btnExportar" 
+                        onclick="exportarExcel()" 
+                        class="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar Excel
+                </button>
+            </div>
+        </section>
+        
+        <!-- Tabla de datos -->
+        <section class="bg-white rounded-2xl card-shadow overflow-hidden">
+            <div class="table-scroll">
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white sticky top-0">
+                        <tr id="tableHeaders">
+                            <th class="px-4 py-3 text-left text-sm font-semibold">Seleccionar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="100" class="px-6 py-16 text-center text-gray-500">
+                                <i class="fas fa-table text-6xl text-gray-400 mb-4"></i>
+                                <p class="text-xl font-semibold mb-2">Selecciona una opción para cargar datos</p>
+                                <p class="text-gray-400">Usa los botones de arriba para comenzar</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // Funciones placeholder - se implementarán con los controladores
+        function cargarDatos(tipo) {
+            console.log('Cargando datos:', tipo);
+            alert('Funcionalidad en desarrollo. Tipo: ' + tipo);
+            // TODO: Implementar carga de datos
+            document.getElementById('filterSection').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'block';
+        }
+        
+        function aplicarFiltros() {
+            console.log('Aplicando filtros');
+            // TODO: Implementar filtros
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filterFecha').value = '';
+            document.getElementById('filterMercado').value = '';
+            document.getElementById('filterProveedor').value = '';
+            document.getElementById('filterCondicion').value = '';
+            aplicarFiltros();
+        }
+        
+        function mostrarModalNuevo() {
+            alert('Modal de nuevo registro (en desarrollo)');
+            // TODO: Implementar modal
+        }
+        
+        function editarSeleccionado() {
+            alert('Editar registro seleccionado (en desarrollo)');
+            // TODO: Implementar edición
+        }
+        
+        function eliminarSeleccionado() {
+            if (confirm('¿Estás seguro de eliminar este registro?')) {
+                alert('Eliminar registro (en desarrollo)');
+                // TODO: Implementar eliminación
+            }
+        }
+        
+        function exportarExcel() {
+            alert('Exportar a Excel (en desarrollo)');
+            // TODO: Implementar exportación
+        }
+    </script>
+</body>
+</html>

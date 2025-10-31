@@ -3,466 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sistema de Gestión de Pollo - Dashboard administrativo">
-    <title>Dashboard - Gestión de Pollo</title>
+    <meta name="description" content="Sistema de Gestión de Pollo - Múltiples Dashboards">
+    <title>Sistema de Gestión - Dashboard</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Estilos personalizados -->
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* Scrollbar personalizado */
-        .table-scroll {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .table-scroll::-webkit-scrollbar,
-        .modal-content-scroll::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .table-scroll::-webkit-scrollbar-track,
-        .modal-content-scroll::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb,
-        .modal-content-scroll::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb:hover,
-        .modal-content-scroll::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
+        /* Sidebar */
+        .sidebar {
             position: fixed;
-            z-index: 50;
             left: 0;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
+            height: 100vh;
+            width: 260px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
         }
-        .modal.show {
-            display: block;
+        
+        .sidebar.open {
+            transform: translateX(0);
         }
-        .modal-content-scroll {
-            max-height: 70vh;
-            overflow-y: auto;
+        
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .menu-item {
+            transition: all 0.2s ease;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #60a5fa;
+        }
+        
+        /* Content area */
+        .content-wrapper {
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (min-width: 1024px) {
+            .sidebar {
+                transform: translateX(0);
+            }
+            
+            .content-wrapper {
+                margin-left: 260px;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+            }
+            
+            .menu-toggle-mobile {
+                display: none;
+            }
+        }
+        
         /* Animaciones */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideDown {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        .slide-down {
-            animation: slideDown 0.4s ease;
+        
+        .animate-slide-in {
+            animation: slideIn 0.3s ease;
         }
-
-        /* Mejoras visuales */
-        .card-shadow {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        
+        /* Dashboard iframe */
+        #dashboardFrame {
+            width: 100%;
+            min-height: calc(100vh - 80px);
+            border: none;
+            background: #f9fafb;
         }
-        .btn-hover-scale {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .btn-hover-scale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 400px;
-        }
-
-        .toast {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease;
-            min-width: 300px;
-        }
-
-        .toast.closing {
-            animation: slideOutRight 0.3s ease;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-        }
-
-        .toast-success {
-            border-left: 4px solid #10b981;
-        }
-
-        .toast-error {
-            border-left: 4px solid #ef4444;
-        }
-
-        .toast-warning {
-            border-left: 4px solid #f59e0b;
-        }
-
-        .toast-info {
-            border-left: 4px solid #3b82f6;
-        }
-
-        .toast-icon {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-        }
-
-        .toast-content {
-            flex: 1;
-        }
-
-        .toast-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .toast-message {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .toast-close {
-            cursor: pointer;
-            color: #9ca3af;
-            transition: color 0.2s;
-            padding: 4px;
-        }
-
-        .toast-close:hover {
-            color: #4b5563;
+        
+        /* Loading */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <header class="bg-white rounded-2xl shadow-xl p-8 mb-8 slide-down">
-            <div class="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-                        Dashboard de Gestión
-                    </h1>
-                    <p class="text-gray-600 text-lg">Sistema de gestión de clientes y proveedores de pollo</p>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <!-- Logo/Header -->
+        <div class="p-6 border-b border-blue-700">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-lg">Sistema</h2>
+                        <p class="text-blue-300 text-xs">Gestión Pollo</p>
+                    </div>
                 </div>
-                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full p-4 shadow-lg">
-                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
+                <button onclick="toggleSidebar()" class="lg:hidden text-white hover:text-blue-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Menu -->
+        <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
+            <div class="mb-4">
+                <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Dashboards</p>
+            </div>
+            
+            <!-- Dashboard Capturas de Pantalla -->
+            <a href="#" onclick="loadDashboard('dashboard-capturas.html', this)" 
+               class="menu-item active flex items-center gap-3 px-4 py-3 text-white rounded-lg" 
+               data-dashboard="capturas">
+                <i class="fas fa-camera w-5"></i>
+                <span class="font-medium">Capturas de Pantalla</span>
+            </a>
+            
+            <!-- Dashboard Comercialización -->
+            <a href="#" onclick="loadDashboard('dashboard-comercializacion.html', this)" 
+               class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg" 
+               data-dashboard="comercializacion">
+                <i class="fas fa-shopping-cart w-5"></i>
+                <span class="font-medium">Comercialización</span>
+            </a>
+            
+            <!-- Separator -->
+            <div class="my-4 border-t border-blue-700"></div>
+            
+            <div class="mb-4">
+                <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Herramientas</p>
+            </div>
+            
+            <!-- Reportes -->
+            <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg">
+                <i class="fas fa-file-excel w-5"></i>
+                <span class="font-medium">Reportes</span>
+            </a>
+            
+            <!-- Configuración -->
+            <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg">
+                <i class="fas fa-cog w-5"></i>
+                <span class="font-medium">Configuración</span>
+            </a>
+        </nav>
+        
+        <!-- Footer -->
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700">
+            <div class="text-center">
+                <p class="text-blue-300 text-xs">© 2024</p>
+                <p class="text-white text-sm font-semibold">Cesar Osire x Sergio Andre</p>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm sticky top-0 z-50">
+            <div class="px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Menu Toggle (Mobile) -->
+                    <button onclick="toggleSidebar()" class="menu-toggle-mobile text-gray-600 hover:text-gray-900 lg:hidden">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <div>
+                        <h1 id="dashboardTitle" class="text-2xl font-bold text-gray-800">Capturas de Pantalla</h1>
+                        <p class="text-sm text-gray-500">Sistema de gestión de clientes y proveedores</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- User Info -->
+                    <div class="hidden md:flex items-center gap-3">
+                        <div class="text-right">
+                            <p class="text-sm font-semibold text-gray-700">Usuario Admin</p>
+                            <p class="text-xs text-gray-500">Administrador</p>
+                        </div>
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
-
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto">
-            <!-- Selector de tipo de datos -->
-            <section class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                    </svg>
-                    Selecciona el tipo de datos
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button onclick="cargarDatos('vivo-arequipa')" 
-                            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
-                        <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        <span class="block text-sm">Vivo</span>
-                        <span class="block text-lg font-bold">Arequipa</span>
-                    </button>
-                    <button onclick="cargarDatos('vivo-provincia')" 
-                            class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
-                        <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <span class="block text-sm">Vivo</span>
-                        <span class="block text-lg font-bold">Provincias</span>
-                    </button>
-                    <button onclick="cargarDatos('beneficiado-arequipa')" 
-                            class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
-                        <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span class="block text-sm">Beneficiado</span>
-                        <span class="block text-lg font-bold">Arequipa</span>
-                    </button>
-                    <button onclick="cargarDatos('beneficiado-provincia')" 
-                            class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
-                        <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                        </svg>
-                        <span class="block text-sm">Beneficiado</span>
-                        <span class="block text-lg font-bold">Provincias</span>
-                    </button>
-                </div>
-            </section>
-
-            <!-- Filtros -->
-            <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="filterSection" style="display: none;">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        Filtros
-                    </h2>
-                    <button onclick="limpiarFiltros()" 
-                            class="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 text-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Limpiar filtros
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Año</label>
-                        <select id="filterAno" onchange="aplicarFiltros()" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                            <option value="">Todos</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Mes</label>
-                        <select id="filterMes" onchange="aplicarFiltros()" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                            <option value="">Todos</option>
-                            <option value="Enero">Enero</option>
-                            <option value="Febrero">Febrero</option>
-                            <option value="Marzo">Marzo</option>
-                            <option value="Abril">Abril</option>
-                            <option value="Mayo">Mayo</option>
-                            <option value="Junio">Junio</option>
-                            <option value="Julio">Julio</option>
-                            <option value="Agosto">Agosto</option>
-                            <option value="Septiembre">Septiembre</option>
-                            <option value="Octubre">Octubre</option>
-                            <option value="Noviembre">Noviembre</option>
-                            <option value="Diciembre">Diciembre</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Provincia</label>
-                        <select id="filterProvincia" onchange="aplicarFiltros()" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Zona</label>
-                        <select id="filterZona" onchange="aplicarFiltros()" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                            <option value="">Todas</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo Cliente</label>
-                        <select id="filterTipoCliente" onchange="aplicarFiltros()" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                            <option value="">Todos</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4 text-sm text-gray-600 flex items-center gap-2">
-                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span id="filterInfo">Mostrando todos los registros</span>
-                </div>
-            </section>
-
-            <!-- Botones de acción -->
-            <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="actionButtons" style="display: none;">
-                <div class="flex flex-wrap gap-3 justify-center items-center">
-                    <div class="flex items-center gap-2 text-gray-700 font-semibold mr-4">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <span>Acciones:</span>
-                    </div>
-                    <button onclick="mostrarModalNuevo()" 
-                            class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Nuevo
-                    </button>
-                    <button id="btnModificar" 
-                            onclick="editarSeleccionado()" 
-                            disabled 
-                            class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Modificar
-                    </button>
-                    <button id="btnEliminar" 
-                            onclick="eliminarSeleccionado()" 
-                            disabled 
-                            class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                        Eliminar
-                    </button>
-                    <button id="btnReporte" 
-                            onclick="generarReporteSeleccionado()" 
-                            disabled 
-                            class="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Reporte
-                    </button>
-                </div>
-            </section>
-
-            <!-- Tabla de datos -->
-            <section class="bg-white rounded-2xl card-shadow overflow-hidden">
-                <div class="table-scroll">
-                    <table class="w-full">
-                        <thead class="bg-gradient-to-r from-gray-700 to-gray-800 text-white sticky top-0">
-                            <tr id="tableHeaders">
-                                <th class="px-4 py-3 text-left text-sm font-semibold">Seleccionar</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-gray-200">
-                            <tr>
-                                <td colspan="100" class="px-6 py-16 text-center text-gray-500">
-                                    <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <p class="text-xl font-semibold mb-2">Selecciona una opción para cargar datos</p>
-                                    <p class="text-gray-400">Usa los botones de arriba para comenzar</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-
-        <footer class="text-center mt-8 text-gray-600">
-            <p class="text-sm">
-                &copy; 2024 | 
-                <span class="font-semibold">Cesar Osire x Sergio Andre</span>
-            </p>
-        </footer>
-    </div>
-
-    <!-- Modal de formulario -->
-    <div id="formModal" class="modal">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full slide-down">
-                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-2xl flex justify-between items-center">
-                    <h3 id="modalTitle" class="text-2xl font-bold">Formulario</h3>
-                    <button onclick="cerrarModal()" 
-                            class="text-white hover:text-gray-200 text-3xl font-bold transition-transform hover:scale-110">
-                        &times;
-                    </button>
-                </div>
-                <div class="modal-content-scroll px-6 py-4">
-                    <form id="registroForm"></form>
-                </div>
-                <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
-                    <button type="button" 
-                            onclick="cerrarModal()" 
-                            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg transition btn-hover-scale">
-                        Cancelar
-                    </button>
-                    <button type="button" 
-                            onclick="guardarRegistro()" 
-                            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg transition btn-hover-scale">
-                        Guardar
-                    </button>
-                </div>
+        
+        <!-- Dashboard Content -->
+        <main class="p-6 relative">
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
-        </div>
+            
+            <iframe 
+                id="dashboardFrame" 
+                src="dashboard-capturas.html"
+                onload="hideLoading()">
+            </iframe>
+        </main>
     </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <!-- Scripts - ORDEN IMPORTANTÍSIMO (Arquitectura por capas) -->
-    <!-- 1. Configuración -->
-    <script src="js/config/config.js"></script>
-    <script src="js/config/constants.js"></script>
     
-    <!-- 2. Servicios -->
-    <script src="js/services/api.service.js"></script>
-    
-    <!-- 3. Vistas -->
-    <script src="js/views/table.view.js"></script>
-    <script src="js/views/form.view.js"></script>
-    
-    <!-- 4. Controladores -->
-    <script src="js/controllers/data.controller.js"></script>
-    <script src="js/controllers/ui.controller.js"></script>
-    <script src="js/controllers/form.controller.js"></script>
-    <script src="js/controllers/view.controller.js"></script>
-    <script src="js/controllers/filter.controller.js"></script>
-    
-    <!-- 5. Utilidades -->
-    <script src="js/utils/notifications.js"></script>
-    <script src="js/utils/helpers.js"></script>
-    
-    <!-- 6. Aplicación principal -->
-    <script src="app.js"></script>
+    <script>
+        // Toggle Sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        // Load Dashboard
+        function loadDashboard(url, element) {
+            // Prevenir comportamiento por defecto del enlace
+            event.preventDefault();
+            
+            // Mostrar loading
+            showLoading();
+            
+            // Actualizar menu activo
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            element.classList.add('active');
+            
+            // Cargar dashboard
+            const frame = document.getElementById('dashboardFrame');
+            frame.src = url;
+            
+            // Actualizar título
+            const titles = {
+                'dashboard-capturas.html': 'Capturas de Pantalla',
+                'dashboard-comercializacion.html': 'Comercialización'
+            };
+            document.getElementById('dashboardTitle').textContent = titles[url] || 'Dashboard';
+            
+            // Cerrar sidebar en móvil
+            if (window.innerWidth < 1024) {
+                toggleSidebar();
+            }
+        }
+        
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingIndicator').classList.add('hidden');
+        }
+        
+        // Responsive: cerrar sidebar al hacer clic fuera
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.add('open');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            }
+        });
+        
+        // Inicializar sidebar abierto en desktop
+        if (window.innerWidth >= 1024) {
+            document.getElementById('sidebar').classList.add('open');
+        }
+    </script>
 </body>
 </html>

@@ -3,7 +3,6 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
 require_once __DIR__ . '/../controllers/ReporteController.php';
-require_once __DIR__ . '/../controllers/VivoArequipaController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -25,10 +24,9 @@ $db = (new Database())->getConnection();
 $vivoController = new VivoController($db);
 $beneficiadoController = new BeneficiadoController($db);
 $reporteController = new ReporteController($db);
-$VivoArequipaController = new VivoArequipaController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
-// IMPORTANTE: Usar parse_url para separar path de query string
+// ⭐ IMPORTANTE: Usar parse_url para separar path de query string
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
 // ========== RUTAS REPORTES EXCEL (PRIMERO, para que no interfieran) ==========
@@ -140,17 +138,6 @@ elseif (strpos($path, "/beneficiado/actualizar") !== false && $request == "PUT")
 // DELETE Beneficiado Borrar
 elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
     $beneficiadoController->delete($matches[1]);
-    exit;
-}
-
-
-//################## RUTAS VIVO AREQUIPA #################################
-// GET Vivo All
-elseif (strpos($path, "/vivoArequipa/all") !== false && $request == "GET") {
-    $VivoArequipaController->getAll();
-    exit;
-}elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
-    $VivoArequipaController->create();
     exit;
 }
 
