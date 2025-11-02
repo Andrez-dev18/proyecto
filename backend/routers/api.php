@@ -4,6 +4,15 @@ require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
 require_once __DIR__ . '/../controllers/ReporteController.php';
 require_once __DIR__ . '/../controllers/VivoArequipaController.php';
+<<<<<<< HEAD
+=======
+require_once __DIR__ . '/../controllers/CondicionController.php';
+require_once __DIR__ . '/../controllers/EmpresaController.php';
+require_once __DIR__ . '/../controllers/MercadoController.php';
+require_once __DIR__ . '/../controllers/ProveedorController.php';
+require_once __DIR__ . '/../controllers/ProvinciaController.php';
+require_once __DIR__ . '/../controllers/TipoController.php';
+>>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -26,6 +35,15 @@ $vivoController = new VivoController($db);
 $beneficiadoController = new BeneficiadoController($db);
 $reporteController = new ReporteController($db);
 $VivoArequipaController = new VivoArequipaController($db);
+<<<<<<< HEAD
+=======
+$CondicionController = new CondicionController($db);
+$EmpresaController = new EmpresaController($db);
+$MercadoController = new MercadoController($db);
+$ProveedorController = new ProveedorController($db);
+$ProvinciaController = new ProvinciaController($db);
+$TipoController = new TipoController($db);
+>>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -152,6 +170,29 @@ elseif (strpos($path, "/vivoArequipa/all") !== false && $request == "GET") {
 }elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
     $VivoArequipaController->create();
     exit;
+<<<<<<< HEAD
+=======
+} //#RUTAS CONDICION
+elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
+    $CondicionController->getAll();
+    exit;
+    //#RUTAS EMPRESA
+}elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
+    $EmpresaController->getAll();
+    exit;
+}elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
+    $MercadoController->getAll();
+    exit;
+}elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
+    $ProveedorController->getAll();
+    exit;
+}elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
+    $ProvinciaController->getAll();
+    exit;
+}elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
+    $TipoController->getAll();
+    exit;
+>>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
 }
 
 // ========== RUTA NO ENCONTRADA ==========
