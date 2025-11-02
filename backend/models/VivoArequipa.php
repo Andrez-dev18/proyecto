@@ -1,7 +1,7 @@
 <?php 
 
 class VivoArequipa{
-     public int $id;
+    public int $id;
     public ?string $fecha;
     public ?string $mercado;
     public ?string $empresa;
