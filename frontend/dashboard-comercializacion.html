@@ -3,92 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Comercialización</title>
+    <title>Dashboard - Información del Mercado</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .table-scroll {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .table-scroll::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .table-scroll::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        .table-scroll::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        .card-shadow {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-hover-scale {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .btn-hover-scale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-        
+        .table-scroll { max-height: 500px; overflow-y: auto; }
+        .card-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
+        .btn-hover-scale { transition: transform 0.2s ease; }
+        .btn-hover-scale:hover { transform: translateY(-2px); }
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .slide-down {
-            animation: slideDown 0.4s ease;
+        .slide-down { animation: slideDown 0.4s ease; }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOutRight {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(100%); }
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
         
-        <!-- Header Info -->
+        <!-- Header -->
         <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl shadow-xl p-6 mb-6 slide-down">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
                     <i class="fas fa-shopping-cart text-white text-3xl"></i>
                 </div>
                 <div class="text-white">
-                    <h1 class="text-3xl font-bold mb-1">Dashboard de Comercialización</h1>
-                    <p class="text-purple-100">Gestión de comercialización de pollo vivo</p>
+                    <h1 class="text-3xl font-bold mb-1">Información del Mercado</h1>
+                    <p class="text-purple-100">Gestión de información del mercado de pollo vivo</p>
                 </div>
             </div>
         </div>
         
-        <!-- Selector de tipo de datos -->
+        <!-- Selector de tipo -->
         <section class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
             <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-filter text-purple-600"></i>
                 Selecciona el tipo de datos
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="cargarDatos('vivo-aqp')" 
+                <button id="btnVivoAqp" 
                         class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
                     <i class="fas fa-city text-2xl mb-2"></i>
                     <span class="block text-sm">Comercialización Vivo</span>
                     <span class="block text-lg font-bold">Arequipa</span>
                 </button>
-                <button onclick="cargarDatos('vivo-provincia')" 
+                <button id="btnVivoProvincia" 
                         class="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg btn-hover-scale">
                     <i class="fas fa-map-marked-alt text-2xl mb-2"></i>
                     <span class="block text-sm">Comercialización Vivo</span>
@@ -98,154 +67,251 @@
         </section>
         
         <!-- Filtros -->
-        <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="filterSection" style="display: none;">
+        <section id="filterSection" class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2">
                     <i class="fas fa-sliders-h text-purple-600"></i>
                     Filtros
                 </h2>
-                <button onclick="limpiarFiltros()" 
-                        class="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 text-sm">
-                    <i class="fas fa-times-circle"></i>
+                <button id="btnLimpiarFiltros" class="text-purple-600 hover:text-purple-700 font-semibold">
+                    <i class="fas fa-times-circle mr-1"></i>
                     Limpiar filtros
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha</label>
-                    <input type="date" id="filterFecha" onchange="aplicarFiltros()" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                    <input type="date" id="filterFecha" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Mercado/Provincia</label>
-                    <select id="filterMercado" onchange="aplicarFiltros()" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                        <option value="">Todos</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Mercado</label>
+                    <select id="filterMercado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Proveedor</label>
-                    <select id="filterProveedor" onchange="aplicarFiltros()" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                        <option value="">Todos</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                    <select id="filterProvincia" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                 </div>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Condición/Tipo</label>
-                    <select id="filterCondicion" onchange="aplicarFiltros()" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
-                        <option value="">Todos</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                    <select id="filterProveedor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                 </div>
-            </div>
-            <div class="mt-4 text-sm text-gray-600 flex items-center gap-2">
-                <i class="fas fa-info-circle text-purple-600"></i>
-                <span id="filterInfo">Mostrando todos los registros</span>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                    <select id="filterCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="filterTipo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                </div>
             </div>
         </section>
         
-        <!-- Botones de acción -->
-        <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="actionButtons" style="display: none;">
-            <div class="flex flex-wrap gap-3 justify-center items-center">
-                <div class="flex items-center gap-2 text-gray-700 font-semibold mr-4">
-                    <i class="fas fa-tools text-purple-600"></i>
-                    <span>Acciones:</span>
-                </div>
-                <button onclick="mostrarModalNuevo()" 
-                        class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
-                    <i class="fas fa-plus-circle"></i>
+        <!-- Acciones -->
+        <section class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-purple-600"></i>
+                Acciones
+            </h2>
+            <div class="flex flex-wrap gap-3">
+                <button id="btnNuevo" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-plus mr-2"></i>
                     Nuevo Registro
                 </button>
-                <button id="btnModificar" 
-                        onclick="editarSeleccionado()" 
-                        disabled 
-                        class="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                    <i class="fas fa-edit"></i>
+                <button id="btnModificar" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-edit mr-2"></i>
                     Modificar
                 </button>
-                <button id="btnEliminar" 
-                        onclick="eliminarSeleccionado()" 
-                        disabled 
-                        class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-                    <i class="fas fa-trash-alt"></i>
+                <button id="btnEliminar" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-trash mr-2"></i>
                     Eliminar
                 </button>
-                <button id="btnExportar" 
-                        onclick="exportarExcel()" 
-                        class="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
-                    <i class="fas fa-file-excel"></i>
+                <button id="btnExportar" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-file-excel mr-2"></i>
                     Exportar Excel
                 </button>
             </div>
         </section>
         
-        <!-- Tabla de datos -->
-        <section class="bg-white rounded-2xl card-shadow overflow-hidden">
+        <!-- Tabla -->
+        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Registros
+            </h2>
             <div class="table-scroll">
-                <table class="w-full">
-                    <thead class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white sticky top-0">
-                        <tr id="tableHeaders">
-                            <th class="px-4 py-3 text-left text-sm font-semibold">Seleccionar</th>
+                <table class="min-w-full">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mercado/Provincia</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">P. Mayorista</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">P. Público</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="divide-y divide-gray-200">
-                        <tr>
-                            <td colspan="100" class="px-6 py-16 text-center text-gray-500">
-                                <i class="fas fa-table text-6xl text-gray-400 mb-4"></i>
-                                <p class="text-xl font-semibold mb-2">Selecciona una opción para cargar datos</p>
-                                <p class="text-gray-400">Usa los botones de arriba para comenzar</p>
-                            </td>
-                        </tr>
+                    <tbody id="tableBody">
+                        <tr><td colspan="7" class="text-center py-8 text-gray-500">Selecciona un tipo de datos para comenzar</td></tr>
                     </tbody>
                 </table>
             </div>
         </section>
     </div>
-    
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
+                <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
+            </div>
+            <form id="modalForm" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Fecha -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
+                        <input type="date" id="modalFecha" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Campos Arequipa -->
+                    <div id="campoEmpresa">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                        <select id="modalEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+                    <div id="campoMercado">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Mercado</label>
+                        <select id="modalMercado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+                    <div id="campoRucEmpr">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">RUC Empresa</label>
+                        <input type="text" id="modalRucEmpr" maxlength="11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div id="campoCondicion">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
+                        <select id="modalCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+
+                    <!-- Campos Provincia -->
+                    <div id="campoProvincia" style="display:none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                        <select id="modalProvincia" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+                    <div id="campoTipo" style="display:none;">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                        <select id="modalTipo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+
+                    <!-- Proveedor -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
+                        <select id="modalProveedor" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">RUC Proveedor</label>
+                        <input type="text" id="modalRucProv" maxlength="11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Precios -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio May. Mín</label>
+                        <input type="number" id="modalPrecioMayMin" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio May. Máx</label>
+                        <input type="number" id="modalPrecioMayMax" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Púb. Mín</label>
+                        <input type="number" id="modalPrecioPubMin" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Púb. Máx</label>
+                        <input type="number" id="modalPrecioPubMax" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Pesos -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Mín</label>
+                        <input type="number" id="modalPesoMachoMin" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Máx</label>
+                        <input type="number" id="modalPesoMachoMax" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hemb. Mín</label>
+                        <input type="number" id="modalPesoHembMin" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hemb. Máx</label>
+                        <input type="number" id="modalPesoHembMax" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Color -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Mín</label>
+                        <input type="number" id="modalColorMin" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Máx</label>
+                        <input type="number" id="modalColorMax" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Pesos Promedio -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Mín</label>
+                        <input type="number" id="modalPesoMachoPromMin" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Máx</label>
+                        <input type="number" id="modalPesoMachoPromMax" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hemb. Mín</label>
+                        <input type="number" id="modalPesoHembraPromMin" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hemb. Máx</label>
+                        <input type="number" id="modalPesoHembraPromMax" step="0.1" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
+                        <input type="number" id="modalCantidad" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="btnCancelar" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnGuardar" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="bg-white p-6 rounded-xl shadow-2xl">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
+            <p class="text-gray-700">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config/config.comercializacion.js"></script>
+    <script src="js/services/comercializacion.service.js"></script>
+    <script src="js/controllers/comercializacion.controller.js"></script>
     <script>
-        // Funciones placeholder - se implementarán con los controladores
-        function cargarDatos(tipo) {
-            console.log('Cargando datos:', tipo);
-            alert('Funcionalidad en desarrollo. Tipo: ' + tipo);
-            // TODO: Implementar carga de datos
-            document.getElementById('filterSection').style.display = 'block';
-            document.getElementById('actionButtons').style.display = 'block';
-        }
-        
-        function aplicarFiltros() {
-            console.log('Aplicando filtros');
-            // TODO: Implementar filtros
-        }
-        
-        function limpiarFiltros() {
-            document.getElementById('filterFecha').value = '';
-            document.getElementById('filterMercado').value = '';
-            document.getElementById('filterProveedor').value = '';
-            document.getElementById('filterCondicion').value = '';
-            aplicarFiltros();
-        }
-        
-        function mostrarModalNuevo() {
-            alert('Modal de nuevo registro (en desarrollo)');
-            // TODO: Implementar modal
-        }
-        
-        function editarSeleccionado() {
-            alert('Editar registro seleccionado (en desarrollo)');
-            // TODO: Implementar edición
-        }
-        
-        function eliminarSeleccionado() {
-            if (confirm('¿Estás seguro de eliminar este registro?')) {
-                alert('Eliminar registro (en desarrollo)');
-                // TODO: Implementar eliminación
-            }
-        }
-        
-        function exportarExcel() {
-            alert('Exportar a Excel (en desarrollo)');
-            // TODO: Implementar exportación
-        }
+        // Inicializar controlador al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            comercializacionController.init();
+        });
     </script>
 </body>
 </html>

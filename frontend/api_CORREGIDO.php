@@ -3,7 +3,6 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
 require_once __DIR__ . '/../controllers/ReporteController.php';
-require_once __DIR__ . '/../controllers/ComercializacionController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -25,13 +24,11 @@ $db = (new Database())->getConnection();
 $vivoController = new VivoController($db);
 $beneficiadoController = new BeneficiadoController($db);
 $reporteController = new ReporteController($db);
-$comercializacionController = new ComercializacionController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
-// ⭐ IMPORTANTE: Usar parse_url para separar path de query string
-$path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+$path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH); // Obtener path sin query string
 
-// ========== RUTAS REPORTES EXCEL (PRIMERO, para que no interfieran) ==========
+// ========== RUTAS REPORTES EXCEL (PRIMERO) ==========
 if (strpos($path, "/reporte/beneficiado/arequipa/excel") !== false && $request == "GET") {
     $reporteController->exportarArequipaBeneficiadoExcel();
     exit;
@@ -143,117 +140,9 @@ elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $reques
     exit;
 }
 
-// ========== RUTAS COMERCIALIZACION ==========
-
-// GET Comercialización Vivo Arequipa (con o sin filtros)
-elseif (strpos($path, "/comercializacion/vivo-aqp") !== false && $request == "GET") {
-    if (!empty($_GET)) {
-        $comercializacionController->filtrarVivoAqp();
-    } else {
-        $comercializacionController->getVivoAqp();
-    }
-    exit;
-}
-
-// GET Comercialización Vivo Provincia (con o sin filtros)
-elseif (strpos($path, "/comercializacion/vivo-provincia") !== false && $request == "GET") {
-    if (!empty($_GET)) {
-        $comercializacionController->filtrarVivoProvincia();
-    } else {
-        $comercializacionController->getVivoProvincia();
-    }
-    exit;
-}
-
-// POST Comercialización Crear
-elseif (strpos($path, "/comercializacion/crear") !== false && $request == "POST") {
-    $comercializacionController->create();
-    exit;
-}
-
-// PUT Comercialización Actualizar
-elseif (strpos($path, "/comercializacion/actualizar") !== false && $request == "PUT") {
-    $comercializacionController->update();
-    exit;
-}
-
-// DELETE Comercialización Borrar
-elseif (preg_match("/\/comercializacion\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
-    $comercializacionController->delete($matches[1]);
-    exit;
-}
-
-// ========== RUTAS PARA SELECTS ==========
-
-// GET Mercados
-elseif (strpos($path, "/comercializacion/mercados") !== false && $request == "GET") {
-    $comercializacionController->getMercados();
-    exit;
-}
-
-// GET Proveedores
-elseif (strpos($path, "/comercializacion/proveedores") !== false && $request == "GET") {
-    $comercializacionController->getProveedores();
-    exit;
-}
-
-// GET Provincias
-elseif (strpos($path, "/comercializacion/provincias") !== false && $request == "GET") {
-    $comercializacionController->getProvincias();
-    exit;
-}
-
-// GET Condiciones
-elseif (strpos($path, "/comercializacion/condiciones") !== false && $request == "GET") {
-    $comercializacionController->getCondiciones();
-    exit;
-}
-
-// GET Tipos
-elseif (strpos($path, "/comercializacion/tipos") !== false && $request == "GET") {
-    $comercializacionController->getTipos();
-    exit;
-}
-
-// ========== RUTAS ADICIONALES CATÁLOGOS ==========
-
-// GET Empresa All
-elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
-    $comercializacionController->getEmpresas();
-    exit;
-}
-
-// GET Mercado All
-elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
-    $comercializacionController->getMercados();
-    exit;
-}
-
-// GET Proveedor All
-elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
-    $comercializacionController->getProveedores();
-    exit;
-}
-
-// GET Provincia All
-elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
-    $comercializacionController->getProvincias();
-    exit;
-}
-
-// GET Tipo All
-elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
-    $comercializacionController->getTipos();
-    exit;
-}
-
 // ========== RUTA NO ENCONTRADA ==========
 else {
     http_response_code(404);
-    echo json_encode([
-        "error" => "Ruta no encontrada",
-        "path" => $path,
-        "method" => $request
-    ]);
+    echo json_encode(["error" => "Ruta no encontrada: " . $path]);
 }
 ?>

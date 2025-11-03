@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Comercialización</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test API Comercialización</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Catálogos</h2>
+        <button onclick="testEmpresas()">Test Empresas</button>
+        <button onclick="testMercados()">Test Mercados</button>
+        <button onclick="testProveedores()">Test Proveedores</button>
+        <button onclick="testProvincias()">Test Provincias</button>
+        <button onclick="testCondiciones()">Test Condiciones</button>
+        <button onclick="testTipos()">Test Tipos</button>
+        <div id="catalogos-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Datos Vivo Arequipa</h2>
+        <button onclick="testVivoAqp()">Cargar Vivo Arequipa</button>
+        <div id="vivo-aqp-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Datos Vivo Provincia</h2>
+        <button onclick="testVivoProvincia()">Cargar Vivo Provincia</button>
+        <div id="vivo-provincia-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Test Crear Registro</h2>
+        <button onclick="testCrearVivoAqp()">Crear Registro Vivo Arequipa</button>
+        <div id="crear-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8033/proyecto/backend';
+
+        async function testAPI(endpoint, elementId, label) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = `<div class="result">⏳ Cargando ${label}...</div>`;
+            
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result">
+                        ✅ ${label} - Status: ${response.status}
+                        Total registros: ${Array.isArray(data) ? data.length : 'N/A'}
+                        
+                        Datos:
+                        ${JSON.stringify(data, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Error en ${label}:
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function testEmpresas() {
+            testAPI('/empresa/all', 'catalogos-result', 'Empresas');
+        }
+
+        function testMercados() {
+            testAPI('/mercado/all', 'catalogos-result', 'Mercados');
+        }
+
+        function testProveedores() {
+            testAPI('/proveedor/all', 'catalogos-result', 'Proveedores');
+        }
+
+        function testProvincias() {
+            testAPI('/provincia/all', 'catalogos-result', 'Provincias');
+        }
+
+        function testCondiciones() {
+            testAPI('/comercializacion/condiciones', 'catalogos-result', 'Condiciones');
+        }
+
+        function testTipos() {
+            testAPI('/comercializacion/tipos', 'catalogos-result', 'Tipos');
+        }
+
+        function testVivoAqp() {
+            testAPI('/comercializacion/vivo-aqp', 'vivo-aqp-result', 'Vivo Arequipa');
+        }
+
+        function testVivoProvincia() {
+            testAPI('/comercializacion/vivo-provincia', 'vivo-provincia-result', 'Vivo Provincia');
+        }
+
+        async function testCrearVivoAqp() {
+            const resultDiv = document.getElementById('crear-result');
+            resultDiv.innerHTML = '<div class="result">⏳ Creando registro de prueba...</div>';
+            
+            const testData = {
+                tabla: 'com_db_vivo_aqp',
+                fecha: "2025-02-11",
+                mercado: 1,
+                empresa: 1,
+                ruc_empr: "",
+                condicion: 1,
+                proveedor: 1,
+                ruc_prov: "",
+                precioMayMin: 7.8,
+                precioMayMax: 8.2,
+                precioPubMin: 8.5,
+                precioPubMax: 9.0,
+                pesoMachoMin: 2.3,
+                pesoMachoMax: 2.8,
+                pesoHembMin: 2.0,
+                pesoHembMax: 2.4,
+                colorMin: 1.0,
+                colorMax: 2.0,
+                pesoMachoPromMin: 2.4,
+                pesoMachoPromMax: 2.7,
+                pesoHembraPromMin: 2.1,
+                pesoHembraPromMax: 2.3,
+                cantidad: 100,
+                usuarioRegistro: "admin",
+                fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' '),
+                usuarioTransferencia: "sistema",
+                fechaHoraTransferencia: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/comercializacion/crear`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(testData)
+                });
+                
+                const result = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? '' : 'error'}">
+                        ${response.ok ? '✅' : '❌'} Crear Registro - Status: ${response.status}
+                        
+                        Datos enviados:
+                        ${JSON.stringify(testData, null, 2)}
+                        
+                        Respuesta:
+                        ${JSON.stringify(result, null, 2)}
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ Error al crear registro:
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
