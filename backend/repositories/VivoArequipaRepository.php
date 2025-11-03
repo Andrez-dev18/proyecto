@@ -12,9 +12,6 @@ class VivoArequipaRepository
 
     public function findAll()
     {
-<<<<<<< HEAD
-        $query = "SELECT * FROM com_db_vivo_aqp";
-=======
         $query = "
         SELECT
             a.id,
@@ -50,30 +47,11 @@ class VivoArequipaRepository
         LEFT JOIN com_condicion c ON a.condicion = c.codigo
         LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
     ";
->>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
         return $this->executeQuery($query);
     }
 
 
     public function save($data)
-<<<<<<< HEAD
-{
-    $query = "INSERT INTO com_db_vivo_aqp (
-        fecha, mercado, empresa, ruc_empr, condicion, proveedor, ruc_prov,
-        precioMayMin, precioMayMax, precioPubMin, precioPubMax,
-        pesoMachoMin, pesoMachoMax, pesoHembMin, pesoHembMax,
-        colorMin, colorMax, pesoMachoPromMin, pesoMachoPromMax,
-        pesoHembraPromMin, pesoHembraPromMax, cantidad,
-        usuarioRegistro, fechaHoraRegistro, usuarioTransferencia, fechaHoraTransferencia
-    ) VALUES (
-        :fecha, :mercado, :empresa, :ruc_empr, :condicion, :proveedor, :ruc_prov,
-        :precioMayMin, :precioMayMax, :precioPubMin, :precioPubMax,
-        :pesoMachoMin, :pesoMachoMax, :pesoHembMin, :pesoHembMax,
-        :colorMin, :colorMax, :pesoMachoPromMin, :pesoMachoPromMax,
-        :pesoHembraPromMin, :pesoHembraPromMax, :cantidad,
-        :usuarioRegistro, :fechaHoraRegistro, :usuarioTransferencia, :fechaHoraTransferencia
-    )";
-=======
     {
         $query = "
         INSERT INTO com_db_vivo_aqp (
@@ -128,25 +106,15 @@ class VivoArequipaRepository
             :fechaHoraTransferencia
         )
     ";
->>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
 
     $stmt = $this->conn->prepare($query);
 
     $params = [
         ':fecha' => $data['fecha'] ?? null,
-<<<<<<< HEAD
-        ':mercado' => $data['mercado'] ?? null,
-        ':empresa' => $data['empresa'] ?? null,
-        ':ruc_empr' => $data['ruc_empr'] ?? null,
-        ':condicion' => $data['condicion'] ?? null,
-        ':proveedor' => $data['proveedor'] ?? null,
-        ':ruc_prov' => $data['ruc_prov'] ?? null,
-=======
         ':mercado' => $data['mercado'] ?? null, // ID numérico
         ':empresa' => $data['empresa'] ?? null, // ID numérico
         ':condicion' => $data['condicion'] ?? null, // ID numérico
         ':proveedor' => $data['proveedor'] ?? null, // ID numérico
->>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
         ':precioMayMin' => $data['precioMayMin'] ?? null,
         ':precioMayMax' => $data['precioMayMax'] ?? null,
         ':precioPubMin' => $data['precioPubMin'] ?? null,
@@ -169,11 +137,7 @@ class VivoArequipaRepository
     ];
 
     return $stmt->execute($params);
-<<<<<<< HEAD
-}
-=======
     }
->>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
 
 
     private function executeQuery($query)
@@ -181,11 +145,4 @@ class VivoArequipaRepository
         $stmt = $this->conn->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-<<<<<<< HEAD
-
 }
-
-?>
-=======
-}
->>>>>>> 666f841b1b2dd8a35caa2caf0c1d75526fefc10a
