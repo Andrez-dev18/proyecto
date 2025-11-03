@@ -164,6 +164,9 @@ elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $reques
 elseif (strpos($path, "/vivoArequipa/all") !== false && $request == "GET") {
     $VivoArequipaController->getAll();
     exit;
+} elseif (strpos($path, "/vivoArequipa/filtro") !== false && $request == "GET") {
+    $VivoArequipaController->obtenerDatosFiltrados();
+    exit;
 }
 // POST Vivo Arequipa Crear
 elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
@@ -185,6 +188,9 @@ elseif (preg_match("/\/vivoArequipa\/borrar\/(\d+)/", $path, $matches) && ($requ
 // GET Vivo All
 elseif (strpos($path, "/vivoProvincia/all") !== false && $request == "GET") {
     $VivoProvinciaController->getAll();
+    exit;
+}elseif (strpos($path, "/vivoProvincia/filtro") !== false && $request == "GET") {
+    $VivoProvinciaController->obtenerDatosFiltrados();
     exit;
 }
 // POST Vivo Provincia Crear

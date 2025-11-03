@@ -205,11 +205,60 @@ class VivoArequipaRepository
         $stmt = $this->conn->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     public function delete($id)
     {
         $query = "DELETE FROM com_db_vivo_aqp WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([':id' => $id]);
+    }
+
+
+    public function findByFilters($fecha = null, $mercado = null, $empresa = null, $condicion = null, $proveedor = null)
+    {
+        $query = "
+        SELECT
+            a.id,
+            a.fecha,
+            m.nombre AS mercado,
+            e.nombre AS empresa,
+            e.ruc AS ruc_empresa,
+            c.nombre AS condicion,
+            pr.nombre AS proveedor,
+            pr.ruc AS ruc_proveedor,
+            a.precioMayMin,
+            a.precioMayMax,
+            a.precioPubMin,
+            a.precioPubMax,
+            a.pesoMachoMin,
+            a.pesoMachoMax,
+            a.pesoHembMin,
+            a.pesoHembMax,
+            a.colorMin,
+            a.colorMax,
+            a.pesoMachoPromMin,
+            a.pesoMachoPromMax,
+            a.pesoHembraPromMin,
+            a.pesoHembraPromMax,
+            a.cantidad,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_vivo_aqp a
+        LEFT JOIN com_mercado m ON a.mercado = m.codigo
+        LEFT JOIN com_empresa e ON a.empresa = e.codigo
+        LEFT JOIN com_condicion c ON a.condicion = c.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        WHERE 1=1
+    ";
+
+        if (!empty($fecha)) $query .= " AND a.fecha = '$fecha'";
+        if (!empty($mercado)) $query .= " AND a.mercado = $mercado";
+        if (!empty($empresa)) $query .= " AND a.empresa = $empresa";
+        if (!empty($condicion)) $query .= " AND a.condicion = $condicion";
+        if (!empty($proveedor)) $query .= " AND a.proveedor = $proveedor";
+
+        return $this->executeQuery($query);
     }
 }

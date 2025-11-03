@@ -27,4 +27,9 @@ class VivoArequipaService
         return $this->repo->delete($id);
     }
 
+    public function obtenerDatosFiltrados($fecha = null, $mercado = null, $empresa = null, $condicion = null, $proveedor = null)
+    {
+        return $this->repo->findByFilters($fecha, $mercado, $empresa, $condicion, $proveedor);
+    }
+
 }

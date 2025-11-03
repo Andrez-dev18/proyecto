@@ -51,6 +51,22 @@ class VivoProvinciaController
         echo json_encode(["message" => "Registro eliminado correctamente"]);
     }
 
+    public function obtenerDatosFiltrados()
+    {
+        $fecha = $_GET['fecha'] ?? null;
+        $provincia = $_GET['provincia'] ?? null;
+        $proveedor = $_GET['proveedor'] ?? null;
+        $tipo = $_GET['tipo'] ?? null;
+
+        $resultados = $this->service->obtenerDatosFiltrados($fecha, $provincia, $proveedor, $tipo);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'data' => $resultados
+        ]);
+    }
+
 }
 
 ?>

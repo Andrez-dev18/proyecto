@@ -46,8 +46,7 @@ class VivoProvinciaRepository
         ORDER BY v.id DESC
     ";
 
-    return $this->executeQuery($query);
-    
+        return $this->executeQuery($query);
     }
 
 
@@ -194,13 +193,61 @@ class VivoProvinciaRepository
         return $stmt->execute($params);
     }
 
+    public function findByFilters($fecha = null, $provincia = null, $proveedor = null, $tipo = null)
+    {
+        $query = "
+        SELECT 
+            v.id,
+            v.fecha,
+            p.nombre AS provincia,
+            pr.nombre AS proveedor,
+            pr.ruc AS ruc_proveedor,
+            t.nombre AS tipo,
+            t.linea,
+            v.precioMayCarMin,
+            v.precioMayCarMax,
+            v.precioMayBraMin,
+            v.precioMayBraMax,
+            v.precioPubMin,
+            v.precioPubMax,
+            v.pesoMachoPromMin,
+            v.pesoMachoPromMax,
+            v.pesoHembraPromMin,
+            v.pesoHembraPromMax,
+            v.pesoBrasaPromMin,
+            v.pesoBrasaPromMax,
+            v.colorMin,
+            v.colorMax,
+            v.cantidad,
+            v.usuarioRegistro,
+            v.fechaHoraRegistro,
+            v.usuarioTransferencia,
+            v.fechaHoraTransferencia
+        FROM com_db_vivo_provincia v
+        LEFT JOIN com_provincia p ON v.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON v.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON v.tipo = t.codigo
+        WHERE 1=1
+    ";
+
+        if (!empty($fecha)) $query .= " AND v.fecha = '$fecha'";
+        if (!empty($provincia)) $query .= " AND v.provincia = $provincia";
+        if (!empty($proveedor)) $query .= " AND v.proveedor = $proveedor";
+        if (!empty($tipo)) $query .= " AND v.tipo = $tipo";
+
+        $query .= " ORDER BY v.id DESC";
+
+        return $this->executeQuery($query);
+    }
+
+
 
     private function executeQuery($query)
     {
         $stmt = $this->conn->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
     public function delete($id)
     {
         $query = "DELETE FROM com_db_vivo_provincia WHERE id = :id";

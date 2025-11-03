@@ -51,6 +51,24 @@ class VivoArequipaController
         echo json_encode(["message" => "Registro eliminado correctamente"]);
     }
 
+    public function obtenerDatosFiltrados()
+    {
+        // Obtener parámetros desde la query string
+        $fecha = $_GET['fecha'] ?? null;
+        $mercado = $_GET['mercado'] ?? null;
+        $empresa = $_GET['empresa'] ?? null;
+        $condicion = $_GET['condicion'] ?? null;
+        $proveedor = $_GET['proveedor'] ?? null;
+
+        $resultados = $this->service->obtenerDatosFiltrados($fecha, $mercado, $empresa, $condicion, $proveedor);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'data' => $resultados
+        ]);
+    }
+
 }
 
 ?>
