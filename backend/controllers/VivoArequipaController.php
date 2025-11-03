@@ -28,6 +28,29 @@ class VivoArequipaController
         echo json_encode(["message" => "Registro creado correctamente"]);
     }
 
+    public function update()
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
+        if (!isset($data["id"]) || $data["id"] <= 0) {
+            http_response_code(400);
+            echo json_encode(["error" => "ID inválido para actualizar el registro."]);
+            return;
+        }
+        $this->service->save($data);
+        echo json_encode(["message" => "Registro actualizado correctamente"]);
+    }
+
+    public function delete($id)
+    {
+        if (!$id || $id <= 0) {
+            http_response_code(400);
+            echo json_encode(["error" => "ID inválido para eliminar el registro."]);
+            return;
+        }
+        $this->service->delete($id);
+        echo json_encode(["message" => "Registro eliminado correctamente"]);
+    }
+
 }
 
 ?>

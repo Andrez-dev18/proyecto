@@ -3,7 +3,14 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
 require_once __DIR__ . '/../controllers/ReporteController.php';
-require_once __DIR__ . '/../controllers/ComercializacionController.php';
+require_once __DIR__ . '/../controllers/VivoArequipaController.php';
+require_once __DIR__ . '/../controllers/VivoProvinciaController.php';
+require_once __DIR__ . '/../controllers/CondicionController.php';
+require_once __DIR__ . '/../controllers/EmpresaController.php';
+require_once __DIR__ . '/../controllers/MercadoController.php';
+require_once __DIR__ . '/../controllers/ProveedorController.php';
+require_once __DIR__ . '/../controllers/ProvinciaController.php';
+require_once __DIR__ . '/../controllers/TipoController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -25,13 +32,19 @@ $db = (new Database())->getConnection();
 $vivoController = new VivoController($db);
 $beneficiadoController = new BeneficiadoController($db);
 $reporteController = new ReporteController($db);
-$comercializacionController = new ComercializacionController($db);
+$VivoArequipaController = new VivoArequipaController($db);
+$VivoProvinciaController = new VivoProvinciaController($db);
+$CondicionController = new CondicionController($db);
+$EmpresaController = new EmpresaController($db);
+$MercadoController = new MercadoController($db);
+$ProveedorController = new ProveedorController($db);
+$ProvinciaController = new ProvinciaController($db);
+$TipoController = new TipoController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
-// ⭐ IMPORTANTE: Usar parse_url para separar path de query string
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
-// ========== RUTAS REPORTES EXCEL (PRIMERO, para que no interfieran) ==========
+// ========== RUTAS REPORTES EXCEL (PRIMERO, MÁS ESPECÍFICAS) ==========
 if (strpos($path, "/reporte/beneficiado/arequipa/excel") !== false && $request == "GET") {
     $reporteController->exportarArequipaBeneficiadoExcel();
     exit;
@@ -49,11 +62,83 @@ elseif (strpos($path, "/reporte/vivo/provincia/excel") !== false && $request == 
     exit;
 }
 
-// ========== RUTAS VIVO ==========
+//################## RUTAS VIVO AREQUIPA #################################
+// DELETE debe ir primero (más específico)
+elseif (preg_match("/\/vivoArequipa\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
+    $VivoArequipaController->delete($matches[1]);
+    exit;
+}
+elseif (strpos($path, "/vivoArequipa/exportar") !== false && $request == "GET") {
+    $VivoArequipaController->exportarCSV();
+    exit;
+}
+elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
+    $VivoArequipaController->create();
+    exit;
+}
+elseif (strpos($path, "/vivoArequipa/actualizar") !== false && $request == "PUT") {
+    $VivoArequipaController->update();
+    exit;
+}
+elseif (strpos($path, "/vivoArequipa/all") !== false && $request == "GET") {
+    $VivoArequipaController->getAll();
+    exit;
+}
+
+//################## RUTAS VIVO PROVINCIA #################################
+// DELETE debe ir primero (más específico)
+elseif (preg_match("/\/vivoProvincia\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
+    $VivoProvinciaController->delete($matches[1]);
+    exit;
+}
+elseif (strpos($path, "/vivoProvincia/exportar") !== false && $request == "GET") {
+    $VivoProvinciaController->exportarCSV();
+    exit;
+}
+elseif (strpos($path, "/vivoProvincia/crear") !== false && $request == "POST") {
+    $VivoProvinciaController->create();
+    exit;
+}
+elseif (strpos($path, "/vivoProvincia/actualizar") !== false && $request == "PUT") {
+    $VivoProvinciaController->update();
+    exit;
+}
+elseif (strpos($path, "/vivoProvincia/all") !== false && $request == "GET") {
+    $VivoProvinciaController->getAll();
+    exit;
+}
+
+// ========== RUTAS CATÁLOGOS (TABLAS SECUNDARIAS) ==========
+
+elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
+    $CondicionController->getAll();
+    exit;
+}
+elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
+    $EmpresaController->getAll();
+    exit;
+}
+elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
+    $MercadoController->getAll();
+    exit;
+}
+elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
+    $ProveedorController->getAll();
+    exit;
+}
+elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
+    $ProvinciaController->getAll();
+    exit;
+}
+elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
+    $TipoController->getAll();
+    exit;
+}
+
+// ========== RUTAS VIVO (DASHBOARD CAPTURAS - MANTENER FUNCIONANDO) ==========
 
 // GET Vivo Arequipa (con o sin filtros)
 elseif (strpos($path, "/vivo/arequipa") !== false && $request == "GET") {
-    // Si hay parámetros GET, usar filtrado
     if (!empty($_GET)) {
         $vivoController->filtrarArequipa();
     } else {
@@ -96,11 +181,10 @@ elseif (preg_match("/\/vivo\/borrar\/(\d+)/", $path, $matches) && $request == "D
     exit;
 }
 
-// ========== RUTAS BENEFICIADO ==========
+// ========== RUTAS BENEFICIADO (DASHBOARD CAPTURAS - MANTENER FUNCIONANDO) ==========
 
 // GET Beneficiado Arequipa (con o sin filtros)
 elseif (strpos($path, "/beneficiado/arequipa") !== false && $request == "GET") {
-    // Si hay parámetros GET, usar filtrado
     if (!empty($_GET)) {
         $beneficiadoController->filtrarArequipa();
     } else {
@@ -140,110 +224,6 @@ elseif (strpos($path, "/beneficiado/actualizar") !== false && $request == "PUT")
 // DELETE Beneficiado Borrar
 elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
     $beneficiadoController->delete($matches[1]);
-    exit;
-}
-
-// ========== RUTAS COMERCIALIZACION ==========
-
-// GET Comercialización Vivo Arequipa (con o sin filtros)
-elseif (strpos($path, "/comercializacion/vivo-aqp") !== false && $request == "GET") {
-    if (!empty($_GET)) {
-        $comercializacionController->filtrarVivoAqp();
-    } else {
-        $comercializacionController->getVivoAqp();
-    }
-    exit;
-}
-
-// GET Comercialización Vivo Provincia (con o sin filtros)
-elseif (strpos($path, "/comercializacion/vivo-provincia") !== false && $request == "GET") {
-    if (!empty($_GET)) {
-        $comercializacionController->filtrarVivoProvincia();
-    } else {
-        $comercializacionController->getVivoProvincia();
-    }
-    exit;
-}
-
-// POST Comercialización Crear
-elseif (strpos($path, "/comercializacion/crear") !== false && $request == "POST") {
-    $comercializacionController->create();
-    exit;
-}
-
-// PUT Comercialización Actualizar
-elseif (strpos($path, "/comercializacion/actualizar") !== false && $request == "PUT") {
-    $comercializacionController->update();
-    exit;
-}
-
-// DELETE Comercialización Borrar
-elseif (preg_match("/\/comercializacion\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
-    $comercializacionController->delete($matches[1]);
-    exit;
-}
-
-// ========== RUTAS PARA SELECTS ==========
-
-// GET Mercados
-elseif (strpos($path, "/comercializacion/mercados") !== false && $request == "GET") {
-    $comercializacionController->getMercados();
-    exit;
-}
-
-// GET Proveedores
-elseif (strpos($path, "/comercializacion/proveedores") !== false && $request == "GET") {
-    $comercializacionController->getProveedores();
-    exit;
-}
-
-// GET Provincias
-elseif (strpos($path, "/comercializacion/provincias") !== false && $request == "GET") {
-    $comercializacionController->getProvincias();
-    exit;
-}
-
-// GET Condiciones
-elseif (strpos($path, "/comercializacion/condiciones") !== false && $request == "GET") {
-    $comercializacionController->getCondiciones();
-    exit;
-}
-
-// GET Tipos
-elseif (strpos($path, "/comercializacion/tipos") !== false && $request == "GET") {
-    $comercializacionController->getTipos();
-    exit;
-}
-
-// ========== RUTAS ADICIONALES CATÁLOGOS ==========
-
-// GET Empresa All
-elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
-    $comercializacionController->getEmpresas();
-    exit;
-}
-
-// GET Mercado All
-elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
-    $comercializacionController->getMercados();
-    exit;
-}
-
-// GET Proveedor All
-elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
-    $comercializacionController->getProveedores();
-    exit;
-}
-
-// GET Provincia All
-elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
-    $comercializacionController->getProvincias();
-    exit;
-}
-
-// GET Tipo All
-elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
-    $comercializacionController->getTipos();
     exit;
 }
 

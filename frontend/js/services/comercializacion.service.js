@@ -1,7 +1,7 @@
 class ComercializacionService {
     constructor() {
         this.baseURL = typeof ComercializacionConfig !== 'undefined' 
-            ? ComercializacionConfig.apiBaseURL 
+            ? ComercializacionConfig.API.BASE_URL 
             : 'http://localhost:8033/proyecto/backend';
     }
 
@@ -9,8 +9,8 @@ class ComercializacionService {
     
     async getVivoAqp() {
         try {
-            console.log('Fetch URL:', `${this.baseURL}/comercializacion/vivo-aqp`);
-            const response = await fetch(`${this.baseURL}/comercializacion/vivo-aqp`);
+            console.log('Fetch URL:', `${this.baseURL}/vivoArequipa/all`);
+            const response = await fetch(`${this.baseURL}/vivoArequipa/all`);
             
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
@@ -37,7 +37,7 @@ class ComercializacionService {
         if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
         if (filtros.condicion) params.append('condicion', filtros.condicion);
 
-        const response = await fetch(`${this.baseURL}/comercializacion/vivo-aqp?${params}`);
+        const response = await fetch(`${this.baseURL}/vivoArequipa/all?${params}`);
         if (!response.ok) throw new Error('Error al filtrar datos');
         return await response.json();
     }
@@ -46,8 +46,8 @@ class ComercializacionService {
     
     async getVivoProvincia() {
         try {
-            console.log('Fetch URL:', `${this.baseURL}/comercializacion/vivo-provincia`);
-            const response = await fetch(`${this.baseURL}/comercializacion/vivo-provincia`);
+            console.log('Fetch URL:', `${this.baseURL}/vivoProvincia/all`);
+            const response = await fetch(`${this.baseURL}/vivoProvincia/all`);
             
             console.log('Response status:', response.status);
             
@@ -73,7 +73,7 @@ class ComercializacionService {
         if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
         if (filtros.tipo) params.append('tipo', filtros.tipo);
 
-        const response = await fetch(`${this.baseURL}/comercializacion/vivo-provincia?${params}`);
+        const response = await fetch(`${this.baseURL}/vivoProvincia/all?${params}`);
         if (!response.ok) throw new Error('Error al filtrar datos');
         return await response.json();
     }
@@ -81,31 +81,136 @@ class ComercializacionService {
     // ========== CRUD OPERATIONS ==========
     
     async crear(tabla, data) {
-        const response = await fetch(`${this.baseURL}/comercializacion/crear`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tabla, ...data })
-        });
-        if (!response.ok) throw new Error('Error al crear registro');
-        return await response.json();
+        try {
+            const endpoint = tabla === 'com_db_vivo_aqp' ? '/vivoArequipa/crear' : '/vivoProvincia/crear';
+            console.log('Creando registro:', endpoint, data);
+            
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al crear registro');
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error en crear:', error);
+            throw error;
+        }
     }
 
     async actualizar(tabla, data) {
-        const response = await fetch(`${this.baseURL}/comercializacion/actualizar`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ tabla, ...data })
-        });
-        if (!response.ok) throw new Error('Error al actualizar registro');
-        return await response.json();
+        try {
+            const endpoint = tabla === 'com_db_vivo_aqp' ? '/vivoArequipa/actualizar' : '/vivoProvincia/actualizar';
+            const url = `${this.baseURL}${endpoint}`;
+            
+            console.log('=== ACTUALIZAR REGISTRO ===');
+            console.log('URL:', url);
+            console.log('Método: PUT');
+            console.log('Datos enviados:', JSON.stringify(data, null, 2));
+            
+            let response = await fetch(url, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            
+            console.log('Status respuesta:', response.status);
+            
+            const responseText = await response.text();
+            console.log('Respuesta del servidor:', responseText);
+            
+            if (!response.ok) {
+                // Retry with POST fallback (some servers/clients can't send PUT)
+                console.warn('PUT failed, status', response.status, 'retrying with POST fallback');
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const fallbackText = await response.text();
+                console.log('Fallback response:', fallbackText);
+                if (!response.ok) {
+                    let errorMsg = 'Error al actualizar registro';
+                    try {
+                        const errorData = JSON.parse(fallbackText);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = fallbackText || errorMsg;
+                    }
+                    throw new Error(errorMsg);
+                }
+                return JSON.parse(fallbackText);
+            }
+
+            return JSON.parse(responseText);
+        } catch (error) {
+            console.error('Error en actualizar:', error);
+            throw error;
+        }
     }
 
     async eliminar(tabla, id) {
-        const response = await fetch(`${this.baseURL}/comercializacion/borrar/${id}?tabla=${tabla}`, {
-            method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Error al eliminar registro');
-        return await response.json();
+        try {
+            const endpoint = tabla === 'com_db_vivo_aqp' ? '/vivoArequipa/borrar' : '/vivoProvincia/borrar';
+            const url = `${this.baseURL}${endpoint}/${id}`;
+            
+            console.log('=== ELIMINAR REGISTRO ===');
+            console.log('URL:', url);
+            console.log('Método: DELETE');
+            console.log('ID:', id);
+            
+            let response = await fetch(url, { method: 'DELETE' });
+
+            console.log('Status respuesta:', response.status);
+
+            let responseText = await response.text();
+            console.log('Respuesta del servidor:', responseText);
+
+            if (!response.ok) {
+                // If server returned HTML (unexpected) or DELETE not allowed, try POST fallback
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('text/html') || response.status === 405 || response.status === 404) {
+                    console.warn('DELETE returned HTML or failed, retrying with POST fallback');
+                    response = await fetch(url, { method: 'POST' });
+                    responseText = await response.text();
+                    console.log('Fallback (POST) respuesta del servidor:', responseText);
+                }
+
+                if (!response.ok) {
+                    let errorMsg = 'Error al eliminar registro';
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = responseText || errorMsg;
+                    }
+                    throw new Error(errorMsg);
+                }
+            }
+
+            return responseText ? JSON.parse(responseText) : { success: true };
+        } catch (error) {
+            console.error('Error en eliminar:', error);
+            throw error;
+        }
+    }
+    
+    async exportarCSV(tabla) {
+        try {
+            const endpoint = tabla === 'com_db_vivo_aqp' ? '/vivoArequipa/exportar' : '/vivoProvincia/exportar';
+            console.log('Exportando a CSV:', endpoint);
+            
+            // Abrir en nueva pestaña para descargar
+            window.open(`${this.baseURL}${endpoint}`, '_blank');
+        } catch (error) {
+            console.error('Error en exportar:', error);
+            throw error;
+        }
     }
 
     // ========== CATÁLOGOS ==========
@@ -151,7 +256,7 @@ class ComercializacionService {
     }
 
     async getCondiciones() {
-        const response = await fetch(`${this.baseURL}/comercializacion/condiciones`);
+        const response = await fetch(`${this.baseURL}/condicion/all`);
         if (!response.ok) throw new Error('Error al obtener condiciones');
         const data = await response.json();
         return data.map(item => ({
@@ -161,7 +266,7 @@ class ComercializacionService {
     }
 
     async getTipos() {
-        const response = await fetch(`${this.baseURL}/comercializacion/tipos`);
+        const response = await fetch(`${this.baseURL}/tipo/all`);
         if (!response.ok) throw new Error('Error al obtener tipos');
         const data = await response.json();
         return data.map(item => ({

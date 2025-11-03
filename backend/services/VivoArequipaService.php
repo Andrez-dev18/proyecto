@@ -22,4 +22,9 @@ class VivoArequipaService
         return $this->repo->save($data);
     }
 
+    public function delete($id)
+    {
+        return $this->repo->delete($id);
+    }
+
 }

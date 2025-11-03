@@ -207,24 +207,46 @@ class ComercializacionController {
         if (!tbody) return;
 
         if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="100%" class="text-center py-4">No hay registros</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="100%" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
             return;
         }
 
-        tbody.innerHTML = this.datos.map(registro => {
+        tbody.innerHTML = this.datos.map((registro, index) => {
+            // Obtener nombres de catálogos
+            const nombreEmpresa = this.obtenerNombreCatalogo('empresas', registro.empresa);
             const nombreMercado = this.obtenerNombreCatalogo('mercados', registro.mercado);
             const nombreProvincia = this.obtenerNombreCatalogo('provincias', registro.provincia);
             const nombreProveedor = this.obtenerNombreCatalogo('proveedores', registro.proveedor);
+            const nombreCondicion = this.obtenerNombreCatalogo('condiciones', registro.condicion);
+            const nombreTipo = this.obtenerNombreCatalogo('tipos', registro.tipo);
+
+            // Determinar qué columnas mostrar según el tipo
+            const ubicacion = this.tipoActual === 'vivo-aqp' 
+                ? `${nombreMercado || '-'}` 
+                : `${nombreProvincia || '-'}`;
+            
+            const infoAdicional = this.tipoActual === 'vivo-aqp'
+                ? `${nombreEmpresa || '-'} / ${nombreCondicion || '-'}`
+                : `${nombreTipo || '-'}`;
 
             return `
-                <tr class="cursor-pointer hover:bg-gray-50" onclick="comercializacionController.seleccionarRegistro(${registro.id})">
-                    <td class="px-4 py-2">${registro.id}</td>
-                    <td class="px-4 py-2">${registro.fecha}</td>
-                    <td class="px-4 py-2">${nombreMercado || nombreProvincia || '-'}</td>
-                    <td class="px-4 py-2">${nombreProveedor}</td>
-                    <td class="px-4 py-2">${registro.precioMayMin} - ${registro.precioMayMax}</td>
-                    <td class="px-4 py-2">${registro.precioPubMin} - ${registro.precioPubMax}</td>
-                    <td class="px-4 py-2">${registro.cantidad}</td>
+                <tr class="cursor-pointer hover:bg-blue-50 transition-colors" 
+                    onclick="comercializacionController.seleccionarRegistro(${registro.id})"
+                    data-index="${index}">
+                    <td class="px-4 py-3 border-b">${registro.id || '-'}</td>
+                    <td class="px-4 py-3 border-b">${registro.fecha || '-'}</td>
+                    <td class="px-4 py-3 border-b font-medium text-blue-600">${ubicacion}</td>
+                    <td class="px-4 py-3 border-b">${nombreProveedor || '-'}</td>
+                    <td class="px-4 py-3 border-b text-sm text-gray-600">${infoAdicional}</td>
+                    <td class="px-4 py-3 border-b">
+                        <span class="text-green-600 font-semibold">S/ ${registro.precioMayMin || 0}</span> - 
+                        <span class="text-green-600 font-semibold">S/ ${registro.precioMayMax || 0}</span>
+                    </td>
+                    <td class="px-4 py-3 border-b">
+                        <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMin || 0}</span> - 
+                        <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMax || 0}</span>
+                    </td>
+                    <td class="px-4 py-3 border-b font-bold text-gray-700">${registro.cantidad || 0}</td>
                 </tr>
             `;
         }).join('');
@@ -237,13 +259,17 @@ class ComercializacionController {
     }
 
     seleccionarRegistro(id) {
-        this.registroSeleccionado = this.datos.find(d => d.id === id);
+        this.registroSeleccionado = this.datos.find(d => d.id == id);
+        console.log('Registro seleccionado:', this.registroSeleccionado);
         
         // Resaltar fila
         document.querySelectorAll('#tableBody tr').forEach(tr => {
             tr.classList.remove('bg-blue-100');
         });
-        event.currentTarget.classList.add('bg-blue-100');
+        
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('bg-blue-100');
+        }
     }
 
     mostrarModalNuevo() {
@@ -256,7 +282,9 @@ class ComercializacionController {
         document.getElementById('modalTitle').textContent = 'Nuevo Registro';
         this.limpiarFormulario();
         this.mostrarCamposSegunTipo();
-        document.getElementById('modal').classList.remove('hidden');
+        const modal = document.getElementById('modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
     }
 
     modificarSeleccionado() {
@@ -268,24 +296,36 @@ class ComercializacionController {
         document.getElementById('modalTitle').textContent = 'Modificar Registro';
         this.cargarDatosEnFormulario();
         this.mostrarCamposSegunTipo();
-        document.getElementById('modal').classList.remove('hidden');
+        const modal = document.getElementById('modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
     }
 
     async eliminarSeleccionado() {
+        console.log('=== ELIMINAR REGISTRO ===');
+        console.log('Registro seleccionado:', this.registroSeleccionado);
+        console.log('Tabla actual:', this.tablaActual);
+        
         if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
+            this.mostrarNotificacion('⚠️ Selecciona un registro de la tabla', 'warning');
             return;
         }
 
         if (!confirm('¿Estás seguro de eliminar este registro?')) return;
 
         try {
+            this.mostrarCargando(true);
+            console.log('Eliminando ID:', this.registroSeleccionado.id);
+            
             await this.service.eliminar(this.tablaActual, this.registroSeleccionado.id);
-            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
-            this.cargarDatos(this.tipoActual);
+            this.mostrarNotificacion('✅ Registro eliminado exitosamente', 'success');
             this.registroSeleccionado = null;
+            await this.cargarDatos(this.tipoActual);
         } catch (error) {
-            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
+            console.error('Error al eliminar:', error);
+            this.mostrarNotificacion('❌ Error al eliminar: ' + error.message, 'error');
+        } finally {
+            this.mostrarCargando(false);
         }
     }
 
@@ -301,23 +341,44 @@ class ComercializacionController {
         // Campos de Provincia
         document.getElementById('campoProvincia').style.display = esAqp ? 'none' : 'block';
         document.getElementById('campoTipo').style.display = esAqp ? 'none' : 'block';
-        document.getElementById('campoPrecioMayorCar').style.display = esAqp ? 'none' : 'block';
-        document.getElementById('campoPrecioMayorBra').style.display = esAqp ? 'none' : 'block';
-        document.getElementById('campoPesoBrasa').style.display = esAqp ? 'none' : 'block';
     }
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
+        console.log('Cargando datos en formulario:', r);
         
         document.getElementById('modalFecha').value = r.fecha;
-        document.getElementById('modalEmpresa').value = r.empresa || '';
-        document.getElementById('modalMercado').value = r.mercado || '';
-        document.getElementById('modalProvincia').value = r.provincia || '';
-        document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
-        document.getElementById('modalCondicion').value = r.condicion || '';
-        document.getElementById('modalProveedor').value = r.proveedor || '';
+        
+        // Convertir nombres a IDs para los selects
+        if (this.tipoActual === 'vivo-aqp') {
+            // Buscar ID de empresa por nombre
+            const empresaObj = this.catalogos.empresas.find(e => e.empresa === r.empresa);
+            document.getElementById('modalEmpresa').value = empresaObj ? empresaObj.id : '';
+            
+            // Buscar ID de mercado por nombre
+            const mercadoObj = this.catalogos.mercados.find(m => m.mercado === r.mercado);
+            document.getElementById('modalMercado').value = mercadoObj ? mercadoObj.id : '';
+            
+            document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
+            
+            // Buscar ID de condicion por nombre
+            const condicionObj = this.catalogos.condiciones.find(c => c.condicion === r.condicion);
+            document.getElementById('modalCondicion').value = condicionObj ? condicionObj.id : '';
+        } else {
+            // Buscar ID de provincia por nombre
+            const provinciaObj = this.catalogos.provincias.find(p => p.provincia === r.provincia);
+            document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.id : '';
+            
+            // Buscar ID de tipo por nombre
+            const tipoObj = this.catalogos.tipos.find(t => t.tipo === r.tipo);
+            document.getElementById('modalTipo').value = tipoObj ? tipoObj.id : '';
+        }
+        
+        // Buscar ID de proveedor por nombre
+        const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
+        document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
+        
         document.getElementById('modalRucProv').value = r.ruc_prov || '';
-        document.getElementById('modalTipo').value = r.tipo || '';
         
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
@@ -356,19 +417,34 @@ class ComercializacionController {
         if (!this.validarFormulario(data)) return;
 
         try {
+            this.mostrarCargando(true);
+            
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                await this.service.actualizar(this.tablaActual, data);
-                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
+                console.log('Actualizando registro ID:', data.id);
+                console.log('Datos a enviar:', data);
+                
+                const resultado = await this.service.actualizar(this.tablaActual, data);
+                console.log('Resultado actualización:', resultado);
+                
+                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
             } else {
-                await this.service.crear(this.tablaActual, data);
-                this.mostrarNotificacion('Registro creado exitosamente', 'success');
+                console.log('Creando nuevo registro');
+                console.log('Datos a enviar:', data);
+                
+                const resultado = await this.service.crear(this.tablaActual, data);
+                console.log('Resultado creación:', resultado);
+                
+                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
-            this.cargarDatos(this.tipoActual);
+            await this.cargarDatos(this.tipoActual);
         } catch (error) {
-            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            console.error('Error al guardar:', error);
+            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+        } finally {
+            this.mostrarCargando(false);
         }
     }
 
@@ -376,9 +452,13 @@ class ComercializacionController {
         const usuario = 'admin'; // Obtener del sistema de login
         const ahora = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
+        // Obtener ID del proveedor (enviamos códigos/IDs al backend)
+        const proveedorId = parseInt(document.getElementById('modalProveedor').value) || null;
+
         const data = {
             fecha: document.getElementById('modalFecha').value,
-            proveedor: parseInt(document.getElementById('modalProveedor').value) || null,
+            // Enviar códigos (IDs) para relaciones en lugar de nombres
+            proveedor: proveedorId,
             ruc_prov: document.getElementById('modalRucProv').value || '',
             precioMayMin: parseFloat(document.getElementById('modalPrecioMayMin').value) || 0,
             precioMayMax: parseFloat(document.getElementById('modalPrecioMayMax').value) || 0,
@@ -402,13 +482,23 @@ class ComercializacionController {
         };
 
         if (this.tipoActual === 'vivo-aqp') {
-            data.mercado = parseInt(document.getElementById('modalMercado').value) || null;
-            data.empresa = parseInt(document.getElementById('modalEmpresa').value) || null;
+            // Enviar IDs para mercado/empresa/condicion
+            const mercadoId = parseInt(document.getElementById('modalMercado').value) || null;
+            const empresaId = parseInt(document.getElementById('modalEmpresa').value) || null;
+            const condicionId = parseInt(document.getElementById('modalCondicion').value) || null;
+
+            data.mercado = mercadoId;
+            data.empresa = empresaId;
             data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
-            data.condicion = parseInt(document.getElementById('modalCondicion').value) || null;
+            data.condicion = condicionId;
         } else {
-            data.provincia = parseInt(document.getElementById('modalProvincia').value) || null;
-            data.tipo = parseInt(document.getElementById('modalTipo').value) || null;
+            // Enviar IDs para provincia/tipo
+            const provinciaId = parseInt(document.getElementById('modalProvincia').value) || null;
+            const tipoId = parseInt(document.getElementById('modalTipo').value) || null;
+
+            data.provincia = provinciaId;
+            data.tipo = tipoId;
+
             data.precioMayCarMin = data.precioMayMin;
             data.precioMayCarMax = data.precioMayMax;
             data.precioMayBraMin = 0;
@@ -433,17 +523,29 @@ class ComercializacionController {
     }
 
     cerrarModal() {
-        document.getElementById('modal').classList.add('hidden');
+        const modal = document.getElementById('modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
         this.registroSeleccionado = null;
     }
 
     exportarExcel() {
+        if (!this.tipoActual) {
+            this.mostrarNotificacion('Primero selecciona un tipo de datos', 'warning');
+            return;
+        }
+        
         if (this.datos.length === 0) {
             this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
         
-        this.mostrarNotificacion('Función de exportar en desarrollo', 'info');
+        try {
+            this.service.exportarCSV(this.tablaActual);
+            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+        } catch (error) {
+            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+        }
     }
 
     mostrarCargando(mostrar) {

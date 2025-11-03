@@ -1,7 +1,8 @@
-// Configuración de Comercialización
+// Configuración de Comercialización (igual que app.js)
 const ComercializacionConfig = {
-    // URL base del API (sin /api.php al final)
-    apiBaseURL: 'http://localhost:8033/proyecto/backend',
+    API: {
+        BASE_URL: 'http://localhost:8033/proyecto/backend'
+    },
     
     // Usuario por defecto
     usuarioPorDefecto: 'admin',

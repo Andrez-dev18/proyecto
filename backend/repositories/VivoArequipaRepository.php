@@ -53,90 +53,150 @@ class VivoArequipaRepository
 
     public function save($data)
     {
-        $query = "
-        INSERT INTO com_db_vivo_aqp (
-            fecha,
-            mercado,
-            empresa,
-            condicion,
-            proveedor,
-            precioMayMin,
-            precioMayMax,
-            precioPubMin,
-            precioPubMax,
-            pesoMachoMin,
-            pesoMachoMax,
-            pesoHembMin,
-            pesoHembMax,
-            colorMin,
-            colorMax,
-            pesoMachoPromMin,
-            pesoMachoPromMax,
-            pesoHembraPromMin,
-            pesoHembraPromMax,
-            cantidad,
-            usuarioRegistro,
-            fechaHoraRegistro,
-            usuarioTransferencia,
-            fechaHoraTransferencia
-        ) VALUES (
-            :fecha,
-            :mercado,
-            :empresa,
-            :condicion,
-            :proveedor,
-            :precioMayMin,
-            :precioMayMax,
-            :precioPubMin,
-            :precioPubMax,
-            :pesoMachoMin,
-            :pesoMachoMax,
-            :pesoHembMin,
-            :pesoHembMax,
-            :colorMin,
-            :colorMax,
-            :pesoMachoPromMin,
-            :pesoMachoPromMax,
-            :pesoHembraPromMin,
-            :pesoHembraPromMax,
-            :cantidad,
-            :usuarioRegistro,
-            :fechaHoraRegistro,
-            :usuarioTransferencia,
-            :fechaHoraTransferencia
-        )
-    ";
+        // If id exists, perform UPDATE; otherwise INSERT
+        if (isset($data['id']) && $data['id'] > 0) {
+            $query = "
+            UPDATE com_db_vivo_aqp SET
+                fecha = :fecha,
+                mercado = :mercado,
+                empresa = :empresa,
+                condicion = :condicion,
+                proveedor = :proveedor,
+                precioMayMin = :precioMayMin,
+                precioMayMax = :precioMayMax,
+                precioPubMin = :precioPubMin,
+                precioPubMax = :precioPubMax,
+                pesoMachoMin = :pesoMachoMin,
+                pesoMachoMax = :pesoMachoMax,
+                pesoHembMin = :pesoHembMin,
+                pesoHembMax = :pesoHembMax,
+                colorMin = :colorMin,
+                colorMax = :colorMax,
+                pesoMachoPromMin = :pesoMachoPromMin,
+                pesoMachoPromMax = :pesoMachoPromMax,
+                pesoHembraPromMin = :pesoHembraPromMin,
+                pesoHembraPromMax = :pesoHembraPromMax,
+                cantidad = :cantidad,
+                usuarioRegistro = :usuarioRegistro,
+                fechaHoraRegistro = :fechaHoraRegistro,
+                usuarioTransferencia = :usuarioTransferencia,
+                fechaHoraTransferencia = :fechaHoraTransferencia
+            WHERE id = :id
+            ";
 
-    $stmt = $this->conn->prepare($query);
+            $stmt = $this->conn->prepare($query);
+            $params = [
+                ':id' => $data['id'],
+                ':fecha' => $data['fecha'] ?? null,
+                ':mercado' => $data['mercado'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':condicion' => $data['condicion'] ?? null,
+                ':proveedor' => $data['proveedor'] ?? null,
+                ':precioMayMin' => $data['precioMayMin'] ?? null,
+                ':precioMayMax' => $data['precioMayMax'] ?? null,
+                ':precioPubMin' => $data['precioPubMin'] ?? null,
+                ':precioPubMax' => $data['precioPubMax'] ?? null,
+                ':pesoMachoMin' => $data['pesoMachoMin'] ?? null,
+                ':pesoMachoMax' => $data['pesoMachoMax'] ?? null,
+                ':pesoHembMin' => $data['pesoHembMin'] ?? null,
+                ':pesoHembMax' => $data['pesoHembMax'] ?? null,
+                ':colorMin' => $data['colorMin'] ?? null,
+                ':colorMax' => $data['colorMax'] ?? null,
+                ':pesoMachoPromMin' => $data['pesoMachoPromMin'] ?? null,
+                ':pesoMachoPromMax' => $data['pesoMachoPromMax'] ?? null,
+                ':pesoHembraPromMin' => $data['pesoHembraPromMin'] ?? null,
+                ':pesoHembraPromMax' => $data['pesoHembraPromMax'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? null,
+                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
+                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
+                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
+                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null
+            ];
+        } else {
+            $query = "
+            INSERT INTO com_db_vivo_aqp (
+                fecha,
+                mercado,
+                empresa,
+                condicion,
+                proveedor,
+                precioMayMin,
+                precioMayMax,
+                precioPubMin,
+                precioPubMax,
+                pesoMachoMin,
+                pesoMachoMax,
+                pesoHembMin,
+                pesoHembMax,
+                colorMin,
+                colorMax,
+                pesoMachoPromMin,
+                pesoMachoPromMax,
+                pesoHembraPromMin,
+                pesoHembraPromMax,
+                cantidad,
+                usuarioRegistro,
+                fechaHoraRegistro,
+                usuarioTransferencia,
+                fechaHoraTransferencia
+            ) VALUES (
+                :fecha,
+                :mercado,
+                :empresa,
+                :condicion,
+                :proveedor,
+                :precioMayMin,
+                :precioMayMax,
+                :precioPubMin,
+                :precioPubMax,
+                :pesoMachoMin,
+                :pesoMachoMax,
+                :pesoHembMin,
+                :pesoHembMax,
+                :colorMin,
+                :colorMax,
+                :pesoMachoPromMin,
+                :pesoMachoPromMax,
+                :pesoHembraPromMin,
+                :pesoHembraPromMax,
+                :cantidad,
+                :usuarioRegistro,
+                :fechaHoraRegistro,
+                :usuarioTransferencia,
+                :fechaHoraTransferencia
+            )
+            ";
 
-    $params = [
-        ':fecha' => $data['fecha'] ?? null,
-        ':mercado' => $data['mercado'] ?? null, // ID numérico
-        ':empresa' => $data['empresa'] ?? null, // ID numérico
-        ':condicion' => $data['condicion'] ?? null, // ID numérico
-        ':proveedor' => $data['proveedor'] ?? null, // ID numérico
-        ':precioMayMin' => $data['precioMayMin'] ?? null,
-        ':precioMayMax' => $data['precioMayMax'] ?? null,
-        ':precioPubMin' => $data['precioPubMin'] ?? null,
-        ':precioPubMax' => $data['precioPubMax'] ?? null,
-        ':pesoMachoMin' => $data['pesoMachoMin'] ?? null,
-        ':pesoMachoMax' => $data['pesoMachoMax'] ?? null,
-        ':pesoHembMin' => $data['pesoHembMin'] ?? null,
-        ':pesoHembMax' => $data['pesoHembMax'] ?? null,
-        ':colorMin' => $data['colorMin'] ?? null,
-        ':colorMax' => $data['colorMax'] ?? null,
-        ':pesoMachoPromMin' => $data['pesoMachoPromMin'] ?? null,
-        ':pesoMachoPromMax' => $data['pesoMachoPromMax'] ?? null,
-        ':pesoHembraPromMin' => $data['pesoHembraPromMin'] ?? null,
-        ':pesoHembraPromMax' => $data['pesoHembraPromMax'] ?? null,
-        ':cantidad' => $data['cantidad'] ?? null,
-        ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
-        ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
-        ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
-        ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null
-    ];
+            $stmt = $this->conn->prepare($query);
+            $params = [
+                ':fecha' => $data['fecha'] ?? null,
+                ':mercado' => $data['mercado'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':condicion' => $data['condicion'] ?? null,
+                ':proveedor' => $data['proveedor'] ?? null,
+                ':precioMayMin' => $data['precioMayMin'] ?? null,
+                ':precioMayMax' => $data['precioMayMax'] ?? null,
+                ':precioPubMin' => $data['precioPubMin'] ?? null,
+                ':precioPubMax' => $data['precioPubMax'] ?? null,
+                ':pesoMachoMin' => $data['pesoMachoMin'] ?? null,
+                ':pesoMachoMax' => $data['pesoMachoMax'] ?? null,
+                ':pesoHembMin' => $data['pesoHembMin'] ?? null,
+                ':pesoHembMax' => $data['pesoHembMax'] ?? null,
+                ':colorMin' => $data['colorMin'] ?? null,
+                ':colorMax' => $data['colorMax'] ?? null,
+                ':pesoMachoPromMin' => $data['pesoMachoPromMin'] ?? null,
+                ':pesoMachoPromMax' => $data['pesoMachoPromMax'] ?? null,
+                ':pesoHembraPromMin' => $data['pesoHembraPromMin'] ?? null,
+                ':pesoHembraPromMax' => $data['pesoHembraPromMax'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? null,
+                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
+                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
+                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
+                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null
+            ];
+        }
 
-    return $stmt->execute($params);
+        return $stmt->execute($params);
     }
 
 
@@ -144,5 +204,12 @@ class VivoArequipaRepository
     {
         $stmt = $this->conn->query($query);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    public function delete($id)
+    {
+        $query = "DELETE FROM com_db_vivo_aqp WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([':id' => $id]);
     }
 }

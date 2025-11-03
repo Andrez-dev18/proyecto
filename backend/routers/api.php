@@ -164,17 +164,42 @@ elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $reques
 elseif (strpos($path, "/vivoArequipa/all") !== false && $request == "GET") {
     $VivoArequipaController->getAll();
     exit;
-}elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
+}
+// POST Vivo Arequipa Crear
+elseif (strpos($path, "/vivoArequipa/crear") !== false && $request == "POST") {
     $VivoArequipaController->create();
     exit;
 }
+// PUT Vivo Arequipa Actualizar (aceptar PUT o POST como fallback)
+elseif (strpos($path, "/vivoArequipa/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $VivoArequipaController->update();
+    exit;
+}
+// DELETE Vivo Arequipa Borrar (aceptar DELETE o POST como fallback)
+elseif (preg_match("/\/vivoArequipa\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $VivoArequipaController->delete($matches[1]);
+    exit;
+}
+
 //################## RUTAS VIVO PROVINCIA #################################
 // GET Vivo All
 elseif (strpos($path, "/vivoProvincia/all") !== false && $request == "GET") {
     $VivoProvinciaController->getAll();
     exit;
-}elseif (strpos($path, "/vivoProvincia/crear") !== false && $request == "POST") {
+}
+// POST Vivo Provincia Crear
+elseif (strpos($path, "/vivoProvincia/crear") !== false && $request == "POST") {
     $VivoProvinciaController->create();
+    exit;
+}
+// PUT Vivo Provincia Actualizar (aceptar PUT o POST como fallback)
+elseif (strpos($path, "/vivoProvincia/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $VivoProvinciaController->update();
+    exit;
+}
+// DELETE Vivo Provincia Borrar (aceptar DELETE o POST como fallback)
+elseif (preg_match("/\/vivoProvincia\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $VivoProvinciaController->delete($matches[1]);
     exit;
 }
  //#RUTAS CONDICION
