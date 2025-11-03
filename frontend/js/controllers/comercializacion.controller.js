@@ -163,27 +163,53 @@ class ComercializacionController {
         if (!this.tipoActual) return;
 
         try {
+            // Validar fecha
+            const fecha = document.getElementById('filterFecha').value;
+            if (!fecha) {
+                this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
+                return;
+            }
+
             this.mostrarCargando(true);
 
             const filtros = {
-                fecha: document.getElementById('filterFecha').value,
-                proveedor: document.getElementById('filterProveedor').value
+                fecha: fecha
             };
 
             if (this.tipoActual === 'vivo-aqp') {
-                filtros.mercado = document.getElementById('filterMercado').value;
-                filtros.condicion = document.getElementById('filterCondicion').value;
-                this.datos = await this.service.filtrarVivoAqp(filtros);
+                const mercado = document.getElementById('filterMercado').value;
+                const proveedor = document.getElementById('filterProveedor').value;
+                const condicion = document.getElementById('filterCondicion').value;
+
+                if (mercado) filtros.mercado = mercado;
+                if (proveedor) filtros.proveedor = proveedor;
+                if (condicion) filtros.condicion = condicion;
+                
+                console.log('Filtros Arequipa:', filtros);
+                const result = await this.service.filtrarVivoAqp(filtros);
+                console.log('Respuesta del servidor:', result);
+                this.datos = result.data || [];
             } else {
-                filtros.provincia = document.getElementById('filterProvincia').value;
-                filtros.tipo = document.getElementById('filterTipo').value;
-                this.datos = await this.service.filtrarVivoProvincia(filtros);
+                const provincia = document.getElementById('filterProvincia').value;
+                const proveedor = document.getElementById('filterProveedor').value;
+                const tipo = document.getElementById('filterTipo').value;
+
+                if (provincia) filtros.provincia = provincia;
+                if (proveedor) filtros.proveedor = proveedor;
+                if (tipo) filtros.tipo = tipo;
+                
+                console.log('Filtros Provincia:', filtros);
+                const response = await this.service.filtrarVivoProvincia(filtros);
+                this.datos = Array.isArray(response.data) ? response.data : [];
             }
 
             this.renderizarTabla();
-            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'info');
+            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
         } catch (error) {
-            this.mostrarNotificacion('Error al filtrar: ' + error.message, 'error');
+            console.error('Error completo:', error);
+            this.mostrarNotificacion('❌ ' + error.message, 'error');
+            this.datos = [];
+            this.renderizarTabla();
         } finally {
             this.mostrarCargando(false);
         }
@@ -207,50 +233,93 @@ class ComercializacionController {
         if (!tbody) return;
 
         if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="100%" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
             return;
         }
 
         tbody.innerHTML = this.datos.map((registro, index) => {
-            // Obtener nombres de catálogos
             const nombreEmpresa = this.obtenerNombreCatalogo('empresas', registro.empresa);
             const nombreMercado = this.obtenerNombreCatalogo('mercados', registro.mercado);
-            const nombreProvincia = this.obtenerNombreCatalogo('provincias', registro.provincia);
-            const nombreProveedor = this.obtenerNombreCatalogo('proveedores', registro.proveedor);
+            const nombreProvincia = registro.provincia || '-';
+            const nombreProveedor = registro.proveedor || '-';
             const nombreCondicion = this.obtenerNombreCatalogo('condiciones', registro.condicion);
-            const nombreTipo = this.obtenerNombreCatalogo('tipos', registro.tipo);
+            const nombreTipo = registro.tipo || '-';
 
             // Determinar qué columnas mostrar según el tipo
             const ubicacion = this.tipoActual === 'vivo-aqp' 
                 ? `${nombreMercado || '-'}` 
-                : `${nombreProvincia || '-'}`;
+                : nombreProvincia;
+            
+            // Para provincias, usamos los campos específicos de precios
+            const precioMayMin = this.tipoActual === 'vivo-aqp' ? registro.precioMayMin : registro.precioMayCarMin;
+            const precioMayMax = this.tipoActual === 'vivo-aqp' ? registro.precioMayMax : registro.precioMayCarMax;
             
             const infoAdicional = this.tipoActual === 'vivo-aqp'
                 ? `${nombreEmpresa || '-'} / ${nombreCondicion || '-'}`
-                : `${nombreTipo || '-'}`;
+                : nombreTipo;
 
-            return `
-                <tr class="cursor-pointer hover:bg-blue-50 transition-colors" 
-                    onclick="comercializacionController.seleccionarRegistro(${registro.id})"
-                    data-index="${index}">
-                    <td class="px-4 py-3 border-b">${registro.id || '-'}</td>
-                    <td class="px-4 py-3 border-b">${registro.fecha || '-'}</td>
-                    <td class="px-4 py-3 border-b font-medium text-blue-600">${ubicacion}</td>
-                    <td class="px-4 py-3 border-b">${nombreProveedor || '-'}</td>
-                    <td class="px-4 py-3 border-b text-sm text-gray-600">${infoAdicional}</td>
-                    <td class="px-4 py-3 border-b">
-                        <span class="text-green-600 font-semibold">S/ ${registro.precioMayMin || 0}</span> - 
-                        <span class="text-green-600 font-semibold">S/ ${registro.precioMayMax || 0}</span>
-                    </td>
-                    <td class="px-4 py-3 border-b">
-                        <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMin || 0}</span> - 
-                        <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMax || 0}</span>
-                    </td>
-                    <td class="px-4 py-3 border-b font-bold text-gray-700">${registro.cantidad || 0}</td>
-                </tr>
-            `;
+                // fila principal y fila de detalles (inicialmente oculta)
+                return `
+                    <tr class="cursor-pointer hover:bg-blue-50 transition-colors" data-index="${index}" onclick="comercializacionController.seleccionarRegistro(event, ${registro.id})" onkeydown="if(event.key==='Enter') comercializacionController.toggleDetalle(event,this)">
+                        <td class="px-2 py-2 border-b text-center">
+                            <button type="button" class="text-blue-600 hover:text-blue-800" onclick="event.stopPropagation(); comercializacionController.toggleDetalle(event,this)">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            ${registro.id || '-'}
+                        </td>
+                        <td class="px-2 py-2 border-b text-left">${registro.fecha || '-'}</td>
+                        <td class="px-2 py-2 border-b text-left font-medium text-blue-600">${ubicacion}</td>
+                        <td class="px-2 py-2 border-b text-left">${nombreEmpresa || '-'}</td>
+                        <td class="px-2 py-2 border-b text-left">${registro.ruc_empresa || '-'}</td>
+                        <td class="px-2 py-2 border-b text-left">${nombreProveedor}</td>
+                        <td class="px-2 py-2 border-b text-left text-sm text-gray-600">${infoAdicional}</td>
+                        <td class="px-2 py-2 border-b text-center">
+                            <span class="text-green-600 font-semibold">S/ ${precioMayMin || 0}</span> - 
+                            <span class="text-green-600 font-semibold">S/ ${precioMayMax || 0}</span>
+                        </td>
+                        <td class="px-2 py-2 border-b text-center">
+                            <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMin || 0}</span> - 
+                            <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMax || 0}</span>
+                        </td>
+                        <td class="px-2 py-2 border-b text-center">${registro.pesoMachoMin || 0} - ${registro.pesoMachoMax || 0}</td>
+                        <td class="px-2 py-2 border-b text-center">${registro.pesoMachoPromMin || 0} - ${registro.pesoMachoPromMax || 0}</td>
+                        <td class="px-2 py-2 border-b text-center">${registro.colorMin || 0} - ${registro.colorMax || 0}</td>
+                        <td class="px-2 py-2 border-b text-center font-bold text-gray-700">${registro.cantidad || 0}</td>
+                    </tr>
+                    <tr class="detail-row text-sm text-gray-600 bg-gray-50" style="display:none;" data-index-detail="${index}">
+                        <td class="px-3 py-2 border-b" colspan="13">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <div><strong>RUC Proveedor:</strong> ${registro.ruc_proveedor || '-'}</div>
+                                ${this.tipoActual === 'vivo-aqp' ? `
+                                    <div><strong>Peso Hembra (mín - máx):</strong> ${registro.pesoHembMin || 0} - ${registro.pesoHembMax || 0}</div>
+                                    <div><strong>Peso Hembra Prom (mín - máx):</strong> ${registro.pesoHembraPromMin || 0} - ${registro.pesoHembraPromMax || 0}</div>
+                                ` : `
+                                    <div><strong>Precio Brasa (mín - máx):</strong> S/ ${registro.precioMayBraMin || 0} - S/ ${registro.precioMayBraMax || 0}</div>
+                                    <div><strong>Peso Brasa Prom (mín - máx):</strong> ${registro.pesoBrasaPromMin || 0} - ${registro.pesoBrasaPromMax || 0}</div>
+                                `}
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500">
+                                ${registro.usuarioRegistro ? `Registro: ${registro.usuarioRegistro} | ${registro.fechaHoraRegistro || '-'}` : ''}
+                                ${registro.usuarioTransferencia ? ` | Transfer: ${registro.usuarioTransferencia} | ${registro.fechaHoraTransferencia}` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
         }).join('');
     }
+
+        toggleDetalle(event, el) {
+            // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
+            const btn = el instanceof Element ? el : (event && event.currentTarget);
+            const tr = btn.closest('tr');
+            if (!tr) return;
+            const next = tr.nextElementSibling;
+            if (!next || !next.classList.contains('detail-row')) return;
+            next.style.display = next.style.display === 'none' ? 'table-row' : 'none';
+            // alternar icono
+            const icon = tr.querySelector('i.fas');
+            if (icon) icon.classList.toggle('fa-chevron-up');
+        }
 
     obtenerNombreCatalogo(catalogo, id) {
         if (!id) return '-';
@@ -258,17 +327,33 @@ class ComercializacionController {
         return item ? Object.values(item)[1] : id;
     }
 
-    seleccionarRegistro(id) {
+    seleccionarRegistro(event, id) {
+        // Permitir llamada sin evento (compatibilidad)
+        if (typeof event !== 'object' || !event) {
+            id = event;
+            event = null;
+        }
+
         this.registroSeleccionado = this.datos.find(d => d.id == id);
         console.log('Registro seleccionado:', this.registroSeleccionado);
-        
-        // Resaltar fila
+
+        // Remover resaltado en todas las filas principales y detalle
         document.querySelectorAll('#tableBody tr').forEach(tr => {
             tr.classList.remove('bg-blue-100');
         });
-        
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('bg-blue-100');
+
+        // Resaltar la fila principal y la de detalle asociada (si existe)
+        if (event) {
+            const tr = event.currentTarget || event.target.closest('tr');
+            if (tr) {
+                tr.classList.add('bg-blue-100');
+                const det = tr.nextElementSibling;
+                if (det && det.classList.contains('detail-row')) det.classList.add('bg-blue-100');
+            }
+        } else {
+            // Si no hay evento, buscar por índice del registro
+            const row = Array.from(document.querySelectorAll('#tableBody tr')).find(r => r.textContent.includes(String(id)));
+            if (row) row.classList.add('bg-blue-100');
         }
     }
 

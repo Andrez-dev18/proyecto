@@ -1,16 +1,22 @@
 class ComercializacionService {
     constructor() {
-        this.baseURL = typeof ComercializacionConfig !== 'undefined' 
-            ? ComercializacionConfig.API.BASE_URL 
-            : 'http://localhost:8033/proyecto/backend';
+        this.baseURL = 'http://localhost:8033/proyecto/backend';
     }
 
     // ========== VIVO AREQUIPA ==========
     
     async getVivoAqp() {
         try {
-            console.log('Fetch URL:', `${this.baseURL}/vivoArequipa/all`);
-            const response = await fetch(`${this.baseURL}/vivoArequipa/all`);
+            const url = `${this.baseURL}/vivoArequipa/all`;
+            console.log('Fetch URL:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
             
             console.log('Response status:', response.status);
             console.log('Response headers:', response.headers);
@@ -23,7 +29,9 @@ class ComercializacionService {
             
             const data = await response.json();
             console.log('Data received:', data);
-            return data;
+            
+            // Asegurar que retornamos siempre un array
+            return Array.isArray(data) ? data : [];
         } catch (error) {
             console.error('Fetch error:', error);
             throw new Error(`No se pudo cargar Vivo Arequipa: ${error.message}`);
@@ -31,25 +39,71 @@ class ComercializacionService {
     }
 
     async filtrarVivoAqp(filtros) {
-        const params = new URLSearchParams();
-        if (filtros.fecha) params.append('fecha', filtros.fecha);
-        if (filtros.mercado) params.append('mercado', filtros.mercado);
-        if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
-        if (filtros.condicion) params.append('condicion', filtros.condicion);
+        if (!filtros.fecha) {
+            throw new Error('La fecha es un campo obligatorio para el filtro');
+        }
 
-        const response = await fetch(`${this.baseURL}/vivoArequipa/all?${params}`);
-        if (!response.ok) throw new Error('Error al filtrar datos');
-        return await response.json();
+        try {
+            const params = new URLSearchParams();
+            params.append('fecha', filtros.fecha);
+            
+            // Solo añadir parámetros que tengan valor
+            if (filtros.mercado) params.append('mercado', filtros.mercado);
+            if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
+            if (filtros.condicion) params.append('condicion', filtros.condicion);
+            
+            const url = `${this.baseURL}/vivoArequipa/filtro?${params}`;
+            console.log('Filtrando Vivo Arequipa:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            
+            const contentType = response.headers.get('content-type');
+            console.log('Content-Type:', contentType);
+            
+            if (!response.ok) {
+                const error = await response.text();
+                console.error('Error response:', error);
+                throw new Error(`Error ${response.status}: ${error}`);
+            }
+            
+            const result = await response.json();
+            console.log('Filtered data received:', result);
+            
+            // Validar la estructura de la respuesta
+            if (!result || typeof result !== 'object') {
+                throw new Error('Respuesta del servidor inválida');
+            }
+            
+            // Asegurarnos de que tenemos un objeto con status y data
+            if (result.status !== 'success' || !Array.isArray(result.data)) {
+                throw new Error('Formato de respuesta inválido');
+            }
+            
+            return result; // Retornamos el objeto completo {status, data}
+        } catch (error) {
+            console.error('Error en filtrarVivoAqp:', error);
+            throw error;
+        }
     }
 
     // ========== VIVO PROVINCIA ==========
     
     async getVivoProvincia() {
         try {
-            console.log('Fetch URL:', `${this.baseURL}/vivoProvincia/all`);
-            const response = await fetch(`${this.baseURL}/vivoProvincia/all`);
+            const url = `${this.baseURL}/vivoProvincia/all`;
+            console.log('Fetch URL:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
             
             console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
             
             if (!response.ok) {
                 const errorText = await response.text();
@@ -59,7 +113,9 @@ class ComercializacionService {
             
             const data = await response.json();
             console.log('Data received:', data);
-            return data;
+            
+            // Asegurar que retornamos siempre un array
+            return Array.isArray(data) ? data : [];
         } catch (error) {
             console.error('Fetch error:', error);
             throw new Error(`No se pudo cargar Vivo Provincia: ${error.message}`);
@@ -67,15 +123,38 @@ class ComercializacionService {
     }
 
     async filtrarVivoProvincia(filtros) {
-        const params = new URLSearchParams();
-        if (filtros.fecha) params.append('fecha', filtros.fecha);
-        if (filtros.provincia) params.append('provincia', filtros.provincia);
-        if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
-        if (filtros.tipo) params.append('tipo', filtros.tipo);
+        if (!filtros.fecha) {
+            throw new Error('La fecha es un campo obligatorio para el filtro');
+        }
 
-        const response = await fetch(`${this.baseURL}/vivoProvincia/all?${params}`);
-        if (!response.ok) throw new Error('Error al filtrar datos');
-        return await response.json();
+        try {
+            const params = new URLSearchParams();
+            params.append('fecha', filtros.fecha);
+            
+            // Solo añadir parámetros que tengan valor
+            if (filtros.provincia) params.append('provincia', filtros.provincia);
+            if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
+            if (filtros.tipo) params.append('tipo', filtros.tipo);
+            
+            const url = `${this.baseURL}/vivoProvincia/filtro?${params}`;
+            console.log('Filtrando Vivo Provincia:', url);
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                const error = await response.text();
+                console.error('Error response:', error);
+                throw new Error(`Error ${response.status}: ${error}`);
+            }
+            
+            const result = await response.json();
+            console.log('Filtered data received:', result);
+            
+            return result; // Retornamos el objeto completo {status, data}
+        } catch (error) {
+            console.error('Error en filtrarVivoProvincia:', error);
+            throw error;
+        }
     }
 
     // ========== CRUD OPERATIONS ==========

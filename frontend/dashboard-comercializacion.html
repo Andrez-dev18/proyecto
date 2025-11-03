@@ -9,7 +9,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        .table-scroll { max-height: 500px; overflow-y: auto; }
+        .table-scroll { 
+            max-height: calc(100vh - 450px); 
+            min-height: 300px;
+            overflow-y: auto; 
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+        .table-scroll table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table-scroll th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .table-scroll th, .table-scroll td {
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        .table-scroll tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        .filter-group {
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+        }
         .card-shadow { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); }
         .btn-hover-scale { transition: transform 0.2s ease; }
         .btn-hover-scale:hover { transform: translateY(-2px); }
@@ -79,29 +106,60 @@
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Filtros principales siempre visibles -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
+                        Fecha
+                    </label>
                     <input type="date" id="filterFecha" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Mercado</label>
-                    <select id="filterMercado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-user mr-1 text-purple-600"></i>
+                        Proveedor
+                    </label>
+                    <select id="filterProveedor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los proveedores</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
-                    <select id="filterProvincia" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                <!-- Filtros de Arequipa -->
+                <div class="filter-arequipa">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-store mr-1 text-purple-600"></i>
+                        Mercado
+                    </label>
+                    <select id="filterMercado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los mercados</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                    <select id="filterProveedor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                <div class="filter-arequipa">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-check-circle mr-1 text-purple-600"></i>
+                        Condición
+                    </label>
+                    <select id="filterCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las condiciones</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
-                    <select id="filterCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                <!-- Filtros de Provincia -->
+                <div class="filter-provincia" style="display: none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Provincia
+                    </label>
+                    <select id="filterProvincia" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las provincias</option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                    <select id="filterTipo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                <div class="filter-provincia" style="display: none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-tag mr-1 text-purple-600"></i>
+                        Tipo
+                    </label>
+                    <select id="filterTipo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los tipos</option>
+                    </select>
                 </div>
             </div>
         </section>
@@ -142,14 +200,19 @@
                 <table class="min-w-full">
                     <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Fecha</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">📍 Ubicación</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">👤 Proveedor</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">📋 Info</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">💰 P. Mayorista</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">💵 P. Público</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">📦 Cantidad</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-12">#</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">FECHA</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">UBICACIÓN</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">EMPRESA</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">RUC</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">PROVEEDOR</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">COND/TIPO</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">P.MAYOR</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">P.PÚBLICO</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PESOS</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PROM.PESO</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">COLOR</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-20">CANT.</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
