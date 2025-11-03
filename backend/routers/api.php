@@ -62,6 +62,12 @@ elseif (strpos($path, "/reporte/vivo/arequipa/excel") !== false && $request == "
 elseif (strpos($path, "/reporte/vivo/provincia/excel") !== false && $request == "GET") {
     $reporteController->exportarProvinciaVivoExcel();
     exit;
+}elseif (strpos($path, "/reporte/vivoProvincia/excel") !== false && $request == "GET") {
+    $reporteController->exportarVivoProvinciaExcel();
+    exit;
+}elseif (strpos($path, "/reporte/vivoArequipa/excel") !== false && $request == "GET") {
+    $reporteController->exportarVivoArequipaExcel();
+    exit;
 }
 
 // ========== RUTAS VIVO ==========
