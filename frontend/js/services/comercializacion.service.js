@@ -39,52 +39,38 @@ class ComercializacionService {
     }
 
     async filtrarVivoAqp(filtros) {
-        if (!filtros.fecha) {
-            throw new Error('La fecha es un campo obligatorio para el filtro');
+        try {
+        const params = new URLSearchParams();
+
+        // Solo añadir los parámetros que tengan valor
+        if (filtros.fecha) params.append('fecha', filtros.fecha);
+        if (filtros.mercado) params.append('mercado', filtros.mercado);
+        if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
+        if (filtros.condicion) params.append('condicion', filtros.condicion);
+
+        const url = `${this.baseURL}/vivoArequipa/filtro?${params}`;
+        console.log('Filtrando Vivo Arequipa:', url);
+
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText}`);
         }
 
-        try {
-            const params = new URLSearchParams();
-            params.append('fecha', filtros.fecha);
-            
-            // Solo añadir parámetros que tengan valor
-            if (filtros.mercado) params.append('mercado', filtros.mercado);
-            if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
-            if (filtros.condicion) params.append('condicion', filtros.condicion);
-            
-            const url = `${this.baseURL}/vivoArequipa/filtro?${params}`;
-            console.log('Filtrando Vivo Arequipa:', url);
-            
-            const response = await fetch(url);
-            console.log('Response status:', response.status);
-            
-            const contentType = response.headers.get('content-type');
-            console.log('Content-Type:', contentType);
-            
-            if (!response.ok) {
-                const error = await response.text();
-                console.error('Error response:', error);
-                throw new Error(`Error ${response.status}: ${error}`);
-            }
-            
-            const result = await response.json();
-            console.log('Filtered data received:', result);
-            
-            // Validar la estructura de la respuesta
-            if (!result || typeof result !== 'object') {
-                throw new Error('Respuesta del servidor inválida');
-            }
-            
-            // Asegurarnos de que tenemos un objeto con status y data
-            if (result.status !== 'success' || !Array.isArray(result.data)) {
-                throw new Error('Formato de respuesta inválido');
-            }
-            
-            return result; // Retornamos el objeto completo {status, data}
-        } catch (error) {
-            console.error('Error en filtrarVivoAqp:', error);
-            throw error;
+        const result = await response.json();
+        console.log('Filtered data received:', result);
+
+        if (!result || typeof result !== 'object' || !Array.isArray(result.data)) {
+            throw new Error('Formato de respuesta inválido');
         }
+
+        return result;
+    } catch (error) {
+        console.error('Error en filtrarVivoAqp:', error);
+        throw error;
+    }
     }
 
     // ========== VIVO PROVINCIA ==========
@@ -123,15 +109,12 @@ class ComercializacionService {
     }
 
     async filtrarVivoProvincia(filtros) {
-        if (!filtros.fecha) {
-            throw new Error('La fecha es un campo obligatorio para el filtro');
-        }
-
+        
         try {
             const params = new URLSearchParams();
-            params.append('fecha', filtros.fecha);
             
             // Solo añadir parámetros que tengan valor
+            if (filtros.fecha) params.append('fecha', filtros.fecha);
             if (filtros.provincia) params.append('provincia', filtros.provincia);
             if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
             if (filtros.tipo) params.append('tipo', filtros.tipo);
@@ -281,7 +264,7 @@ class ComercializacionService {
     
     async exportarCSV(tabla) {
         try {
-            const endpoint = tabla === 'com_db_vivo_aqp' ? '/vivoArequipa/exportar' : '/vivoProvincia/exportar';
+            const endpoint = tabla === 'com_db_vivo_aqp' ? '/reporte/vivoArequipa/excel' : '/reporte/vivoProvincia/excel';
             console.log('Exportando a CSV:', endpoint);
             
             // Abrir en nueva pestaña para descargar

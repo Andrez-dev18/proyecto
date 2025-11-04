@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de Gestión de Pollo - Múltiples Dashboards">
     <title>Sistema de Gestión - Dashboard</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         /* Sidebar */
         .sidebar {
@@ -26,11 +27,11 @@
             z-index: 1000;
             box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .sidebar.open {
             transform: translateX(0);
         }
-        
+
         .sidebar-overlay {
             position: fixed;
             inset: 0;
@@ -40,65 +41,66 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
         }
-        
+
         .sidebar-overlay.active {
             opacity: 1;
             pointer-events: all;
         }
-        
+
         .menu-item {
             transition: all 0.2s ease;
         }
-        
+
         .menu-item:hover {
             background: rgba(255, 255, 255, 0.1);
             transform: translateX(5px);
         }
-        
+
         .menu-item.active {
             background: rgba(255, 255, 255, 0.15);
             border-left: 4px solid #60a5fa;
         }
-        
+
         /* Content area */
         .content-wrapper {
             transition: margin-left 0.3s ease;
         }
-        
+
         @media (min-width: 1024px) {
             .sidebar {
                 transform: translateX(0);
             }
-            
+
             .content-wrapper {
                 margin-left: 260px;
             }
-            
+
             .sidebar-overlay {
                 display: none;
             }
-            
+
             .menu-toggle-mobile {
                 display: none;
             }
         }
-        
+
         /* Animaciones */
         @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+
         .animate-slide-in {
             animation: slideIn 0.3s ease;
         }
-        
+
         /* Dashboard iframe */
         #dashboardFrame {
             width: 100%;
@@ -106,7 +108,7 @@
             border: none;
             background: #f9fafb;
         }
-        
+
         /* Loading */
         .loading {
             position: absolute;
@@ -116,6 +118,7 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-100">
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar">
@@ -136,49 +139,90 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Menu -->
+        <!-- Navbar actualizado -->
         <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
             <div class="mb-4">
                 <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Dashboards</p>
             </div>
-            
-            <!-- Dashboard Capturas de Pantalla -->
-            <a href="#" onclick="loadDashboard('dashboard-capturas.html', this)" 
-               class="menu-item active flex items-center gap-3 px-4 py-3 text-white rounded-lg" 
-               data-dashboard="capturas">
-                <i class="fas fa-camera w-5"></i>
-                <span class="font-medium">Capturas de Pantalla</span>
-            </a>
-            
-            <!-- Dashboard Información del Mercado -->
-            <a href="#" onclick="loadDashboard('dashboard-comercializacion.html', this)" 
-               class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg" 
-               data-dashboard="comercializacion">
-                <i class="fas fa-shopping-cart w-5"></i>
-                <span class="font-medium">Información del Mercado</span>
-            </a>
-            
-            <!-- Separator -->
-            <div class="my-4 border-t border-blue-700"></div>
-            <!--
-            <div class="mb-4">
-                <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Herramientas</p>
+
+            <!-- CAPTURAS DE PANTALLA -->
+            <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="toggleSubmenu('submenu-capturas')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-camera w-5"></i>
+                        <span class="font-medium">Capturas de Pantalla</span>
+                    </span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+
+                <div id="submenu-capturas" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <!-- VIVO -->
+                    <div>
+                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
+                            onclick="toggleSubmenu('submenu-capturas-vivo')">
+                            <span>Vivo</span>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                        <div id="submenu-capturas-vivo" class="submenu hidden pl-4 mt-1 space-y-1">
+                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','vivo-arequipa')"
+                                class="block text-gray-400 hover:text-white">Arequipa</a>
+                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','vivo-provincia')"
+                                class="block text-gray-400 hover:text-white">Provincias</a>
+                        </div>
+                    </div>
+
+                    <!-- BENEFICIADO -->
+                    <div>
+                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
+                            onclick="toggleSubmenu('submenu-capturas-beneficiado')">
+                            <span>Beneficiado</span>
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                        <div id="submenu-capturas-beneficiado" class="submenu hidden pl-4 mt-1 space-y-1">
+                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','beneficiado-arequipa')"
+                                class="block text-gray-400 hover:text-white">Arequipa</a>
+                            <a href="#"
+                                onclick="loadDashboardAndData('dashboard-capturas.html','beneficiado-provincia')"
+                                class="block text-gray-400 hover:text-white">Provincias</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-             Reportes 
-            <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg">
-                <i class="fas fa-file-excel w-5"></i>
-                <span class="font-medium">Reportes</span>
-            </a>
-            
-            - Configuración 
-            <a href="#" class="menu-item flex items-center gap-3 px-4 py-3 text-white rounded-lg">
-                <i class="fas fa-cog w-5"></i>
-                <span class="font-medium">Configuración</span>
-            </a>
-        </nav>-->
-        
+
+            <!-- INFORMACIÓN DEL MERCADO -->
+            <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="toggleSubmenu('submenu-mercado')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-shopping-cart w-5"></i>
+                        <span class="font-medium">Información del Mercado</span>
+                    </span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+
+                <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
+                        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
+                        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
+                </div>
+            </div>
+
+            <div class="my-4 border-t border-blue-700"></div>
+        </nav>
+
+
+        <script>
+            function toggleSubmenu(id) {
+                const submenu = document.getElementById(id);
+                submenu.classList.toggle('hidden');
+            }
+        </script>
+
+
         <!-- Footer -->
         <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-700">
             <div class="text-center">
@@ -187,10 +231,10 @@
             </div>
         </div>
     </aside>
-    
+
     <!-- Overlay -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
-    
+
     <!-- Main Content -->
     <div class="content-wrapper">
         <!-- Top Bar -->
@@ -198,16 +242,17 @@
             <div class="px-4 py-4 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <!-- Menu Toggle (Mobile) -->
-                    <button onclick="toggleSidebar()" class="menu-toggle-mobile text-gray-600 hover:text-gray-900 lg:hidden">
+                    <button onclick="toggleSidebar()"
+                        class="menu-toggle-mobile text-gray-600 hover:text-gray-900 lg:hidden">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    
+
                     <div>
                         <h1 id="dashboardTitle" class="text-2xl font-bold text-gray-800">Capturas de Pantalla</h1>
                         <p class="text-sm text-gray-500">Sistema de gestión de clientes y proveedores</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-center gap-4">
                     <!-- User Info -->
                     <div class="hidden md:flex items-center gap-3">
@@ -215,78 +260,112 @@
                             <p class="text-sm font-semibold text-gray-700">Usuario Admin</p>
                             <p class="text-xs text-gray-500">Administrador</p>
                         </div>
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                             <i class="fas fa-user text-white"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
-        
+
         <!-- Dashboard Content -->
         <main class="p-6 relative">
             <div id="loadingIndicator" class="loading hidden">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
-            
-            <iframe 
-                id="dashboardFrame" 
-                src="dashboard-capturas.html"
-                onload="hideLoading()">
+
+            <iframe id="dashboardFrame" src="dashboard-capturas.html" onload="hideLoading()">
             </iframe>
         </main>
     </div>
-    
+
     <script>
         // Toggle Sidebar
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
+
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
         }
-        
+
         // Load Dashboard
         function loadDashboard(url, element) {
             // Prevenir comportamiento por defecto del enlace
             event.preventDefault();
-            
+
             // Mostrar loading
             showLoading();
-            
+
             // Actualizar menu activo
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
             });
             element.classList.add('active');
-            
+
             // Cargar dashboard
             const frame = document.getElementById('dashboardFrame');
             frame.src = url;
-            
+
             // Actualizar título
             const titles = {
                 'dashboard-capturas.html': 'Capturas de Pantalla',
                 'dashboard-comercializacion.html': 'Información del Mercado'
             };
             document.getElementById('dashboardTitle').textContent = titles[url] || 'Dashboard';
-            
+
             // Cerrar sidebar en móvil
             if (window.innerWidth < 1024) {
                 toggleSidebar();
             }
         }
-        
+
+
+        function loadDashboardAndData(dashboardUrl, tipo) {
+            const frame = document.getElementById('dashboardFrame');
+            const titulo = document.getElementById('dashboardTitle');
+            const titles = {
+                'dashboard-capturas.html': 'Capturas de Pantalla',
+                'dashboard-comercializacion.html': 'Información del Mercado'
+            };
+
+            titulo.textContent = titles[dashboardUrl] || 'Dashboard';
+            showLoading();
+
+            const run = () => {
+                try {
+                    if (frame.contentWindow && typeof frame.contentWindow.cargarDatos === 'function') {
+                        frame.contentWindow.cargarDatos(tipo);
+                    } else {
+                        console.error("La función cargarDatos no existe en el iframe.");
+                    }
+                } finally {
+                    hideLoading();
+                }
+            };
+
+            if (frame.src.includes(dashboardUrl)) {
+                // ya está cargado ese dashboard
+                run();
+            } else {
+                // esperar a que el nuevo dashboard se cargue
+                frame.onload = run;
+                frame.src = dashboardUrl;
+            }
+
+            if (window.innerWidth < 1024) toggleSidebar();
+        }
+
         // Loading functions
         function showLoading() {
             document.getElementById('loadingIndicator').classList.remove('hidden');
         }
-        
+
         function hideLoading() {
             document.getElementById('loadingIndicator').classList.add('hidden');
         }
-        
+
         // Responsive: cerrar sidebar al hacer clic fuera
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 1024) {
@@ -294,11 +373,14 @@
                 document.getElementById('sidebarOverlay').classList.remove('active');
             }
         });
-        
+
         // Inicializar sidebar abierto en desktop
         if (window.innerWidth >= 1024) {
             document.getElementById('sidebar').classList.add('open');
         }
     </script>
+    <script src="js/services/comercializacion.service.js"></script>
+    <script src="js/controllers/comercializacion.controller.js"></script>
 </body>
+
 </html>

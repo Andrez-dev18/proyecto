@@ -16,7 +16,7 @@ class ComercializacionController {
     async cargarCatalogos() {
         try {
             console.log('Cargando catálogos...');
-            
+
             const [empresas, mercados, proveedores, provincias, condiciones, tipos] = await Promise.all([
                 this.service.getEmpresas(),
                 this.service.getMercados(),
@@ -73,7 +73,7 @@ class ComercializacionController {
         const select = document.getElementById(selectId);
         if (!select) return;
 
-        const opciones = datos.map(item => 
+        const opciones = datos.map(item =>
             `<option value="${item[valueField]}">${item[textField]}</option>`
         ).join('');
 
@@ -113,11 +113,11 @@ class ComercializacionController {
         try {
             this.tipoActual = tipo;
             this.tablaActual = tipo === 'vivo-aqp' ? 'com_db_vivo_aqp' : 'com_db_vivo_provincia';
-            
+
             this.mostrarCargando(true);
-            
+
             console.log(`Cargando datos de tipo: ${tipo}`);
-            
+
             if (tipo === 'vivo-aqp') {
                 this.datos = await this.service.getVivoAqp();
                 this.mostrarFiltrosAqp();
@@ -127,7 +127,7 @@ class ComercializacionController {
             }
 
             console.log(`Datos cargados:`, this.datos);
-            
+
             // Verificar si los datos son un array
             if (!Array.isArray(this.datos)) {
                 throw new Error('La respuesta no es un array válido');
@@ -163,18 +163,13 @@ class ComercializacionController {
         if (!this.tipoActual) return;
 
         try {
-            // Validar fecha
-            const fecha = document.getElementById('filterFecha').value;
-            if (!fecha) {
-                this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
-                return;
-            }
-
             this.mostrarCargando(true);
 
-            const filtros = {
-                fecha: fecha
-            };
+            const filtros = {};
+            const fecha = document.getElementById('filterFecha').value;
+
+            // Solo agregar si tiene valor
+            if (fecha) filtros.fecha = fecha;
 
             if (this.tipoActual === 'vivo-aqp') {
                 const mercado = document.getElementById('filterMercado').value;
@@ -184,7 +179,7 @@ class ComercializacionController {
                 if (mercado) filtros.mercado = mercado;
                 if (proveedor) filtros.proveedor = proveedor;
                 if (condicion) filtros.condicion = condicion;
-                
+
                 console.log('Filtros Arequipa:', filtros);
                 const result = await this.service.filtrarVivoAqp(filtros);
                 console.log('Respuesta del servidor:', result);
@@ -197,7 +192,7 @@ class ComercializacionController {
                 if (provincia) filtros.provincia = provincia;
                 if (proveedor) filtros.proveedor = proveedor;
                 if (tipo) filtros.tipo = tipo;
-                
+
                 console.log('Filtros Provincia:', filtros);
                 const response = await this.service.filtrarVivoProvincia(filtros);
                 this.datos = Array.isArray(response.data) ? response.data : [];
@@ -222,104 +217,124 @@ class ComercializacionController {
         document.getElementById('filterProveedor').value = '';
         document.getElementById('filterCondicion').value = '';
         document.getElementById('filterTipo').value = '';
-        
+
         if (this.tipoActual) {
             this.cargarDatos(this.tipoActual);
         }
     }
 
     renderizarTabla() {
+        const table = $('.min-w-full'); // referencia rápida
         const tbody = document.getElementById('tableBody');
-        if (!tbody) return;
+        const thead = document.querySelector('thead tr');
+        if (!tbody || !thead) return;
 
+        // 🧹 Si la tabla ya tiene un DataTable activo, destruirlo antes de regenerar contenido
+        if ($.fn.DataTable.isDataTable(table)) {
+            table.DataTable().clear().destroy();
+        }
+
+        tbody.innerHTML = '';
         if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="13" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
             return;
         }
 
-        tbody.innerHTML = this.datos.map((registro, index) => {
-            const nombreEmpresa = this.obtenerNombreCatalogo('empresas', registro.empresa);
-            const nombreMercado = this.obtenerNombreCatalogo('mercados', registro.mercado);
-            const nombreProvincia = registro.provincia || '-';
-            const nombreProveedor = registro.proveedor || '-';
-            const nombreCondicion = this.obtenerNombreCatalogo('condiciones', registro.condicion);
-            const nombreTipo = registro.tipo || '-';
+        // Detectar columnas según tipo
+        let columnas = [];
+        if (this.tipoActual === 'vivo-aqp') {
+            columnas = [
+                'id', 'fecha', 'mercado', 'empresa', 'ruc_empresa', 'condicion',
+                'proveedor', 'ruc_proveedor',
+                'precioMayMin', 'precioMayMax', 'precioPubMin', 'precioPubMax',
+                'pesoMachoMin', 'pesoMachoMax', 'pesoHembMin', 'pesoHembMax',
+                'colorMin', 'colorMax',
+                'pesoMachoPromMin', 'pesoMachoPromMax',
+                'pesoHembraPromMin', 'pesoHembraPromMax',
+                'cantidad', 'usuarioRegistro', 'fechaHoraRegistro',
+                'usuarioTransferencia', 'fechaHoraTransferencia'
+            ];
+        } else if (this.tipoActual === 'vivo-provincia') {
+            columnas = [
+                'id', 'fecha', 'provincia', 'proveedor', 'ruc_proveedor',
+                'tipo', 'linea',
+                'precioMayCarMin', 'precioMayCarMax', 'precioMayBraMin', 'precioMayBraMax',
+                'precioPubMin', 'precioPubMax',
+                'pesoMachoPromMin', 'pesoMachoPromMax',
+                'pesoHembraPromMin', 'pesoHembraPromMax',
+                'pesoBrasaPromMin', 'pesoBrasaPromMax',
+                'colorMin', 'colorMax', 'cantidad',
+                'usuarioRegistro', 'fechaHoraRegistro',
+                'usuarioTransferencia', 'fechaHoraTransferencia'
+            ];
+        }
 
-            // Determinar qué columnas mostrar según el tipo
-            const ubicacion = this.tipoActual === 'vivo-aqp' 
-                ? `${nombreMercado || '-'}` 
-                : nombreProvincia;
-            
-            // Para provincias, usamos los campos específicos de precios
-            const precioMayMin = this.tipoActual === 'vivo-aqp' ? registro.precioMayMin : registro.precioMayCarMin;
-            const precioMayMax = this.tipoActual === 'vivo-aqp' ? registro.precioMayMax : registro.precioMayCarMax;
-            
-            const infoAdicional = this.tipoActual === 'vivo-aqp'
-                ? `${nombreEmpresa || '-'} / ${nombreCondicion || '-'}`
-                : nombreTipo;
+        // Agregar columna "Opciones"
+        const columnasConOpciones = [...columnas, 'Opciones'];
 
-                // fila principal y fila de detalles (inicialmente oculta)
-                return `
-                    <tr class="cursor-pointer hover:bg-blue-50 transition-colors" data-index="${index}" onclick="comercializacionController.seleccionarRegistro(event, ${registro.id})" onkeydown="if(event.key==='Enter') comercializacionController.toggleDetalle(event,this)">
-                        <td class="px-2 py-2 border-b text-center">
-                            <button type="button" class="text-blue-600 hover:text-blue-800" onclick="event.stopPropagation(); comercializacionController.toggleDetalle(event,this)">
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            ${registro.id || '-'}
-                        </td>
-                        <td class="px-2 py-2 border-b text-left">${registro.fecha || '-'}</td>
-                        <td class="px-2 py-2 border-b text-left font-medium text-blue-600">${ubicacion}</td>
-                        <td class="px-2 py-2 border-b text-left">${nombreEmpresa || '-'}</td>
-                        <td class="px-2 py-2 border-b text-left">${registro.ruc_empresa || '-'}</td>
-                        <td class="px-2 py-2 border-b text-left">${nombreProveedor}</td>
-                        <td class="px-2 py-2 border-b text-left text-sm text-gray-600">${infoAdicional}</td>
-                        <td class="px-2 py-2 border-b text-center">
-                            <span class="text-green-600 font-semibold">S/ ${precioMayMin || 0}</span> - 
-                            <span class="text-green-600 font-semibold">S/ ${precioMayMax || 0}</span>
-                        </td>
-                        <td class="px-2 py-2 border-b text-center">
-                            <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMin || 0}</span> - 
-                            <span class="text-blue-600 font-semibold">S/ ${registro.precioPubMax || 0}</span>
-                        </td>
-                        <td class="px-2 py-2 border-b text-center">${registro.pesoMachoMin || 0} - ${registro.pesoMachoMax || 0}</td>
-                        <td class="px-2 py-2 border-b text-center">${registro.pesoMachoPromMin || 0} - ${registro.pesoMachoPromMax || 0}</td>
-                        <td class="px-2 py-2 border-b text-center">${registro.colorMin || 0} - ${registro.colorMax || 0}</td>
-                        <td class="px-2 py-2 border-b text-center font-bold text-gray-700">${registro.cantidad || 0}</td>
-                    </tr>
-                    <tr class="detail-row text-sm text-gray-600 bg-gray-50" style="display:none;" data-index-detail="${index}">
-                        <td class="px-3 py-2 border-b" colspan="13">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                                <div><strong>RUC Proveedor:</strong> ${registro.ruc_proveedor || '-'}</div>
-                                ${this.tipoActual === 'vivo-aqp' ? `
-                                    <div><strong>Peso Hembra (mín - máx):</strong> ${registro.pesoHembMin || 0} - ${registro.pesoHembMax || 0}</div>
-                                    <div><strong>Peso Hembra Prom (mín - máx):</strong> ${registro.pesoHembraPromMin || 0} - ${registro.pesoHembraPromMax || 0}</div>
-                                ` : `
-                                    <div><strong>Precio Brasa (mín - máx):</strong> S/ ${registro.precioMayBraMin || 0} - S/ ${registro.precioMayBraMax || 0}</div>
-                                    <div><strong>Peso Brasa Prom (mín - máx):</strong> ${registro.pesoBrasaPromMin || 0} - ${registro.pesoBrasaPromMax || 0}</div>
-                                `}
-                            </div>
-                            <div class="mt-2 text-xs text-gray-500">
-                                ${registro.usuarioRegistro ? `Registro: ${registro.usuarioRegistro} | ${registro.fechaHoraRegistro || '-'}` : ''}
-                                ${registro.usuarioTransferencia ? ` | Transfer: ${registro.usuarioTransferencia} | ${registro.fechaHoraTransferencia}` : ''}
-                            </div>
-                        </td>
-                    </tr>
-                `;
-        }).join('');
+        // Generar encabezado
+        thead.innerHTML = columnasConOpciones
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
+            .join('');
+
+        // Generar filas con botones de acción
+        tbody.innerHTML = this.datos
+            .map((registro, i) => `
+            <tr class="hover:bg-blue-50 transition-colors">
+                ${columnas.map(col => `<td class="px-2 py-1 border-b text-sm text-gray-700">${registro[col] ?? '-'}</td>`).join('')}
+                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${i}">
+                        <i class="fas fa-edit"></i> 
+                    </button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${i}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `)
+            .join('');
+
+        // Asignar eventos a los botones Editar y Eliminar
+        tbody.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.currentTarget.getAttribute('data-index');
+                this.registroSeleccionado = this.datos[index];
+                this.modificarSeleccionado();
+            });
+        });
+
+        tbody.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const index = e.currentTarget.getAttribute('data-index');
+                this.registroSeleccionado = this.datos[index];
+                await this.eliminarSeleccionado();
+            });
+        });
+        // 🟢 Inicializar DataTable (después de renderizar filas)
+        if ($.fn.DataTable.isDataTable('.min-w-full')) {
+            $('.min-w-full').DataTable().destroy(); // evitar duplicar instancias
+        }
+        $('.min-w-full').DataTable({
+            pageLength: 10,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            },
+            responsive: true
+        });
     }
 
-        toggleDetalle(event, el) {
-            // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
-            const btn = el instanceof Element ? el : (event && event.currentTarget);
-            const tr = btn.closest('tr');
-            if (!tr) return;
-            const next = tr.nextElementSibling;
-            if (!next || !next.classList.contains('detail-row')) return;
-            next.style.display = next.style.display === 'none' ? 'table-row' : 'none';
-            // alternar icono
-            const icon = tr.querySelector('i.fas');
-            if (icon) icon.classList.toggle('fa-chevron-up');
-        }
+    toggleDetalle(event, el) {
+        // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
+        const btn = el instanceof Element ? el : (event && event.currentTarget);
+        const tr = btn.closest('tr');
+        if (!tr) return;
+        const next = tr.nextElementSibling;
+        if (!next || !next.classList.contains('detail-row')) return;
+        next.style.display = next.style.display === 'none' ? 'table-row' : 'none';
+        // alternar icono
+        const icon = tr.querySelector('i.fas');
+        if (icon) icon.classList.toggle('fa-chevron-up');
+    }
 
     obtenerNombreCatalogo(catalogo, id) {
         if (!id) return '-';
@@ -390,7 +405,7 @@ class ComercializacionController {
         console.log('=== ELIMINAR REGISTRO ===');
         console.log('Registro seleccionado:', this.registroSeleccionado);
         console.log('Tabla actual:', this.tablaActual);
-        
+
         if (!this.registroSeleccionado) {
             this.mostrarNotificacion('⚠️ Selecciona un registro de la tabla', 'warning');
             return;
@@ -401,7 +416,7 @@ class ComercializacionController {
         try {
             this.mostrarCargando(true);
             console.log('Eliminando ID:', this.registroSeleccionado.id);
-            
+
             await this.service.eliminar(this.tablaActual, this.registroSeleccionado.id);
             this.mostrarNotificacion('✅ Registro eliminado exitosamente', 'success');
             this.registroSeleccionado = null;
@@ -416,13 +431,13 @@ class ComercializacionController {
 
     mostrarCamposSegunTipo() {
         const esAqp = this.tipoActual === 'vivo-aqp';
-        
+
         // Campos de Arequipa
         document.getElementById('campoEmpresa').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoMercado').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoCondicion').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
-        
+
         // Campos de Provincia
         document.getElementById('campoProvincia').style.display = esAqp ? 'none' : 'block';
         document.getElementById('campoTipo').style.display = esAqp ? 'none' : 'block';
@@ -431,21 +446,21 @@ class ComercializacionController {
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
         console.log('Cargando datos en formulario:', r);
-        
+
         document.getElementById('modalFecha').value = r.fecha;
-        
+
         // Convertir nombres a IDs para los selects
         if (this.tipoActual === 'vivo-aqp') {
             // Buscar ID de empresa por nombre
             const empresaObj = this.catalogos.empresas.find(e => e.empresa === r.empresa);
             document.getElementById('modalEmpresa').value = empresaObj ? empresaObj.id : '';
-            
+
             // Buscar ID de mercado por nombre
             const mercadoObj = this.catalogos.mercados.find(m => m.mercado === r.mercado);
             document.getElementById('modalMercado').value = mercadoObj ? mercadoObj.id : '';
-            
+
             document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
-            
+
             // Buscar ID de condicion por nombre
             const condicionObj = this.catalogos.condiciones.find(c => c.condicion === r.condicion);
             document.getElementById('modalCondicion').value = condicionObj ? condicionObj.id : '';
@@ -453,36 +468,36 @@ class ComercializacionController {
             // Buscar ID de provincia por nombre
             const provinciaObj = this.catalogos.provincias.find(p => p.provincia === r.provincia);
             document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.id : '';
-            
+
             // Buscar ID de tipo por nombre
             const tipoObj = this.catalogos.tipos.find(t => t.tipo === r.tipo);
             document.getElementById('modalTipo').value = tipoObj ? tipoObj.id : '';
         }
-        
+
         // Buscar ID de proveedor por nombre
         const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
-        
+
         document.getElementById('modalRucProv').value = r.ruc_prov || '';
-        
+
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
         document.getElementById('modalPrecioPubMin').value = r.precioPubMin || '';
         document.getElementById('modalPrecioPubMax').value = r.precioPubMax || '';
-        
+
         document.getElementById('modalPesoMachoMin').value = r.pesoMachoMin || '';
         document.getElementById('modalPesoMachoMax').value = r.pesoMachoMax || '';
         document.getElementById('modalPesoHembMin').value = r.pesoHembMin || '';
         document.getElementById('modalPesoHembMax').value = r.pesoHembMax || '';
-        
+
         document.getElementById('modalColorMin').value = r.colorMin || '';
         document.getElementById('modalColorMax').value = r.colorMax || '';
-        
+
         document.getElementById('modalPesoMachoPromMin').value = r.pesoMachoPromMin || '';
         document.getElementById('modalPesoMachoPromMax').value = r.pesoMachoPromMax || '';
         document.getElementById('modalPesoHembraPromMin').value = r.pesoHembraPromMin || '';
         document.getElementById('modalPesoHembraPromMax').value = r.pesoHembraPromMax || '';
-        
+
         document.getElementById('modalCantidad').value = r.cantidad || '';
     }
 
@@ -498,28 +513,28 @@ class ComercializacionController {
 
     async guardarRegistro() {
         const data = this.obtenerDatosFormulario();
-        
+
         if (!this.validarFormulario(data)) return;
 
         try {
             this.mostrarCargando(true);
-            
+
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
                 console.log('Actualizando registro ID:', data.id);
                 console.log('Datos a enviar:', data);
-                
+
                 const resultado = await this.service.actualizar(this.tablaActual, data);
                 console.log('Resultado actualización:', resultado);
-                
+
                 this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
-                
+
                 const resultado = await this.service.crear(this.tablaActual, data);
                 console.log('Resultado creación:', resultado);
-                
+
                 this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
             }
 
@@ -619,12 +634,12 @@ class ComercializacionController {
             this.mostrarNotificacion('Primero selecciona un tipo de datos', 'warning');
             return;
         }
-        
+
         if (this.datos.length === 0) {
             this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        
+
         try {
             this.service.exportarCSV(this.tablaActual);
             this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
@@ -642,7 +657,7 @@ class ComercializacionController {
 
     mostrarNotificacion(mensaje, tipo = 'info') {
         console.log(`[${tipo}] ${mensaje}`);
-        
+
         // Crear contenedor si no existe
         let container = document.getElementById('notificaciones-container');
         if (!container) {
@@ -651,7 +666,7 @@ class ComercializacionController {
             container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
             document.body.appendChild(container);
         }
-        
+
         // Crear notificación
         const notif = document.createElement('div');
         const colores = {
@@ -666,16 +681,16 @@ class ComercializacionController {
             warning: '⚠️',
             info: 'ℹ️'
         };
-        
+
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
         notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
             <span style="font-size: 20px;">${iconos[tipo]}</span>
             <span>${mensaje}</span>
         `;
-        
+
         container.appendChild(notif);
-        
+
         // Auto-eliminar después de 4 segundos
         setTimeout(() => {
             notif.style.animation = 'slideOutRight 0.3s ease';
@@ -685,4 +700,4 @@ class ComercializacionController {
 }
 
 // Instancia global
-const comercializacionController = new ComercializacionController();
+window.comercializacionController = new ComercializacionController();
