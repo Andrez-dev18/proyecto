@@ -54,13 +54,14 @@ class VivoArequipaController
     public function obtenerDatosFiltrados()
     {
         // Obtener parámetros desde la query string
-        $fecha = $_GET['fecha'] ?? null;
+        $fechaInicio = $_GET['fechaInicio'] ?? null;
+        $fechaFin = $_GET['fechaFin'] ?? null;
         $mercado = $_GET['mercado'] ?? null;
         $empresa = $_GET['empresa'] ?? null;
         $condicion = $_GET['condicion'] ?? null;
         $proveedor = $_GET['proveedor'] ?? null;
 
-        $resultados = $this->service->obtenerDatosFiltrados($fecha, $mercado, $empresa, $condicion, $proveedor);
+        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $mercado, $empresa, $condicion, $proveedor);
 
         header('Content-Type: application/json');
         echo json_encode([

@@ -97,7 +97,8 @@ class ComercializacionController {
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
         // Filtros
-        document.getElementById('filterFecha')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('filterMercado')?.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
@@ -166,10 +167,12 @@ class ComercializacionController {
             this.mostrarCargando(true);
 
             const filtros = {};
-            const fecha = document.getElementById('filterFecha').value;
+            const fechaInicio = document.getElementById('filterFechaInicio').value;
+            const fechaFin = document.getElementById('filterFechaFin').value;
 
             // Solo agregar si tiene valor
-            if (fecha) filtros.fecha = fecha;
+            if (fechaInicio) filtros.fechaInicio = fechaInicio;
+            if (fechaFin) filtros.fechaFin = fechaFin;
 
             if (this.tipoActual === 'vivo-aqp') {
                 const mercado = document.getElementById('filterMercado').value;
@@ -211,7 +214,8 @@ class ComercializacionController {
     }
 
     limpiarFiltros() {
-        document.getElementById('filterFecha').value = '';
+        document.getElementById('filterFechaInicio').value = '';
+        document.getElementById('filterFechaFin').value = '';
         document.getElementById('filterMercado').value = '';
         document.getElementById('filterProvincia').value = '';
         document.getElementById('filterProveedor').value = '';

@@ -26,9 +26,9 @@ class VivoProvinciaService
         return $this->repo->delete($id);
     }
 
-    public function obtenerDatosFiltrados($fecha = null, $provincia = null, $proveedor = null, $tipo = null)
+    public function obtenerDatosFiltrados($fechaInicio = null, $fechaFin = null, $provincia = null, $proveedor = null, $tipo = null)
     {
-        return $this->repo->findByFilters($fecha, $provincia, $proveedor, $tipo);
+        return $this->repo->findByFilters($fechaInicio, $fechaFin, $provincia, $proveedor, $tipo);
     }
 
 }

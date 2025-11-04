@@ -193,7 +193,7 @@ class VivoProvinciaRepository
         return $stmt->execute($params);
     }
 
-    public function findByFilters($fecha = null, $provincia = null, $proveedor = null, $tipo = null)
+    public function findByFilters($fechaInicio = null, $fechaFin = null, $provincia = null, $proveedor = null, $tipo = null)
     {
         $query = "
         SELECT 
@@ -229,13 +229,17 @@ class VivoProvinciaRepository
         LEFT JOIN com_tipo t ON v.tipo = t.codigo
         WHERE 1=1
     ";
-
-        if (!empty($fecha)) $query .= " AND v.fecha = '$fecha'";
+        // 🔹 Filtro de rango de fechas
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND v.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND v.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND v.fecha <= '$fechaFin'";
+        }
         if (!empty($provincia)) $query .= " AND v.provincia = $provincia";
         if (!empty($proveedor)) $query .= " AND v.proveedor = $proveedor";
         if (!empty($tipo)) $query .= " AND v.tipo = $tipo";
-
-        $query .= " ORDER BY v.id DESC";
 
         return $this->executeQuery($query);
     }

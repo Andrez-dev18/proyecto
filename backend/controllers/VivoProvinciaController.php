@@ -53,12 +53,13 @@ class VivoProvinciaController
 
     public function obtenerDatosFiltrados()
     {
-        $fecha = $_GET['fecha'] ?? null;
+        $fechaInicio = $_GET['fechaInicio'] ?? null;
+        $fechaFin = $_GET['fechaFin'] ?? null;
         $provincia = $_GET['provincia'] ?? null;
         $proveedor = $_GET['proveedor'] ?? null;
         $tipo = $_GET['tipo'] ?? null;
 
-        $resultados = $this->service->obtenerDatosFiltrados($fecha, $provincia, $proveedor, $tipo);
+        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $provincia, $proveedor, $tipo);
 
         header('Content-Type: application/json');
         echo json_encode([

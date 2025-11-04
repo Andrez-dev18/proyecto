@@ -214,7 +214,7 @@ class VivoArequipaRepository
     }
 
 
-    public function findByFilters($fecha = null, $mercado = null, $empresa = null, $condicion = null, $proveedor = null)
+    public function findByFilters($fechaInicio = null, $fechaFin = null, $mercado = null, $empresa = null, $condicion = null, $proveedor = null)
     {
         $query = "
         SELECT
@@ -253,7 +253,16 @@ class VivoArequipaRepository
         WHERE 1=1
     ";
 
-        if (!empty($fecha)) $query .= " AND a.fecha = '$fecha'";
+        // 🔹 Filtro de rango de fechas
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND a.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND a.fecha <= '$fechaFin'";
+        }
+
+        // 🔹 Otros filtros
         if (!empty($mercado)) $query .= " AND a.mercado = $mercado";
         if (!empty($empresa)) $query .= " AND a.empresa = $empresa";
         if (!empty($condicion)) $query .= " AND a.condicion = $condicion";

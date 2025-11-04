@@ -43,7 +43,8 @@ class ComercializacionService {
         const params = new URLSearchParams();
 
         // Solo añadir los parámetros que tengan valor
-        if (filtros.fecha) params.append('fecha', filtros.fecha);
+        if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+        if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
         if (filtros.mercado) params.append('mercado', filtros.mercado);
         if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
         if (filtros.condicion) params.append('condicion', filtros.condicion);
@@ -114,7 +115,8 @@ class ComercializacionService {
             const params = new URLSearchParams();
             
             // Solo añadir parámetros que tengan valor
-            if (filtros.fecha) params.append('fecha', filtros.fecha);
+            if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+            if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
             if (filtros.provincia) params.append('provincia', filtros.provincia);
             if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
             if (filtros.tipo) params.append('tipo', filtros.tipo);
