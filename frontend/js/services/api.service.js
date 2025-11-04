@@ -128,24 +128,18 @@ class ApiService {
     }
 
     obtenerUrlReporte(tipo) {
-        let endpoint = '';
-        
-        switch(tipo) {
-            case AppConfig.TIPOS_DATOS.VIVO_AREQUIPA:
-                endpoint = AppConfig.API.ENDPOINTS.REPORTES.VIVO_AREQUIPA;
-                break;
-            case AppConfig.TIPOS_DATOS.VIVO_PROVINCIA:
-                endpoint = AppConfig.API.ENDPOINTS.REPORTES.VIVO_PROVINCIA;
-                break;
-            case AppConfig.TIPOS_DATOS.BENEFICIADO_AREQUIPA:
-                endpoint = AppConfig.API.ENDPOINTS.REPORTES.BENEFICIADO_AREQUIPA;
-                break;
-            case AppConfig.TIPOS_DATOS.BENEFICIADO_PROVINCIA:
-                endpoint = AppConfig.API.ENDPOINTS.REPORTES.BENEFICIADO_PROVINCIA;
-                break;
-        }
+        const endpoints = {
+        'vivo-arequipa': '/reporte/vivo/arequipa/excel',
+        'vivo-provincia': '/reporte/vivo/provincia/excel',
+        'beneficiado-arequipa': '/reporte/beneficiado/arequipa/excel',
+        'beneficiado-provincia': '/reporte/beneficiado/provincia/excel'
+    };
 
-        return `${this.baseUrl}${endpoint}`;
+    const endpoint = endpoints[tipo];
+
+    if (!endpoint) return null;
+
+    return `${this.baseUrl}${endpoint}`;
     }
 }
 

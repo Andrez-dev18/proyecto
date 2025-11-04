@@ -20,16 +20,8 @@ window.mostrarModalNuevo = function() {
     uiController.mostrarModalNuevo();
 };
 
-window.editarSeleccionado = function() {
-    uiController.mostrarModalEditar();
-};
-
-window.eliminarSeleccionado = async function() {
-    await dataController.eliminarRegistro();
-};
-
-window.generarReporteSeleccionado = function() {
-    dataController.generarReporte();
+window.generarReporteSeleccionado = async function() {
+    await dataController.generarReporte();
 };
 
 window.guardarRegistro = async function() {
@@ -47,3 +39,19 @@ window.aplicarFiltros = async function() {
 window.limpiarFiltros = async function() {
     await filterController.limpiarFiltros();
 };
+
+window.editarRegistro = function(index) {
+    const registro = dataController.obtenerRegistroPorIndex(index);
+    if (!registro) {
+        uiController.mostrarAlerta("No se pudo obtener el registro.");
+        return;
+    }
+    uiController.mostrarModalEditar(registro);
+};
+
+window.eliminarRegistro = async function(index) {
+    const registro = dataController.obtenerRegistroPorIndex(index);
+    if (!registro) return;
+    await dataController.eliminarRegistro(registro.id);
+};
+

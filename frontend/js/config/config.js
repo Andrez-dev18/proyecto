@@ -1,6 +1,6 @@
 const AppConfig = {
     API: {
-        BASE_URL: 'http://localhost:8033/proyecto/backend',
+        BASE_URL: 'http://localhost/proyecto/backend',
         ENDPOINTS: {
             VIVO: {
                 AREQUIPA: '/vivo/arequipa',

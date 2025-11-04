@@ -58,7 +58,7 @@ class UiController {
     }
 
     actualizarEstadoBotones(haySeleccion) {
-        const botones = ['btnModificar', 'btnEliminar', 'btnReporte'];
+        const botones = ['btnModificar', 'btnEliminar'];
         botones.forEach(btnId => {
             const btn = document.getElementById(btnId);
             if (btn) {
@@ -119,22 +119,21 @@ class UiController {
         formController.generarFormulario();
     }
 
-    mostrarModalEditar() {
-        const registro = dataController.obtenerRegistroSeleccionado();
-        
-        if (!registro) {
-            this.mostrarAlerta(AppConfig.MENSAJES.ERROR.SELECCIONAR_REGISTRO);
-            return;
-        }
-
-        if (!registro.id) {
-            this.mostrarError(AppConfig.MENSAJES.ERROR.SIN_ID);
-            return;
-        }
-        
-        this.abrirModal('Modificar Registro');
-        formController.generarFormulario(registro);
+    mostrarModalEditar(registro) {
+    if (!registro) {
+        this.mostrarAlerta("No se pudo cargar el registro para editar.");
+        return;
     }
+
+    if (!registro.id) {
+        this.mostrarError("El registro no tiene ID válido.");
+        return;
+    }
+
+    this.abrirModal('Modificar Registro');
+    formController.generarFormulario(registro);
+}
+
 
     animarDestello(element) {
         element.classList.add('animate-pulse');
