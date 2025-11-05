@@ -1,6 +1,6 @@
 class ComercializacionService {
     constructor() {
-        this.baseURL = 'http://localhost:8033/proyecto/backend';
+        this.baseURL = 'http://localhost/proyecto/backend';
     }
 
     // ========== VIVO AREQUIPA ==========

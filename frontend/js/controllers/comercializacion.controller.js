@@ -323,7 +323,8 @@ class ComercializacionController {
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
             },
-            responsive: true
+            responsive: true,
+            order: [[0, 'desc']],
         });
     }
 

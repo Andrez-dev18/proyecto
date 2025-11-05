@@ -46,6 +46,7 @@ class VivoArequipaRepository
         LEFT JOIN com_empresa e ON a.empresa = e.codigo
         LEFT JOIN com_condicion c ON a.condicion = c.codigo
         LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        ORDER BY a.fechaHoraRegistro DESC;;
     ";
         return $this->executeQuery($query);
     }
