@@ -2,6 +2,9 @@ const AppConfig = {
     API: {
         BASE_URL: 'http://localhost/proyecto/backend',
         ENDPOINTS: {
+            AUTH: {
+                LOGIN: '/usuario/login'
+            },
             VIVO: {
                 AREQUIPA: '/vivo/arequipa',
                 PROVINCIA: '/vivo/provincia',

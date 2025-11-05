@@ -11,6 +11,7 @@ require_once __DIR__ . '/../controllers/ProveedorController.php';
 require_once __DIR__ . '/../controllers/ProvinciaController.php';
 require_once __DIR__ . '/../controllers/TipoController.php';
 require_once __DIR__ . '/../controllers/VivoProvinciaController.php';
+require_once __DIR__ . '/../controllers/UsuarioController.php';
 
 
 header("Access-Control-Allow-Origin: *");
@@ -30,6 +31,7 @@ if (strpos($_SERVER["REQUEST_URI"], '/reporte/') === false) {
 }
 
 $db = (new Database())->getConnection();
+$UserController = new UsuarioController($db);
 $vivoController = new VivoController($db);
 $beneficiadoController = new BeneficiadoController($db);
 $reporteController = new ReporteController($db);
@@ -69,6 +71,14 @@ elseif (strpos($path, "/reporte/vivo/provincia/excel") !== false && $request == 
     $reporteController->exportarVivoArequipaExcel();
     exit;
 }
+
+// ========== RUTAS LOGIN ==========
+elseif (strpos($path, "/usuario/login") !== false && $request == "POST") {
+    $data = json_decode(file_get_contents("php://input"), true);
+    $UserController->login($data);
+    exit;
+}
+
 
 // ========== RUTAS VIVO ==========
 
