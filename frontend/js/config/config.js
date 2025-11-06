@@ -3,7 +3,9 @@ const AppConfig = {
         BASE_URL: 'http://localhost/proyecto/backend',
         ENDPOINTS: {
             AUTH: {
-                LOGIN: '/usuario/login'
+                LOGIN: '/usuario/login',
+                VALIDAR: '/usuario/validarSesion',
+                LOGOUT: '/usuario/logout'
             },
             VIVO: {
                 AREQUIPA: '/vivo/arequipa',

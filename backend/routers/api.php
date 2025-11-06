@@ -77,7 +77,16 @@ elseif (strpos($path, "/usuario/login") !== false && $request == "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
     $UserController->login($data);
     exit;
+}// ========== RUTAS SESIÓN ==========
+elseif (strpos($path, "/usuario/validarSesion") !== false && $request == "GET") {
+    require_once __DIR__ . '/../controllers/session.php';
+    exit;
 }
+elseif (strpos($path, "/usuario/logout") !== false && $request == "GET") {
+    require_once __DIR__ . '/../controllers/logout.php';
+    exit;
+}
+
 
 
 // ========== RUTAS VIVO ==========

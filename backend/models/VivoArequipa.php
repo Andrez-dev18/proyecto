@@ -1,33 +1,33 @@
 <?php 
 
 class VivoArequipa{
-    public int $id;
-    public ?string $fecha;
-    public ?string $mercado;
-    public ?string $empresa;
-    public ?string $ruc_empr;
-    public ?string $condicion;
-    public ?string $proveedor;
-    public ?int $ruc_prov;
-    public ?float $precioMayMin;
-    public ?float $precioMayMax;
-    public ?float $precioPubMin;
-    public ?float $precioPubMax;
-    public ?float $pesoMachoMin;
-    public ?float $pesoMachoMax;
-    public ?float $pesoHembMin;
-    public ?float $pesoHembMax;
-    public ?float $colorMin;
-    public ?float $colorMax;
-    public ?float $pesoMachoPromMin;
-    public ?float $pesoMachoPromMax;
-    public ?float $pesoHembraPromMin;
-    public ?float $pesoHembraPromMax;
-    public ?float $cantidad;
-    public ?string $usuarioRegistro;
-    public ?string $fechaHoraRegistro;
-    public ?string $usuarioTransferencia;
-    public ?string $fechaHoraTransferencia;
+    public $id;
+    public $fecha;
+    public  $mercado;
+    public  $empresa;
+    public  $ruc_empr;
+    public  $condicion;
+    public  $proveedor;
+    public  $ruc_prov;
+    public  $precioMayMin;
+    public  $precioMayMax;
+    public  $precioPubMin;
+    public  $precioPubMax;
+    public  $pesoMachoMin;
+    public  $pesoMachoMax;
+    public  $pesoHembMin;
+    public  $pesoHembMax;
+    public  $colorMin;
+    public  $colorMax;
+    public  $pesoMachoPromMin;
+    public  $pesoMachoPromMax;
+    public  $pesoHembraPromMin;
+    public  $pesoHembraPromMax;
+    public  $cantidad;
+    public  $usuarioRegistro;
+    public  $fechaHoraRegistro;
+    public $usuarioTransferencia;
+    public  $fechaHoraTransferencia;
 
     public static function fromArray(array $r): VivoArequipa {
         $d = new VivoArequipa();

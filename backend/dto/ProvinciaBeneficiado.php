@@ -1,31 +1,31 @@
 <?php
 
 class ProvinciaBeneficiado {
-    public int $id;
-    public int $ano;
-    public string $mes;
-    public ?string $provincia;
-    public ?string $zona;
-    public ?string $compraGrs;
-    public ?string $tipoCliente;
-    public ?string $nombre;
+    public  $id;
+    public  $ano;
+    public  $mes;
+    public  $provincia;
+    public  $zona;
+    public  $compraGrs;
+    public  $tipoCliente;
+    public  $nombre;
     
     // Campos específicos de Provincia Beneficiado
-    public int $grs;
-    public int $rp;
-    public int $grs_vivo;
-    public int $santa_elena;
-    public int $granjas_chicas;
-    public int $rosario;
-    public int $sanfern_lima;
-    public int $avicola_renzo;
-    public int $otros;
+    public $grs;
+    public  $rp;
+    public  $grs_vivo;
+    public  $santa_elena;
+    public  $granjas_chicas;
+    public  $rosario;
+    public  $sanfern_lima;
+    public  $avicola_renzo;
+    public  $otros;
     
-    public int $potencialMinimo;
-    public int $potencialMaximo;
-    public ?string $condicionPtmin;
-    public ?string $condicionPtmax;
-    public ?string $observaciones;
+    public  $potencialMinimo;
+    public  $potencialMaximo;
+    public  $condicionPtmin;
+    public  $condicionPtmax;
+    public  $observaciones;
 
     public static function fromArray(array $r): ProvinciaBeneficiado {
         $d = new ProvinciaBeneficiado();

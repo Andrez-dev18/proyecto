@@ -1,36 +1,36 @@
 <?php
 
 class ProvinciaVivo {
-    public int $id;
-    public int $ano;
-    public string $mes;
-    public ?string $provincia;
-    public ?string $zona;
-    public ?string $compra;
-    public ?string $tipo_cliente;
-    public ?string $nombre;
+    public $id;
+    public $ano;
+    public  $mes;
+    public  $provincia;
+    public  $zona;
+    public  $compra;
+    public  $tipo_cliente;
+    public  $nombre;
 
     // campos para Provincia
-    public int $grs;
-    public int $rp;
-    public int $renzo;
-    public int $fafo;
-    public int $santa_angela;
-    public int $jorge_pan;
-    public int $mirian_g;
-    public int $vasquez;
-    public int $san_joaquin;
-    public int $fortunato;
-    public int $rosario;
-    public int $perca;
-    public int $gamboa;
-    public int $asoc_sondor;
-    public int $otras_granjas_chicas;
+    public  $grs;
+    public  $rp;
+    public  $renzo;
+    public $fafo;
+    public  $santa_angela;
+    public  $jorge_pan;
+    public  $mirian_g;
+    public  $vasquez;
+    public  $san_joaquin;
+    public  $fortunato;
+    public  $rosario;
+    public  $perca;
+    public  $gamboa;
+    public  $asoc_sondor;
+    public  $otras_granjas_chicas;
 
-    public int $potencial_minimo;
-    public int $potencial_maximo;
-    public ?string $condicion_ptmax;
-    public ?string $observaciones;
+    public $potencial_minimo;
+    public  $potencial_maximo;
+    public  $condicion_ptmax;
+    public  $observaciones;
 
     public static function fromArray(array $r): ProvinciaVivo {
         $d = new ProvinciaVivo();

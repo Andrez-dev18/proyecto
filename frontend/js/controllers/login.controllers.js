@@ -45,3 +45,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	}
 });
+document.addEventListener("DOMContentLoaded", async () => {
+    const sesion = await AuthService.validarSesion();
+    if (sesion.success) {
+        window.location.href = "index.html";
+    }
+});

@@ -1,30 +1,27 @@
 <?php
 
 class ArequipaVivo {
-    public int $id;
-    public int $ano;
-    public string $mes;
-    public ?string $provincia;
-    public ?string $zona;
-    public ?string $compra;
-    public ?string $tipo_cliente;
-    public ?string $nombre;
-
-    // cantidades específicas de Arequipa
-    public int $grs;
-    public int $rp;
-    public int $renzo;
-    public int $fafo;
-    public int $santa_angela;
-    public int $rosario;
-    public int $pollo_lima;
-    public int $otras_granjas_chicas;
-
-    public int $potencial_minimo;
-    public int $potencial_maximo;
-    public ?string $condicion_ptmin;
-    public ?string $condicion_ptmax;
-    public ?string $observaciones;
+    public $id;
+    public $ano;
+    public $mes;
+    public $provincia;
+    public $zona;
+    public $compra;
+    public $tipo_cliente;
+    public $nombre;
+    public $grs;
+    public $rp;
+    public $renzo;
+    public $fafo;
+    public $santa_angela;
+    public $rosario;
+    public $pollo_lima;
+    public $otras_granjas_chicas;
+    public $potencial_minimo;
+    public $potencial_maximo;
+    public $condicion_ptmin;
+    public $condicion_ptmax;
+    public $observaciones;
 
     // factory desde un array asociativo (fila DB)
     public static function fromArray(array $r): ArequipaVivo {

@@ -1,38 +1,38 @@
 <?php
 
 class ArequipaBeneficiado {
-    public int $id;
-    public int $ano;
-    public string $mes;
-    public ?string $provincia;
-    public ?string $zona;
-    public ?string $compraGrs;
-    public ?string $tipoCliente;
-    public ?string $nombre;
+    public  $id;
+    public  $ano;
+    public  $mes;
+    public  $provincia;
+    public  $zona;
+    public $compraGrs;
+    public  $tipoCliente;
+    public  $nombre;
     
     // Campos específicos de Arequipa Beneficiado
-    public int $grs;
-    public int $rp;
-    public int $avicola_renzo;
-    public int $avelino;
-    public int $peladores;
-    public int $avicruz;
-    public int $rafael;
-    public int $matilde;
-    public int $avirox;
-    public int $julia;
-    public int $simon;
-    public int $yesica;
-    public int $gabriel;
-    public int $arturo;
-    public int $nicolas;
-    public int $luis_f;
-    public int $mirella;
-    public int $otros;
+    public  $grs;
+    public  $rp;
+    public  $avicola_renzo;
+    public  $avelino;
+    public  $peladores;
+    public  $avicruz;
+    public  $rafael;
+    public  $matilde;
+    public  $avirox;
+    public  $julia;
+    public  $simon;
+    public  $yesica;
+    public $gabriel;
+    public  $arturo;
+    public  $nicolas;
+    public  $luis_f;
+    public  $mirella;
+    public  $otros;
     
-    public int $potencialMinimo;
-    public int $potencialMaximo;
-    public ?string $condicionPtmax;
+    public  $potencialMinimo;
+    public  $potencialMaximo;
+    public  $condicionPtmax;
 
     public static function fromArray(array $r): ArequipaBeneficiado {
         $d = new ArequipaBeneficiado();
