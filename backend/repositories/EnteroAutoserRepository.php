@@ -1,6 +1,6 @@
 <?php
 
-class HuevoRepository
+class EnteroAutoserRepository
 {
     private $conn;
 
@@ -18,27 +18,23 @@ class HuevoRepository
     public function findAll()
     {
         $query = "
-            SELECT
-                h.id,
-                h.fecha,
-                p.nombre AS provincia,
-                t.nombre AS tipo,
-                m.nombre AS mercado,
-                pr.nombre AS proveedor,
-                h.precioMayMin,
-                h.precioMayMax,
-                h.precioPubMin,
-                h.precioPubMax,
-                h.usuarioRegistro,
-                h.fechaHoraRegistro,
-                h.usuarioTransferencia,
-                h.fechaHoraTransferencia
-            FROM com_db_huevo h
-            LEFT JOIN com_provincia p ON h.provincia = p.codigo
-            LEFT JOIN com_tipo t ON h.tipo = t.codigo
-            LEFT JOIN com_mercado m ON h.mercado = m.codigo
-            LEFT JOIN com_proveedor pr ON h.proveedor = pr.codigo
-            ORDER BY h.fechaHoraRegistro DESC
+           SELECT
+                a.id,
+                a.fecha,
+                p.nombre AS proveedor,
+                a.precioMayMin,
+                a.precioMayMax,
+                a.precioPubMin,
+                a.precioPubMax,
+                a.color,
+                a.cantidad,
+                a.usuarioRegistro,
+                a.fechaHoraRegistro,
+                a.usuarioTransferencia,
+                a.fechaHoraTransferencia
+            FROM com_db_entero_autoser a
+            LEFT JOIN com_proveedor p ON a.proveedor = p.codigo
+            ORDER BY a.fechaHoraRegistro DESC
         ";
         return $this->executeQuery($query);
     }
@@ -48,16 +44,15 @@ class HuevoRepository
         // Si existe ID, actualizamos
         if (!empty($data['id'])) {
             $query = "
-            UPDATE com_db_huevo SET
+            UPDATE com_db_entero_autoser SET
                 fecha = :fecha,
-                provincia = :provincia,
-                tipo = :tipo,
-                mercado = :mercado,
                 proveedor = :proveedor,
                 precioMayMin = :precioMayMin,
                 precioMayMax = :precioMayMax,
                 precioPubMin = :precioPubMin,
                 precioPubMax = :precioPubMax,
+                color = :color,
+                cantidad = :cantidad,
                 usuarioRegistro = :usuarioRegistro,
                 fechaHoraRegistro = :fechaHoraRegistro,
                 usuarioTransferencia = :usuarioTransferencia,
@@ -69,14 +64,13 @@ class HuevoRepository
             $params = [
                 ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
-                ':provincia' => $data['provincia'] ?? null,
-                ':tipo' => $data['tipo'] ?? null,
-                ':mercado' => $data['mercado'] ?? null,
                 ':proveedor' => $data['proveedor'] ?? null,
                 ':precioMayMin' => $data['precioMayMin'] ?? null,
                 ':precioMayMax' => $data['precioMayMax'] ?? null,
                 ':precioPubMin' => $data['precioPubMin'] ?? null,
                 ':precioPubMax' => $data['precioPubMax'] ?? null,
+                ':color' => $data['color'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? null,
                 ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
                 ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
                 ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
@@ -86,17 +80,16 @@ class HuevoRepository
         // Si no tiene ID, insertamos nuevo
         else {
             $query = "
-            INSERT INTO com_db_huevo (
+            INSERT INTO com_db_entero_autoser (
                 id,
                 fecha,
-                provincia,
-                tipo,
-                mercado,
                 proveedor,
                 precioMayMin,
                 precioMayMax,
                 precioPubMin,
                 precioPubMax,
+                color,
+                cantidad,
                 usuarioRegistro,
                 fechaHoraRegistro,
                 usuarioTransferencia,
@@ -104,14 +97,13 @@ class HuevoRepository
             ) VALUES (
                 :id,
                 :fecha,
-                :provincia,
-                :tipo,
-                :mercado,
                 :proveedor,
                 :precioMayMin,
                 :precioMayMax,
                 :precioPubMin,
                 :precioPubMax,
+                :color,
+                :cantidad,
                 :usuarioRegistro,
                 :fechaHoraRegistro,
                 :usuarioTransferencia,
@@ -126,14 +118,13 @@ class HuevoRepository
             $params = [
                 ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
-                ':provincia' => $data['provincia'] ?? null,
-                ':tipo' => $data['tipo'] ?? null,
-                ':mercado' => $data['mercado'] ?? null,
                 ':proveedor' => $data['proveedor'] ?? null,
                 ':precioMayMin' => $data['precioMayMin'] ?? null,
                 ':precioMayMax' => $data['precioMayMax'] ?? null,
                 ':precioPubMin' => $data['precioPubMin'] ?? null,
                 ':precioPubMax' => $data['precioPubMax'] ?? null,
+                ':color' => $data['color'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? null,
                 ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
                 ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
                 ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
@@ -145,55 +136,46 @@ class HuevoRepository
     }
 
 
-
     public function delete($id)
     {
-        $query = "DELETE FROM com_db_huevo WHERE id = :id";
+        $query = "DELETE FROM com_db_entero_autoser WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $id]);
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $provincia = null, $tipo = null, $mercado = null, $proveedor = null)
+    public function findByFilters($fechaInicio = null, $fechaFin = null, $proveedor = null)
     {
         $query = "
         SELECT
-                h.id,
-                h.fecha,
-                p.nombre AS provincia,
-                t.nombre AS tipo,
-                m.nombre AS mercado,
-                pr.nombre AS proveedor,
-                h.precioMayMin,
-                h.precioMayMax,
-                h.precioPubMin,
-                h.precioPubMax,
-                h.usuarioRegistro,
-                h.fechaHoraRegistro,
-                h.usuarioTransferencia,
-                h.fechaHoraTransferencia
-            FROM com_db_huevo h
-            LEFT JOIN com_provincia p ON h.provincia = p.codigo
-            LEFT JOIN com_tipo t ON h.tipo = t.codigo
-            LEFT JOIN com_mercado m ON h.mercado = m.codigo
-            LEFT JOIN com_proveedor pr ON h.proveedor = pr.codigo
+                a.id,
+                a.fecha,
+                p.nombre AS proveedor,
+                a.precioMayMin,
+                a.precioMayMax,
+                a.precioPubMin,
+                a.precioPubMax,
+                a.color,
+                a.cantidad,
+                a.usuarioRegistro,
+                a.fechaHoraRegistro,
+                a.usuarioTransferencia,
+                a.fechaHoraTransferencia
+            FROM com_db_entero_autoser a
+            LEFT JOIN com_proveedor p ON a.proveedor = p.codigo
             WHERE 1=1
     ";
 
         // 🔹 Filtro de rango de fechas
         if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $query .= " AND h.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+            $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
         } elseif (!empty($fechaInicio)) {
-            $query .= " AND h.fecha >= '$fechaInicio'";
+            $query .= " AND a.fecha >= '$fechaInicio'";
         } elseif (!empty($fechaFin)) {
-            $query .= " AND h.fecha <= '$fechaFin'";
+            $query .= " AND a.fecha <= '$fechaFin'";
         }
-        // 🔹 Otros filtros
-        if (!empty($provincia)) $query .= " AND h.provincia = $provincia";
-        if (!empty($tipo)) $query .= " AND h.tipo = $tipo";
-        if (!empty($mercado)) $query .= " AND h.mercado = $mercado";
-        if (!empty($proveedor)) $query .= " AND h.proveedor = $proveedor";
-        
+        if (!empty($proveedor)) $query .= " AND a.proveedor = $proveedor";
+
         return $this->executeQuery($query);
     }
 

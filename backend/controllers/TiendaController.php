@@ -19,7 +19,7 @@ class TiendaController
     public function create()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (isset($data["id"]) && $data["id"] != 0) {
+        if (isset($data["id"]) && !empty(trim($data["id"]))) {
             http_response_code(400);
             echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
             return;
@@ -42,13 +42,20 @@ class TiendaController
 
     public function delete($id)
     {
-        if (!$id || $id <= 0) {
+        if (!$id || empty(trim($id))) {
             http_response_code(400);
             echo json_encode(["error" => "ID inválido para eliminar el registro."]);
             return;
         }
-        $this->service->delete($id);
-        echo json_encode(["message" => "Registro eliminado correctamente"]);
+
+        $deletedRows = $this->service->delete($id);
+
+        if ($deletedRows > 0) {
+            echo json_encode(["message" => "Registro eliminado correctamente"]);
+        } else {
+            http_response_code(404);
+            echo json_encode(["error" => "No se encontró el registro con el ID especificado."]);
+        }
     }
 
     public function obtenerDatosFiltrados()

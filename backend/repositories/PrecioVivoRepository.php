@@ -112,7 +112,7 @@ class PrecioVivoRepository
         ";
 
             // Generar UUID manualmente si no existe
-            $data['id'] = $data['id'] ?? $this->generateUuid();
+            $data['id'] = $this->generateUuid();
 
             $stmt = $this->conn->prepare($query);
             $params = [
@@ -139,7 +139,8 @@ class PrecioVivoRepository
     {
         $query = "DELETE FROM com_db_precio_vivo WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
     public function findByFilters($fechaInicio = null, $fechaFin = null, $empresa = null)

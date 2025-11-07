@@ -17,6 +17,9 @@ require_once __DIR__ . '/../controllers/PrecioVivoController.php';
 require_once __DIR__ . '/../controllers/PrecioTrozadoController.php';
 require_once __DIR__ . '/../controllers/TiendaController.php';
 require_once __DIR__ . '/../controllers/HuevoController.php';
+require_once __DIR__ . '/../controllers/GallinaController.php';
+require_once __DIR__ . '/../controllers/AlternoController.php';
+require_once __DIR__ . '/../controllers/EnteroAutoserController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -52,6 +55,9 @@ $PrecioVivoController = new PrecioVivoController($db);
 $PrecioTrozadoController = new PrecioTrozadoController($db);
 $TiendaController = new TiendaController($db);
 $HuevoController = new HuevoController($db);
+$GallinaController = new GallinaController($db);
+$AlternoController = new AlternoController($db);
+$EnteroAutoserController = new EnteroAutoserController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -398,6 +404,81 @@ elseif (preg_match("/\/huevo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&tipo=3&mercado=2&proveedor=2
 }elseif (strpos($path, "/huevo/filtro") !== false && $request == "GET") {
     $HuevoController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_GALLINA#########
+// obtener todos
+elseif (strpos($path, "/gallina/all") !== false && $request == "GET") {
+    $GallinaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/gallina/crear") !== false && $request == "POST") {
+    $GallinaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/gallina/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $GallinaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/gallina\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $GallinaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=3
+}elseif (strpos($path, "/gallina/filtro") !== false && $request == "GET") {
+    $GallinaController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_ALTERNO #########
+// obtener todos
+elseif (strpos($path, "/alterno/all") !== false && $request == "GET") {
+    $AlternoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/alterno/crear") !== false && $request == "POST") {
+    $AlternoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/alterno/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $AlternoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/alterno\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $AlternoController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&mercado=2tipo=3
+}elseif (strpos($path, "/alterno/filtro") !== false && $request == "GET") {
+    $AlternoController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_ENTERO_AUTOSER #########
+// obtener todos
+elseif (strpos($path, "/enteroAutoser/all") !== false && $request == "GET") {
+    $EnteroAutoserController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/enteroAutoser/crear") !== false && $request == "POST") {
+    $EnteroAutoserController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/enteroAutoser/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $EnteroAutoserController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/enteroAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $EnteroAutoserController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
+}elseif (strpos($path, "/enteroAutoser/filtro") !== false && $request == "GET") {
+    $EnteroAutoserController->obtenerDatosFiltrados();
     exit;
 }
 

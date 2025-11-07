@@ -137,7 +137,7 @@ class beneficioProvinciaRepository
             ";
 
             // Generar UUID manualmente
-            $data['id'] = $data['id'] ?? $this->generateUuid();
+            $data['id'] = $this->generateUuid();
 
             $stmt = $this->conn->prepare($query);
             $params = [
@@ -169,7 +169,8 @@ class beneficioProvinciaRepository
     {
         $query = "DELETE FROM com_db_beneficio_provincia WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
     public function findByFilters($fechaInicio = null, $fechaFin = null, $provincia = null,  $proveedor = null)

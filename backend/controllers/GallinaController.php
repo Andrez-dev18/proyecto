@@ -1,14 +1,14 @@
 <?php
-require_once __DIR__ . '/../services/PrecioVivoService.php';
+require_once __DIR__ . '/../services/GallinaService.php';
 
-class PrecioVivoController
+class GallinaController
 {
 
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new PrecioVivoService($db);
+        $this->service = new GallinaService($db);
     }
 
     public function getAll()
@@ -19,9 +19,9 @@ class PrecioVivoController
     public function create()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (!isset($data["id"]) || !empty(trim($data["id"]))) {
+        if (isset($data["id"]) &&  !empty(trim($data["id"]))) {
             http_response_code(400);
-            echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
+            echo json_encode(["error" => "No se debe enviar un ID al crear un nuevo registro."]);
             return;
         }
         $this->service->save($data);
@@ -63,9 +63,9 @@ class PrecioVivoController
         // Obtener parámetros desde la query string
         $fechaInicio = $_GET['fechaInicio'] ?? null;
         $fechaFin = $_GET['fechaFin'] ?? null;
-        $empresa = $_GET['empresa'] ?? null;
+        $tipo = $_GET['tipo'] ?? null;
 
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $empresa);
+        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $tipo);
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -73,5 +73,4 @@ class PrecioVivoController
             'data' => $resultados
         ]);
     }
-
 }

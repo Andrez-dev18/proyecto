@@ -98,7 +98,7 @@ class TiendaRepository
         ";
 
             // Generar UUID si no existe
-            $data['id'] = $data['id'] ?? $this->generateUuid();
+            $data['id'] = $this->generateUuid();
 
             $stmt = $this->conn->prepare($query);
             $params = [
@@ -123,7 +123,8 @@ class TiendaRepository
     {
         $query = "DELETE FROM com_db_tienda WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
     public function findByFilters($fechaInicio = null, $fechaFin = null, $empresa = null, $tipo = null)
