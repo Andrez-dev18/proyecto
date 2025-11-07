@@ -1,0 +1,170 @@
+<?php
+
+class PrecioTrozadoRepository
+{
+    private $conn;
+
+    public function __construct($db)
+    {
+        $this->conn = $db;
+    }
+
+    private function executeQuery($query)
+    {
+        $stmt = $this->conn->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function findAll()
+    {
+        $query = "
+            SELECT
+                p.id,
+                p.fecha,
+                e.nombre AS empresa,
+                c.nombre AS corte,
+                p.precio,
+                p.usuarioRegistro,
+                p.fechaHoraRegistro,
+                p.usuarioTransferencia,
+                p.fechaHoraTransferencia
+            FROM com_db_precio_trozado p
+            LEFT JOIN com_empresa e ON p.empresa = e.codigo
+            LEFT JOIN com_corte c ON P.corte = c.codigo
+            ORDER BY p.fechaHoraRegistro DESC
+        ";
+        return $this->executeQuery($query);
+    }
+
+    public function save($data)
+    {
+        // Si existe ID, actualizamos
+        if (!empty($data['id'])) {
+            $query = "
+            UPDATE com_db_precio_trozado SET
+                fecha = :fecha,
+                empresa = :empresa,
+                corte = :corte,
+                precio = :precio,
+                usuarioRegistro = :usuarioRegistro,
+                fechaHoraRegistro = :fechaHoraRegistro,
+                usuarioTransferencia = :usuarioTransferencia,
+                fechaHoraTransferencia = :fechaHoraTransferencia
+            WHERE id = :id
+        ";
+
+            $stmt = $this->conn->prepare($query);
+            $params = [
+                ':id' => $data['id'],
+                ':fecha' => $data['fecha'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':corte' => $data['corte'] ?? null,
+                ':precio' => $data['precio'] ?? null,
+                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
+                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
+                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
+                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
+            ];
+        }
+        // Si no tiene ID, insertamos nuevo
+        else {
+            $query = "
+            INSERT INTO com_db_precio_trozado (
+                id,
+                fecha,
+                empresa,
+                corte,
+                precio,
+                usuarioRegistro,
+                fechaHoraRegistro,
+                usuarioTransferencia,
+                fechaHoraTransferencia
+            ) VALUES (
+                :id,
+                :fecha,
+                :empresa,
+                :corte,
+                :precio,
+                :usuarioRegistro,
+                :fechaHoraRegistro,
+                :usuarioTransferencia,
+                :fechaHoraTransferencia
+            )
+        ";
+
+            // Generar UUID manualmente si no existe
+            $data['id'] = $data['id'] ?? $this->generateUuid();
+
+            $stmt = $this->conn->prepare($query);
+            $params = [
+                ':id' => $data['id'],
+                ':fecha' => $data['fecha'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':corte' => $data['corte'] ?? null,
+                ':precio' => $data['precio'] ?? null,
+                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
+                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
+                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
+                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
+            ];
+        }
+
+        return $stmt->execute($params);
+    }
+
+
+    public function delete($id)
+    {
+        $query = "DELETE FROM com_db_precio_trozado WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([':id' => $id]);
+    }
+
+    public function findByFilters($fechaInicio = null, $fechaFin = null, $empresa = null)
+    {
+        $query = "
+        SELECT
+                p.id,
+                p.fecha,
+                e.nombre AS empresa,
+                c.nombre AS corte,
+                p.precio,
+                p.usuarioRegistro,
+                p.fechaHoraRegistro,
+                p.usuarioTransferencia,
+                p.fechaHoraTransferencia
+            FROM com_db_precio_trozado p
+            LEFT JOIN com_empresa e ON p.empresa = e.codigo
+            LEFT JOIN com_corte c ON P.corte = c.codigo
+            WHERE 1=1
+    ";
+
+        // 🔹 Filtro de rango de fechas
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND p.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND p.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND p.fecha <= '$fechaFin'";
+        }
+        // 🔹 Otros filtros
+        if (!empty($empresa)) $query .= " AND p.empresa = $empresa";
+
+        return $this->executeQuery($query);
+    }
+
+    private function generateUuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
+}

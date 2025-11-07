@@ -365,8 +365,8 @@
 
         <footer class="text-center mt-8 text-gray-600">
             <p class="text-sm">
-                &copy; 2024 |
-                <span class="font-semibold">Cesar Osire x Sergio Andre</span>
+                &copy; <span id="year"></span> |
+                <span class="font-semibold">Granja Rinconada Del Sur S.A.</span>
             </p>
         </footer>
     </div>
@@ -411,6 +411,8 @@
                 console.error("capturasController.cargarDatos no está definido");
             }
         };
+         // Obtiene el año actual del navegador
+            document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 
 

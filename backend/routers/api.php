@@ -12,7 +12,11 @@ require_once __DIR__ . '/../controllers/ProvinciaController.php';
 require_once __DIR__ . '/../controllers/TipoController.php';
 require_once __DIR__ . '/../controllers/VivoProvinciaController.php';
 require_once __DIR__ . '/../controllers/UsuarioController.php';
-
+require_once __DIR__ . '/../controllers/beneficioProvinciaController.php';
+require_once __DIR__ . '/../controllers/PrecioVivoController.php';
+require_once __DIR__ . '/../controllers/PrecioTrozadoController.php';
+require_once __DIR__ . '/../controllers/TiendaController.php';
+require_once __DIR__ . '/../controllers/HuevoController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -43,6 +47,11 @@ $ProveedorController = new ProveedorController($db);
 $ProvinciaController = new ProvinciaController($db);
 $TipoController = new TipoController($db);
 $VivoProvinciaController = new VivoProvinciaController($db);
+$BeneficioProvincia = new beneficioProvinciaController($db);
+$PrecioVivoController = new PrecioVivoController($db);
+$PrecioTrozadoController = new PrecioTrozadoController($db);
+$TiendaController = new TiendaController($db);
+$HuevoController = new HuevoController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -233,25 +242,162 @@ elseif (preg_match("/\/vivoProvincia\/borrar\/(\d+)/", $path, $matches) && ($req
     $VivoProvinciaController->delete($matches[1]);
     exit;
 }
- //#RUTAS CONDICION
+
+
+
+ //######### RUTAS CONDICION #########
 elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
     $CondicionController->getAll();
     exit;
-    //#RUTAS EMPRESA
+    //########## RUTAS EMPRESA #########
 }elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
     $EmpresaController->getAll();
     exit;
+    //######### RUTAS MERCADO #########
 }elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
     $MercadoController->getAll();
     exit;
+    //######### RUTAS PROVEEDOR #########
 }elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
     $ProveedorController->getAll();
     exit;
+    ######### RUTAS PROVINCIA #########
 }elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
     $ProvinciaController->getAll();
     exit;
+    ######### RUTAS TIPO #########
 }elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
     $TipoController->getAll();
+    exit;
+}
+
+
+
+//======================== RUTAS PARA NUEVAS TABLAS ====================================
+
+
+######### RUTAS BENEFICIO PROVINCIA #########
+// obtener todos
+elseif (strpos($path, "/beneficioProvincia/all") !== false && $request == "GET") {
+    $BeneficioProvincia->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/beneficioProvincia/crear") !== false && $request == "POST") {
+    $BeneficioProvincia->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/beneficioProvincia/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $BeneficioProvincia->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/beneficioProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $BeneficioProvincia->delete($matches[1]);
+    exit;
+    //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&provincia=2&proveedor=5
+}elseif (strpos($path, "/beneficioProvincia/filtro") !== false && $request == "GET") {
+    $BeneficioProvincia->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS PRECIO VIVO #########
+// obtener todos
+elseif (strpos($path, "/precioVivo/all") !== false && $request == "GET") {
+    $PrecioVivoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/precioVivo/crear") !== false && $request == "POST") {
+    $PrecioVivoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/precioVivo/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $PrecioVivoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/precioVivo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $PrecioVivoController->delete($matches[1]);
+    exit;
+    //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&empresa=2
+}elseif (strpos($path, "/precioVivo/filtro") !== false && $request == "GET") {
+    $PrecioVivoController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS PRECIO TROZADO #########
+// obtener todos
+elseif (strpos($path, "/precioTrozado/all") !== false && $request == "GET") {
+    $PrecioTrozadoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/precioTrozado/crear") !== false && $request == "POST") {
+    $PrecioTrozadoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/precioTrozado/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $PrecioTrozadoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/precioTrozado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $PrecioTrozadoController->delete($matches[1]);
+    exit;
+    //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&empresa=2
+}elseif (strpos($path, "/precioTrozado/filtro") !== false && $request == "GET") {
+    $PrecioTrozadoController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_TIENDA #########
+// obtener todos
+elseif (strpos($path, "/tienda/all") !== false && $request == "GET") {
+    $TiendaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/tienda/crear") !== false && $request == "POST") {
+    $TiendaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/tienda/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $TiendaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/tienda\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $TiendaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&empresa=2&tipo=3
+}elseif (strpos($path, "/tienda/filtro") !== false && $request == "GET") {
+    $TiendaController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_HUEVO #########
+// obtener todos
+elseif (strpos($path, "/huevo/all") !== false && $request == "GET") {
+    $HuevoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/huevo/crear") !== false && $request == "POST") {
+    $HuevoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/huevo/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $HuevoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/huevo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $HuevoController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&tipo=3&mercado=2&proveedor=2
+}elseif (strpos($path, "/huevo/filtro") !== false && $request == "GET") {
+    $HuevoController->obtenerDatosFiltrados();
     exit;
 }
 
