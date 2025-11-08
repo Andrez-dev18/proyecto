@@ -26,7 +26,13 @@ const AppConfig = {
                 VIVO_PROVINCIA: '/reporte/vivo/provincia/excel',
                 BENEFICIADO_AREQUIPA: '/reporte/beneficiado/arequipa/excel',
                 BENEFICIADO_PROVINCIA: '/reporte/beneficiado/provincia/excel'
-            }
+            },
+            TAMAMERDIA:{
+                ALL: '/tamamerdia/all',
+                CREAR: '/tamamerdia/crear',
+                EDITAR: '/tamamerdia/actualizar',
+                BORRAR: '/tamamerdia/borrar',
+            },
         }
     },
 

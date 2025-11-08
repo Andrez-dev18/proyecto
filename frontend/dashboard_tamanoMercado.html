@@ -432,24 +432,24 @@
     <!-- DataTables CSS y JS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    
+
+    <!-- Scripts DE CONFIGURACION IMPORTANTE EL ORDEN -->
     <script src="js/config/config.js"></script>
-    <script src="js/config/config.comercializacion.js"></script>
-    <script src="js/services/comercializacion.service.js"></script>
-    <script src="js/controllers/comercializacion.controller.js"></script>
+    <script src="js/services/tamanoMercado.service.js"></script>
+    <script src="js/controllers/tamanoMercado.controller.js"></script>
 
     <script>
         // Inicializar controlador al cargar la página
         document.addEventListener('DOMContentLoaded', () => {
-            comercializacionController.init();
+            tamanoMercadoController.init();
         });
 
         // Definir función global después de que el controlador ya existe
-        window.cargarDatos = async function (tipo) {
-            if (window.comercializacionController && typeof window.comercializacionController.cargarDatos === 'function') {
-                await window.comercializacionController.cargarDatos(tipo);
+        window.cargarDatos = async function () {
+            if (window.tamanoMercadoController && typeof window.tamanoMercadoController.cargarDatos === 'function') {
+                await window.tamanoMercadoController.cargarDatos();
             } else {
-                console.error("comercializacionController.cargarDatos no está definido");
+                console.error("tamanoMercadoController.cargarDatos no está definido");
             }
         };
     </script>

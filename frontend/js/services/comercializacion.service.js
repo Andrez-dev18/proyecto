@@ -1,6 +1,6 @@
 class ComercializacionService {
     constructor() {
-        this.baseURL = 'http://localhost/proyecto/backend';
+        this.baseURL = AppConfig.API.BASE_URL;
     }
 
     // ========== VIVO AREQUIPA ==========
@@ -339,3 +339,4 @@ class ComercializacionService {
         }));
     }
 }
+window.ComercializacionService = new ComercializacionService();

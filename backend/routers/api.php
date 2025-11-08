@@ -20,6 +20,7 @@ require_once __DIR__ . '/../controllers/HuevoController.php';
 require_once __DIR__ . '/../controllers/GallinaController.php';
 require_once __DIR__ . '/../controllers/AlternoController.php';
 require_once __DIR__ . '/../controllers/EnteroAutoserController.php';
+require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -58,6 +59,7 @@ $HuevoController = new HuevoController($db);
 $GallinaController = new GallinaController($db);
 $AlternoController = new AlternoController($db);
 $EnteroAutoserController = new EnteroAutoserController($db);
+$TamaMerDiaController = new TamaMerDiaController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -479,6 +481,31 @@ elseif (preg_match("/\/enteroAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
 }elseif (strpos($path, "/enteroAutoser/filtro") !== false && $request == "GET") {
     $EnteroAutoserController->obtenerDatosFiltrados();
+    exit;
+}
+
+######### RUTAS COM_DB_TAMA_MER_DIA #########
+// obtener todos
+elseif (strpos($path, "/tamamerdia/all") !== false && $request == "GET") {
+    $TamaMerDiaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/tamamerdia/crear") !== false && $request == "POST") {
+    $TamaMerDiaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/tamamerdia/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $TamaMerDiaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $TamaMerDiaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
+}elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
+    $TamaMerDiaController->obtenerDatosFiltrados();
     exit;
 }
 
