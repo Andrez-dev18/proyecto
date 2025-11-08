@@ -21,6 +21,8 @@ require_once __DIR__ . '/../controllers/GallinaController.php';
 require_once __DIR__ . '/../controllers/AlternoController.php';
 require_once __DIR__ . '/../controllers/EnteroAutoserController.php';
 require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
+require_once __DIR__ . '/../controllers/TipoPolloController.php';
+require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -50,6 +52,8 @@ $MercadoController = new MercadoController($db);
 $ProveedorController = new ProveedorController($db);
 $ProvinciaController = new ProvinciaController($db);
 $TipoController = new TipoController($db);
+$TipoPolloController = new TipoPolloController($db);
+$TipoPolloVivoController = new TipoPolloVivoController($db);
 $VivoProvinciaController = new VivoProvinciaController($db);
 $BeneficioProvincia = new beneficioProvinciaController($db);
 $PrecioVivoController = new PrecioVivoController($db);
@@ -276,6 +280,14 @@ elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
     ######### RUTAS TIPO #########
 }elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
     $TipoController->getAll();
+    exit;
+    ############### RUTA TIPO POLLO ####################
+}elseif (strpos($path, "/tipoPollo/all") !== false && $request == "GET") {
+    $TipoPolloController->getAll();
+    exit;
+    ################ RUTA TIPO POLLO VIVO #########################
+}elseif (strpos($path, "/tipoPolloVivo/all") !== false && $request == "GET") {
+    $TipoPolloVivoController->getAll();
     exit;
 }
 
@@ -506,6 +518,10 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
 }elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
     $TamaMerDiaController->obtenerDatosFiltrados();
+    exit;
+    // EXPORTAR A EXCEL
+}elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTamanoMercadoExcel();
     exit;
 }
 

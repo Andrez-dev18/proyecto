@@ -32,6 +32,8 @@ const AppConfig = {
                 CREAR: '/tamamerdia/crear',
                 EDITAR: '/tamamerdia/actualizar',
                 BORRAR: '/tamamerdia/borrar',
+                FILTRO: '/tamamerdia/filtro?',
+                EXPORTA: '/tamamerdia/exportar',
             },
         }
     },

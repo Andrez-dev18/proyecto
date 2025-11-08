@@ -26,9 +26,9 @@ class TamaMerDiaService
         return $this->repo->delete($id);
     }
 
-    public function obtenerDatosFiltrados($fechaInicio = null, $fechaFin = null, $empresa, $tipo = null)
+    public function obtenerDatosFiltrados($fechaInicio = null, $fechaFin = null, $tipo = null, $linea = null, $provincia = null, $zona = null, $empresa = null, $proveedor = null, $producto = null)
     {
-        return $this->repo->findByFilters($fechaInicio, $fechaFin, $empresa, $tipo);
+        return $this->repo->findByFilters($fechaInicio, $fechaFin, $tipo, $linea, $provincia, $zona, $empresa, $proveedor, $producto);
     }
 
 

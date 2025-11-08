@@ -3,66 +3,96 @@ require_once __DIR__ . '/../services/CapturaPantallaBeneficiadoService.php';
 require_once __DIR__ . '/../services/CapturaPantallaVivoService.php';
 require_once __DIR__ . '/../services/VivoArequipaService.php';
 require_once __DIR__ . '/../services/VivoProvinciaService.php';
+require_once __DIR__ . '/../services/TamaMerDiaService.php';
 
-class ReporteController {
+class ReporteController
+{
     private $beneficiadoService;
     private $vivoService;
     private $VivoAqp;
     private $VivoProvincia;
+    private $TamanoMercado;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->beneficiadoService = new CapturaPantallaBeneficiadoService($db);
         $this->vivoService = new CapturaPantallaVivoService($db);
         $this->VivoAqp = new VivoArequipaService($db);
         $this->VivoProvincia = new VivoProvinciaService($db);
+        $this->TamanoMercado = new TamaMerDiaService($db);
     }
 
-    private function outputCSV($filename, $headers, $data, $dataMapper) {
+    private function outputCSV($filename, $headers, $data, $dataMapper)
+    {
         // Configurar headers para descarga
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Pragma: no-cache');
         header('Expires: 0');
-        
+
         // Abrir salida
         $output = fopen('php://output', 'w');
-        
+
         // BOM para UTF-8 (para que Excel reconozca tildes)
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-        
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
         // Escribir título
         fputcsv($output, [strtoupper($filename)], ';');
         fputcsv($output, ['Generado: ' . date('d/m/Y H:i:s')], ';');
         fputcsv($output, [], ';'); // Línea vacía
-        
+
         // Escribir encabezados
         fputcsv($output, $headers, ';');
-        
+
         // Escribir datos
         foreach ($data as $row) {
             fputcsv($output, $dataMapper($row), ';');
         }
-        
+
         // Línea de resumen
         fputcsv($output, [], ';');
         fputcsv($output, ['Total de registros:', count($data)], ';');
-        
+
         fclose($output);
         exit;
     }
 
-    public function exportarArequipaBeneficiadoExcel() {
+    public function exportarArequipaBeneficiadoExcel()
+    {
         $datos = $this->beneficiadoService->getListArequipaBeneficiado();
-        
+
         $headers = [
-            'AÑO', 'MES', 'PROVINCIA', 'ZONA', 'COMPRA GRS', 'TIPO CLIENTE',
-            'NOMBRE', 'GRS', 'RP', 'RENZO', 'AVELINO', 'PELADORES', 'AVICRUZ',
-            'RAFAEL', 'MATILDE', 'AVIROX', 'JULIA', 'SIMON', 'YESICA', 'GABRIEL',
-            'ARTURO', 'NICOLAS', 'LUIS F', 'MIRELLA', 'OTROS',
-            'POTENCIAL MIN', 'POTENCIAL MAX', 'CONDICIÓN PT MAX'
+            'AÑO',
+            'MES',
+            'PROVINCIA',
+            'ZONA',
+            'COMPRA GRS',
+            'TIPO CLIENTE',
+            'NOMBRE',
+            'GRS',
+            'RP',
+            'RENZO',
+            'AVELINO',
+            'PELADORES',
+            'AVICRUZ',
+            'RAFAEL',
+            'MATILDE',
+            'AVIROX',
+            'JULIA',
+            'SIMON',
+            'YESICA',
+            'GABRIEL',
+            'ARTURO',
+            'NICOLAS',
+            'LUIS F',
+            'MIRELLA',
+            'OTROS',
+            'POTENCIAL MIN',
+            'POTENCIAL MAX',
+            'CONDICIÓN PT MAX'
         ];
-        
-        $mapper = function($d) {
+
+        $mapper = function ($d) {
             return [
                 $d['ano'],
                 strtoupper($d['mes']),
@@ -94,7 +124,7 @@ class ReporteController {
                 $d['condicionPtmax'] ?? ''
             ];
         };
-        
+
         $this->outputCSV(
             'Arequipa_Beneficiado_' . date('Y-m-d') . '.csv',
             $headers,
@@ -103,18 +133,35 @@ class ReporteController {
         );
     }
 
-    public function exportarProvinciaBeneficiadoExcel() {
+    public function exportarProvinciaBeneficiadoExcel()
+    {
         $datos = $this->beneficiadoService->getListProvinciaBeneficiado();
-        
+
         $headers = [
-            'AÑO', 'MES', 'PROVINCIA', 'ZONA', 'COMPRA GRS', 'TIPO CLIENTE',
-            'NOMBRE', 'GRS', 'RP', 'GRS VIVO', 'SANTA ELENA', 'GRANJAS CHICAS',
-            'ROSARIO', 'SAN FERNANDO LIMA', 'AVÍCOLA RENZO', 'OTROS',
-            'POTENCIAL MIN', 'POTENCIAL MAX', 'CONDICIÓN PT MIN',
-            'CONDICIÓN PT MAX', 'OBSERVACIONES'
+            'AÑO',
+            'MES',
+            'PROVINCIA',
+            'ZONA',
+            'COMPRA GRS',
+            'TIPO CLIENTE',
+            'NOMBRE',
+            'GRS',
+            'RP',
+            'GRS VIVO',
+            'SANTA ELENA',
+            'GRANJAS CHICAS',
+            'ROSARIO',
+            'SAN FERNANDO LIMA',
+            'AVÍCOLA RENZO',
+            'OTROS',
+            'POTENCIAL MIN',
+            'POTENCIAL MAX',
+            'CONDICIÓN PT MIN',
+            'CONDICIÓN PT MAX',
+            'OBSERVACIONES'
         ];
-        
-        $mapper = function($d) {
+
+        $mapper = function ($d) {
             return [
                 $d['ano'],
                 strtoupper($d['mes']),
@@ -139,7 +186,7 @@ class ReporteController {
                 $d['observaciones'] ?? ''
             ];
         };
-        
+
         $this->outputCSV(
             'Provincia_Beneficiado_' . date('Y-m-d') . '.csv',
             $headers,
@@ -148,18 +195,34 @@ class ReporteController {
         );
     }
 
-    public function exportarArequipaVivoExcel() {
+    public function exportarArequipaVivoExcel()
+    {
         $datos = $this->vivoService->getListArequipaVivo();
-        
+
         $headers = [
-            'AÑO', 'MES', 'PROVINCIA', 'ZONA', 'COMPRA', 'TIPO CLIENTE',
-            'NOMBRE', 'GRS', 'RP', 'RENZO', 'FAFO', 'SANTA ANGELA',
-            'ROSARIO', 'POLLO LIMA', 'OTRAS GRANJAS CHICAS',
-            'POTENCIAL MIN', 'POTENCIAL MAX', 'CONDICIÓN PT MIN',
-            'CONDICIÓN PT MAX', 'OBSERVACIONES'
+            'AÑO',
+            'MES',
+            'PROVINCIA',
+            'ZONA',
+            'COMPRA',
+            'TIPO CLIENTE',
+            'NOMBRE',
+            'GRS',
+            'RP',
+            'RENZO',
+            'FAFO',
+            'SANTA ANGELA',
+            'ROSARIO',
+            'POLLO LIMA',
+            'OTRAS GRANJAS CHICAS',
+            'POTENCIAL MIN',
+            'POTENCIAL MAX',
+            'CONDICIÓN PT MIN',
+            'CONDICIÓN PT MAX',
+            'OBSERVACIONES'
         ];
-        
-        $mapper = function($d) {
+
+        $mapper = function ($d) {
             return [
                 $d['ano'],
                 strtoupper($d['mes']),
@@ -183,7 +246,7 @@ class ReporteController {
                 $d['observaciones'] ?? ''
             ];
         };
-        
+
         $this->outputCSV(
             'Arequipa_Vivo_' . date('Y-m-d') . '.csv',
             $headers,
@@ -192,18 +255,40 @@ class ReporteController {
         );
     }
 
-    public function exportarProvinciaVivoExcel() {
+    public function exportarProvinciaVivoExcel()
+    {
         $datos = $this->vivoService->getListProvinciaVivo();
-        
+
         $headers = [
-            'AÑO', 'MES', 'PROVINCIA', 'ZONA', 'COMPRA', 'TIPO CLIENTE',
-            'NOMBRE', 'GRS', 'RP', 'RENZO', 'FAFO', 'SANTA ANGELA',
-            'JORGE PAN', 'MIRIAN G', 'VASQUEZ', 'SAN JOAQUIN', 'FORTUNATO',
-            'ROSARIO', 'PERCA', 'GAMBOA', 'ASOC SONDOR', 'OTRAS GRANJAS CHICAS',
-            'POTENCIAL MIN', 'POTENCIAL MAX', 'CONDICIÓN PT MAX', 'OBSERVACIONES'
+            'AÑO',
+            'MES',
+            'PROVINCIA',
+            'ZONA',
+            'COMPRA',
+            'TIPO CLIENTE',
+            'NOMBRE',
+            'GRS',
+            'RP',
+            'RENZO',
+            'FAFO',
+            'SANTA ANGELA',
+            'JORGE PAN',
+            'MIRIAN G',
+            'VASQUEZ',
+            'SAN JOAQUIN',
+            'FORTUNATO',
+            'ROSARIO',
+            'PERCA',
+            'GAMBOA',
+            'ASOC SONDOR',
+            'OTRAS GRANJAS CHICAS',
+            'POTENCIAL MIN',
+            'POTENCIAL MAX',
+            'CONDICIÓN PT MAX',
+            'OBSERVACIONES'
         ];
-        
-        $mapper = function($d) {
+
+        $mapper = function ($d) {
             return [
                 $d['ano'],
                 strtoupper($d['mes']),
@@ -233,7 +318,7 @@ class ReporteController {
                 $d['observaciones'] ?? ''
             ];
         };
-        
+
         $this->outputCSV(
             'Provincia_Vivo_' . date('Y-m-d') . '.csv',
             $headers,
@@ -242,150 +327,203 @@ class ReporteController {
         );
     }
 
-    public function exportarVivoProvinciaExcel() {
-    $datos = $this->VivoProvincia->getAll();
+    public function exportarVivoProvinciaExcel()
+    {
+        $datos = $this->VivoProvincia->getAll();
 
-    $headers = [
-        'ID',
-        'FECHA',
-        'PROVINCIA',
-        'PROVEEDOR',
-        'RUC PROVEEDOR',
-        'TIPO',
-        'LINEA',
-        'PRECIO MAY. CARNE MIN',
-        'PRECIO MAY. CARNE MAX',
-        'PRECIO MAY. BRASA MIN',
-        'PRECIO MAY. BRASA MAX',
-        'PRECIO PUB. MIN',
-        'PRECIO PUB. MAX',
-        'PESO MACHO PROM. MIN',
-        'PESO MACHO PROM. MAX',
-        'PESO HEMBRA PROM. MIN',
-        'PESO HEMBRA PROM. MAX',
-        'PESO BRASA PROM. MIN',
-        'PESO BRASA PROM. MAX',
-        'COLOR MIN',
-        'COLOR MAX',
-        'CANTIDAD',
-        'USUARIO REGISTRO',
-        'FECHA REGISTRO',
-        'USUARIO TRANSFERENCIA',
-        'FECHA TRANSFERENCIA'
-    ];
-
-    $mapper = function ($d) {
-        return [
-            $d['id'] ?? '',
-            $d['fecha'] ?? '',
-            strtoupper($d['provincia'] ?? ''),
-            strtoupper($d['proveedor'] ?? ''),
-            $d['ruc_proveedor'] ?? '',
-            strtoupper($d['tipo'] ?? ''),
-            strtoupper($d['linea'] ?? ''),
-            $d['precioMayCarMin'] ?? '',
-            $d['precioMayCarMax'] ?? '',
-            $d['precioMayBraMin'] ?? '',
-            $d['precioMayBraMax'] ?? '',
-            $d['precioPubMin'] ?? '',
-            $d['precioPubMax'] ?? '',
-            $d['pesoMachoPromMin'] ?? '',
-            $d['pesoMachoPromMax'] ?? '',
-            $d['pesoHembraPromMin'] ?? '',
-            $d['pesoHembraPromMax'] ?? '',
-            $d['pesoBrasaPromMin'] ?? '',
-            $d['pesoBrasaPromMax'] ?? '',
-            $d['colorMin'] ?? '',
-            $d['colorMax'] ?? '',
-            $d['cantidad'] ?? '',
-            strtoupper($d['usuarioRegistro'] ?? ''),
-            $d['fechaHoraRegistro'] ?? '',
-            strtoupper($d['usuarioTransferencia'] ?? ''),
-            $d['fechaHoraTransferencia'] ?? ''
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'PROVEEDOR',
+            'RUC PROVEEDOR',
+            'TIPO',
+            'LINEA',
+            'PRECIO MAY. CARNE MIN',
+            'PRECIO MAY. CARNE MAX',
+            'PRECIO MAY. BRASA MIN',
+            'PRECIO MAY. BRASA MAX',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'PESO MACHO PROM. MIN',
+            'PESO MACHO PROM. MAX',
+            'PESO HEMBRA PROM. MIN',
+            'PESO HEMBRA PROM. MAX',
+            'PESO BRASA PROM. MIN',
+            'PESO BRASA PROM. MAX',
+            'COLOR MIN',
+            'COLOR MAX',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
         ];
-    };
 
-    $this->outputCSV(
-        'Vivo_Provincia_' . date('Y-m-d') . '.csv',
-        $headers,
-        $datos,
-        $mapper
-    );
-}
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                $d['ruc_proveedor'] ?? '',
+                strtoupper($d['tipo'] ?? ''),
+                strtoupper($d['linea'] ?? ''),
+                $d['precioMayCarMin'] ?? '',
+                $d['precioMayCarMax'] ?? '',
+                $d['precioMayBraMin'] ?? '',
+                $d['precioMayBraMax'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                $d['pesoMachoPromMin'] ?? '',
+                $d['pesoMachoPromMax'] ?? '',
+                $d['pesoHembraPromMin'] ?? '',
+                $d['pesoHembraPromMax'] ?? '',
+                $d['pesoBrasaPromMin'] ?? '',
+                $d['pesoBrasaPromMax'] ?? '',
+                $d['colorMin'] ?? '',
+                $d['colorMax'] ?? '',
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
 
-    public function exportarVivoArequipaExcel() {
-    $datos = $this->VivoAqp->getAll();
+        $this->outputCSV(
+            'Vivo_Provincia_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
 
-    $headers = [
-        'ID',
-        'FECHA',
-        'MERCADO',
-        'EMPRESA',
-        'RUC EMPRESA',
-        'CONDICIÓN',
-        'PROVEEDOR',
-        'RUC PROVEEDOR',
-        'PRECIO MAY. MIN',
-        'PRECIO MAY. MAX',
-        'PRECIO PUB. MIN',
-        'PRECIO PUB. MAX',
-        'PESO MACHO MIN',
-        'PESO MACHO MAX',
-        'PESO HEMBRA MIN',
-        'PESO HEMBRA MAX',
-        'COLOR MIN',
-        'COLOR MAX',
-        'PESO MACHO PROM. MIN',
-        'PESO MACHO PROM. MAX',
-        'PESO HEMBRA PROM. MIN',
-        'PESO HEMBRA PROM. MAX',
-        'CANTIDAD',
-        'USUARIO REGISTRO',
-        'FECHA REGISTRO',
-        'USUARIO TRANSFERENCIA',
-        'FECHA TRANSFERENCIA'
-    ];
+    public function exportarVivoArequipaExcel()
+    {
+        $datos = $this->VivoAqp->getAll();
 
-    $mapper = function ($d) {
-        return [
-            $d['id'] ?? '',
-            $d['fecha'] ?? '',
-            strtoupper($d['mercado'] ?? ''),
-            strtoupper($d['empresa'] ?? ''),
-            $d['ruc_empresa'] ?? '',
-            strtoupper($d['condicion'] ?? ''),
-            strtoupper($d['proveedor'] ?? ''),
-            $d['ruc_proveedor'] ?? '',
-            $d['precioMayMin'] ?? '',
-            $d['precioMayMax'] ?? '',
-            $d['precioPubMin'] ?? '',
-            $d['precioPubMax'] ?? '',
-            $d['pesoMachoMin'] ?? '',
-            $d['pesoMachoMax'] ?? '',
-            $d['pesoHembMin'] ?? '',
-            $d['pesoHembMax'] ?? '',
-            $d['colorMin'] ?? '',
-            $d['colorMax'] ?? '',
-            $d['pesoMachoPromMin'] ?? '',
-            $d['pesoMachoPromMax'] ?? '',
-            $d['pesoHembraPromMin'] ?? '',
-            $d['pesoHembraPromMax'] ?? '',
-            $d['cantidad'] ?? '',
-            strtoupper($d['usuarioRegistro'] ?? ''),
-            $d['fechaHoraRegistro'] ?? '',
-            strtoupper($d['usuarioTransferencia'] ?? ''),
-            $d['fechaHoraTransferencia'] ?? ''
+        $headers = [
+            'ID',
+            'FECHA',
+            'MERCADO',
+            'EMPRESA',
+            'RUC EMPRESA',
+            'CONDICIÓN',
+            'PROVEEDOR',
+            'RUC PROVEEDOR',
+            'PRECIO MAY. MIN',
+            'PRECIO MAY. MAX',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'PESO MACHO MIN',
+            'PESO MACHO MAX',
+            'PESO HEMBRA MIN',
+            'PESO HEMBRA MAX',
+            'COLOR MIN',
+            'COLOR MAX',
+            'PESO MACHO PROM. MIN',
+            'PESO MACHO PROM. MAX',
+            'PESO HEMBRA PROM. MIN',
+            'PESO HEMBRA PROM. MAX',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
         ];
-    };
 
-    $this->outputCSV(
-        'Vivo_Arequipa_' . date('Y-m-d') . '.csv',
-        $headers,
-        $datos,
-        $mapper
-    );
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['mercado'] ?? ''),
+                strtoupper($d['empresa'] ?? ''),
+                $d['ruc_empresa'] ?? '',
+                strtoupper($d['condicion'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                $d['ruc_proveedor'] ?? '',
+                $d['precioMayMin'] ?? '',
+                $d['precioMayMax'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                $d['pesoMachoMin'] ?? '',
+                $d['pesoMachoMax'] ?? '',
+                $d['pesoHembMin'] ?? '',
+                $d['pesoHembMax'] ?? '',
+                $d['colorMin'] ?? '',
+                $d['colorMax'] ?? '',
+                $d['pesoMachoPromMin'] ?? '',
+                $d['pesoMachoPromMax'] ?? '',
+                $d['pesoHembraPromMin'] ?? '',
+                $d['pesoHembraPromMax'] ?? '',
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        $this->outputCSV(
+            'Vivo_Arequipa_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarTamanoMercadoExcel()
+    {
+        // Obtener todos los registros de la tabla com_db_tama_mer_dia
+        $datos = $this->TamanoMercado->getAll();
+
+        // Encabezados del archivo CSV
+        $headers = [
+            'ID',
+            'FECHA',
+            'TIPO',
+            'LÍNEA',
+            'PROVINCIA',
+            'ZONA',
+            'EMPRESA',
+            'PROVEEDOR',
+            'PRODUCTO',
+            'CANTIDAD',
+            'PESO',
+            'PROMEDIO',
+            'PRECIO',
+            'INFO MERCADO',
+            'BASE DE DATOS'
+        ];
+
+        // Mapeo de los datos
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['tipo'] ?? ''),
+                strtoupper($d['linea'] ?? ''),
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['zona'] ?? ''),
+                strtoupper($d['empresa'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                strtoupper($d['producto'] ?? ''),
+                $d['cantidad'] ?? '',
+                $d['peso'] ?? '',
+                $d['prom'] ?? '',
+                $d['precio'] ?? '',
+                $d['info_mercado'] ?? '',
+                strtoupper($d['nom_db'] ?? '')
+            ];
+        };
+
+        // Exportar a CSV
+        $this->outputCSV(
+            'Tamano_Mercado_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
 }
-
-
-}
-?>

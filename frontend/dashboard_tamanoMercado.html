@@ -132,6 +132,56 @@
                     <input type="date" id="filterFechaFin"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                 </div>
+                <div class="">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-tag mr-1 text-purple-600"></i>
+                        Tipo
+                    </label>
+                    <select id="filterTipoPollo"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-tag mr-1 text-purple-600"></i>
+                        Linea
+                    </label>
+                    <select id="filterTipoLinea"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos las lineas</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Provincia
+                    </label>
+                    <select id="filterProvincia"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las provincias</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Zona
+                    </label>
+                    <select id="filterZona"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las zonas</option>
+                    </select>
+                </div>
+                <div class="">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Empresa
+                    </label>
+                    <select id="filterEmpresa"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las empresas</option>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-user mr-1 text-purple-600"></i>
@@ -142,48 +192,18 @@
                         <option value="">Todos los proveedores</option>
                     </select>
                 </div>
-                <!-- Filtros de Arequipa -->
-                <div class="filter-arequipa">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-store mr-1 text-purple-600"></i>
-                        Mercado
-                    </label>
-                    <select id="filterMercado"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                        <option value="">Todos los mercados</option>
-                    </select>
-                </div>
-                <div class="filter-arequipa">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-check-circle mr-1 text-purple-600"></i>
-                        Condición
-                    </label>
-                    <select id="filterCondicion"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                        <option value="">Todas las condiciones</option>
-                    </select>
-                </div>
-                <!-- Filtros de Provincia -->
-                <div class="filter-provincia" style="display: none;">
+                <div class="">
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
-                        Provincia
+                        Producto
                     </label>
-                    <select id="filterProvincia"
+                    <select id="filterProducto"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                        <option value="">Todas las provincias</option>
+                        <option value="">Todas los productos</option>
                     </select>
                 </div>
-                <div class="filter-provincia" style="display: none;">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">
-                        <i class="fas fa-tag mr-1 text-purple-600"></i>
-                        Tipo
-                    </label>
-                    <select id="filterTipo"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                        <option value="">Todos los tipos</option>
-                    </select>
-                </div>
+                          
+                
             </div>
         </section>
 
@@ -269,136 +289,69 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
-                    <!-- Campos Arequipa -->
-                    <div id="campoEmpresa">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                        <select id="modalEmpresa"
+                    <!-- Campos select -->
+                    <div id="campoTipoTipoPollo">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                        <select id="modalTipoPollo"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                     </div>
-                    <div id="campoMercado">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Mercado</label>
-                        <select id="modalMercado"
+                    <div id="campoLinea">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Linea</label>
+                        <select id="modalTipo"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                     </div>
-                    <div id="campoRucEmpr">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">RUC Empresa</label>
-                        <input type="text" id="modalRucEmpr" maxlength="11"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div id="campoCondicion">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
-                        <select id="modalCondicion"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
-                    </div>
-
-                    <!-- Campos Provincia -->
-                    <div id="campoProvincia" style="display:none;">
+                    <div id="campoProvincia">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
                         <select id="modalProvincia"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                     </div>
-                    <div id="campoTipo" style="display:none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                        <select id="modalTipo"
+                    <div id="campoZona">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Zona</label>
+                        <select id="modalZona"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+
+                    <!--  -->
+                    <div id="campoEmpresa" >
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
+                        <select id="modalEmpresa"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
+                    </div>
+                    <div id="campoProveedor">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                        <select id="modalProveedor"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                     </div>
 
                     <!-- Proveedor -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
-                        <select id="modalProveedor" required
+                    <div id="campoProducto">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+                        <select id="modalTipoPolloVivo" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">RUC Proveedor</label>
-                        <input type="text" id="modalRucProv" maxlength="11"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                        <input type="text" id="modalCantidad" maxlength="11"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Precios -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio May. Mín</label>
-                        <input type="number" id="modalPrecioMayMin" step="0.01"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso</label>
+                        <input type="number" id="modalPeso" step="0.01"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio May. Máx</label>
-                        <input type="number" id="modalPrecioMayMax" step="0.01"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Promedio</label>
+                        <input type="number" id="modalPromedio" step="0.01"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Púb. Mín</label>
-                        <input type="number" id="modalPrecioPubMin" step="0.01"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                        <input type="number" id="modalPrecio" step="0.01"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Púb. Máx</label>
-                        <input type="number" id="modalPrecioPubMax" step="0.01"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-
-                    <!-- Pesos -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Mín</label>
-                        <input type="number" id="modalPesoMachoMin" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Máx</label>
-                        <input type="number" id="modalPesoMachoMax" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hemb. Mín</label>
-                        <input type="number" id="modalPesoHembMin" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hemb. Máx</label>
-                        <input type="number" id="modalPesoHembMax" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-
-                    <!-- Color -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Mín</label>
-                        <input type="number" id="modalColorMin" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Máx</label>
-                        <input type="number" id="modalColorMax" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-
-                    <!-- Pesos Promedio -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Mín</label>
-                        <input type="number" id="modalPesoMachoPromMin" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Máx</label>
-                        <input type="number" id="modalPesoMachoPromMax" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hemb. Mín</label>
-                        <input type="number" id="modalPesoHembraPromMin" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hemb. Máx</label>
-                        <input type="number" id="modalPesoHembraPromMax" step="0.1"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-
-                    <!-- Cantidad -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
-                        <input type="number" id="modalCantidad" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
+                      
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6">

@@ -52,16 +52,19 @@ class TamaMerDiaRepository
         // Si existe ID, actualizamos
         if (!empty($data['id'])) {
             $query = "
-            UPDATE com_db_tienda SET
+            UPDATE com_db_tama_mer_dia SET
                 fecha = :fecha,
-                empresa = :empresa,
                 tipo = :tipo,
-                codpro = :codpro,
-                precio = :precio,
-                usuarioRegistro = :usuarioRegistro,
-                fechaHoraRegistro = :fechaHoraRegistro,
-                usuarioTransferencia = :usuarioTransferencia,
-                fechaHoraTransferencia = :fechaHoraTransferencia
+                linea = :linea,
+                provincia = :provincia,
+                zona = :zona,
+                empresa = :empresa,
+                proveedor = :proveedor,
+                producto = :producto,
+                cantidad = :cantidad,
+                peso = :peso,
+                prom = :prom,
+                precio = :precio
             WHERE id = :id
         ";
 
@@ -69,64 +72,77 @@ class TamaMerDiaRepository
             $params = [
                 ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
-                ':empresa' => $data['empresa'] ?? null,
                 ':tipo' => $data['tipo'] ?? null,
-                ':codpro' => $data['codpro'] ?? null,
-                ':precio' => $data['precio'] ?? null,
-                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
-                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
-                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
-                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
+                ':linea' => $data['linea'] ?? null,
+                ':provincia' => $data['provincia'] ?? null,
+                ':zona' => $data['zona'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':proveedor' => $data['proveedor'] ?? null,
+                ':producto' => $data['producto'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? 0,
+                ':peso' => $data['peso'] ?? 0,
+                ':prom' => $data['prom'] ?? 0,
+                ':precio' => $data['precio'] ?? 0
             ];
         }
         // Si no tiene ID, insertamos nuevo
         else {
             $query = "
-            INSERT INTO com_db_tienda (
-                id,
+            INSERT INTO com_db_tama_mer_dia (
                 fecha,
-                empresa,
                 tipo,
-                codpro,
+                linea,
+                provincia,
+                zona,
+                empresa,
+                proveedor,
+                producto,
+                cantidad,
+                peso,
+                prom,
                 precio,
-                usuarioRegistro,
-                fechaHoraRegistro,
-                usuarioTransferencia,
-                fechaHoraTransferencia
+                info_mercado,
+                nom_db
             ) VALUES (
-                :id,
                 :fecha,
-                :empresa,
                 :tipo,
-                :codpro,
+                :linea,
+                :provincia,
+                :zona,
+                :empresa,
+                :proveedor,
+                :producto,
+                :cantidad,
+                :peso,
+                :prom,
                 :precio,
-                :usuarioRegistro,
-                :fechaHoraRegistro,
-                :usuarioTransferencia,
-                :fechaHoraTransferencia
+                :info_mercado,
+                :nom_db
             )
         ";
 
-            // Generar UUID si no existe
-            $data['id'] = $this->generateUuid();
-
             $stmt = $this->conn->prepare($query);
             $params = [
-                ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
-                ':empresa' => $data['empresa'] ?? null,
                 ':tipo' => $data['tipo'] ?? null,
-                ':codpro' => $data['codpro'] ?? null,
-                ':precio' => $data['precio'] ?? null,
-                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
-                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
-                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
-                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
+                ':linea' => $data['linea'] ?? null,
+                ':provincia' => $data['provincia'] ?? null,
+                ':zona' => $data['zona'] ?? null,
+                ':empresa' => $data['empresa'] ?? null,
+                ':proveedor' => $data['proveedor'] ?? null,
+                ':producto' => $data['producto'] ?? null,
+                ':cantidad' => $data['cantidad'] ?? 0,
+                ':peso' => $data['peso'] ?? 0,
+                ':prom' => $data['prom'] ?? 0,
+                ':precio' => $data['precio'] ?? 0,
+                ':info_mercado' => 0,
+                ':nom_db' => 'grs',
             ];
         }
 
         return $stmt->execute($params);
     }
+
 
 
     public function delete($id)
@@ -137,50 +153,57 @@ class TamaMerDiaRepository
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $empresa = null, $tipo = null)
+    public function findByFilters($fechaInicio = null, $fechaFin = null, $tipo = null, $linea = null, $provincia = null, $zona = null, $empresa = null, $proveedor = null, $producto = null)
     {
         $query = "
         SELECT 
-                tmd.id,
-                tmd.fecha,
-                tp.nombre AS tipo,
-                tl.nombre AS linea,
-                pv.nombre AS provincia,
-                pz.nombre AS zona,
-                e.nombre AS empresa,
-                pr.nombre AS proveedor,
-                pp.nombre AS producto,
-                tmd.cantidad,
-                tmd.peso,
-                tmd.prom,
-                tmd.precio,
-                tmd.info_mercado,
-                tmd.nom_db
-            FROM com_db_tama_mer_dia AS tmd
-            LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
-            LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
-            LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
-            LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
-            LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
-            LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
-            LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
-            WHERE 1=1
+            tmd.id,
+            tmd.fecha,
+            tp.nombre AS tipo,
+            tl.nombre AS linea,
+            pv.nombre AS provincia,
+            pz.nombre AS zona,
+            e.nombre AS empresa,
+            pr.nombre AS proveedor,
+            pp.nombre AS producto,
+            tmd.cantidad,
+            tmd.peso,
+            tmd.prom,
+            tmd.precio,
+            tmd.info_mercado,
+            tmd.nom_db
+        FROM com_db_tama_mer_dia AS tmd
+        LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
+        LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
+        LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
+        LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
+        LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
+        LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
+        LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
+        WHERE 1=1
     ";
 
-        // 🔹 Filtro de rango de fechas
+        // 🔹 Filtro de fechas
         if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $query .= " AND t.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+            $query .= " AND tmd.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
         } elseif (!empty($fechaInicio)) {
-            $query .= " AND t.fecha >= '$fechaInicio'";
+            $query .= " AND tmd.fecha >= '$fechaInicio'";
         } elseif (!empty($fechaFin)) {
-            $query .= " AND t.fecha <= '$fechaFin'";
+            $query .= " AND tmd.fecha <= '$fechaFin'";
         }
-        // 🔹 Otros filtros
-        if (!empty($empresa)) $query .= " AND t.empresa = $empresa";
-        if (!empty($tipo)) $query .= " AND t.tipo = $tipo";
+
+        // 🔹 Filtros adicionales
+        if (!empty($tipo)) $query .= " AND tmd.tipo = $tipo";
+        if (!empty($linea)) $query .= " AND tmd.linea = $linea";
+        if (!empty($provincia)) $query .= " AND tmd.provincia = $provincia";
+        if (!empty($zona)) $query .= " AND tmd.zona = $zona";
+        if (!empty($empresa)) $query .= " AND tmd.empresa = $empresa";
+        if (!empty($proveedor)) $query .= " AND tmd.proveedor = $proveedor";
+        if (!empty($producto)) $query .= " AND tmd.producto = $producto";
 
         return $this->executeQuery($query);
     }
+
 
     private function generateUuid()
     {
