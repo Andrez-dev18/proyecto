@@ -3,7 +3,17 @@ require_once __DIR__ . '/../services/CapturaPantallaBeneficiadoService.php';
 require_once __DIR__ . '/../services/CapturaPantallaVivoService.php';
 require_once __DIR__ . '/../services/VivoArequipaService.php';
 require_once __DIR__ . '/../services/VivoProvinciaService.php';
+require_once __DIR__ . '/../services/beneficioProvinciaService.php';
 require_once __DIR__ . '/../services/TamaMerDiaService.php';
+require_once __DIR__ . '/../services/PrecioVivoService.php';
+require_once __DIR__ . '/../services/PrecioTrozadoService.php';
+require_once __DIR__ . '/../services/TiendaService.php';
+require_once __DIR__ . '/../services/HuevoService.php';
+require_once __DIR__ . '/../services/GallinaService.php';
+require_once __DIR__ . '/../services/AlternoService.php';
+require_once __DIR__ . '/../services/EnteroAutoserService.php';
+require_once __DIR__ . '/../services/TrozadoAutoserService.php';
+require_once __DIR__ . '/../services/CriadorEmprendedorService.php';
 
 class ReporteController
 {
@@ -12,6 +22,16 @@ class ReporteController
     private $VivoAqp;
     private $VivoProvincia;
     private $TamanoMercado;
+    private $BeneficioProvincia;
+    private $PrecioVivo;
+    private $PrecioTrozado;
+    private $Tienda;
+    private $Huevo;
+    private $Gallina;
+    private $Alterno;
+    private $EnteroAutoser;
+    private $TrozadoAutoser;
+    private $Criador;
 
     public function __construct($db)
     {
@@ -20,6 +40,16 @@ class ReporteController
         $this->VivoAqp = new VivoArequipaService($db);
         $this->VivoProvincia = new VivoProvinciaService($db);
         $this->TamanoMercado = new TamaMerDiaService($db);
+        $this->BeneficioProvincia = new beneficioProvinciaService($db);
+        $this->PrecioVivo = new PrecioVivoService($db);
+        $this->PrecioTrozado = new PrecioTrozadoService($db);
+        $this->Tienda = new TiendaService($db);
+        $this->Huevo = new HuevoService($db);
+        $this->Gallina = new GallinaService($db);
+        $this->Alterno = new AlternoService($db);
+        $this->EnteroAutoser = new EnteroAutoserService($db);
+        $this->TrozadoAutoser = new TrozadoAutoserService($db);
+        $this->Criador = new CriadorEmprendedorService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -521,6 +551,494 @@ class ReporteController
         // Exportar a CSV
         $this->outputCSV(
             'Tamano_Mercado_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarBeneficioProvinciaExcel()
+    {
+        $datos = $this->BeneficioProvincia->getAll();
+
+        // Encabezados del archivo Excel/CSV
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'PROVEEDOR',
+            'PRECIO MAY. ENTERO',
+            'PRECIO MAY. MEJORADO',
+            'PRECIO MAY. CARCASA',
+            'PRECIO PUB. MEJORADO',
+            'PRECIO PUB. CARCASA',
+            'PESO PROM. MENOR',
+            'PESO PROM. MAYOR',
+            'COLOR MIN',
+            'COLOR MAX',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos a formato plano
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                $d['precioMayEntero'] ?? '',
+                $d['precioMayMejorado'] ?? '',
+                $d['precioMayCarcasa'] ?? '',
+                $d['precioPubMejorado'] ?? '',
+                $d['precioPubCarcasa'] ?? '',
+                $d['pesoPromMenor'] ?? '',
+                $d['pesoPromMayor'] ?? '',
+                $d['colorMin'] ?? '',
+                $d['colorMax'] ?? '',
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Llamar a la función genérica de exportación
+        $this->outputCSV(
+            'Beneficio_Provincia_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarPrecioVivoExcel()
+    {
+        // Obtener los datos desde el método findAll()
+        $datos = $this->PrecioVivo->getAll();
+
+        // Encabezados del archivo Excel/CSV
+        $headers = [
+            'ID',
+            'FECHA',
+            'EMPRESA',
+            'PRECIO MIN. CENTRO ACOPIO',
+            'PRECIO MAX. CENTRO ACOPIO',
+            'PRECIO MIN. MAYORISTA REPARTO',
+            'PRECIO MAX. MAYORISTA REPARTO',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos al formato plano
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['empresa'] ?? ''),
+                $d['precioMinCentroAcopio'] ?? '',
+                $d['precioMaxCentroAcopio'] ?? '',
+                $d['precioMinMayoristaReparto'] ?? '',
+                $d['precioMaxMayoristaReparto'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar el archivo CSV (puedes cambiar a Excel si lo prefieres)
+        $this->outputCSV(
+            'Precio_Vivo_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarPrecioTrozadoExcel()
+    {
+
+        $datos = $this->PrecioTrozado->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'EMPRESA',
+            'CORTE',
+            'PRECIO',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapeo de datos a formato plano
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['empresa'] ?? ''),
+                strtoupper($d['corte'] ?? ''),
+                $d['precio'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar a CSV o Excel
+        $this->outputCSV(
+            'Precio_Trozado_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarTiendaExcel()
+    {
+
+        $datos = $this->Tienda->getAll();
+
+        // Encabezados del archivo Excel/CSV
+        $headers = [
+            'ID',
+            'FECHA',
+            'EMPRESA',
+            'TIPO',
+            'CÓDIGO PRODUCTO',
+            'PRECIO',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapeo de los datos para exportación
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['empresa'] ?? ''),
+                strtoupper($d['tipo'] ?? ''),
+                strtoupper($d['codpro'] ?? ''),
+                $d['precio'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Llamar a la función genérica de exportación
+        $this->outputCSV(
+            'Tienda_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarHuevoExcel()
+    {
+
+        $datos = $this->Huevo->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'TIPO',
+            'MERCADO',
+            'PROVEEDOR',
+            'PRECIO MAY. MIN',
+            'PRECIO MAY. MAX',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['tipo'] ?? ''),
+                strtoupper($d['mercado'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                $d['precioMayMin'] ?? '',
+                $d['precioMayMax'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (o Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Huevo_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarGallinaExcel()
+    {
+
+        $datos = $this->Gallina->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'TIPO',
+            'PRECIO MAY. MIN',
+            'PRECIO MAY. MAX',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['tipo'] ?? ''),
+                $d['precioMayMin'] ?? '',
+                $d['precioMayMax'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (usa tu función genérica)
+        $this->outputCSV(
+            'Gallina_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarAlternoExcel()
+    {
+        $datos = $this->Alterno->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'MERCADO',
+            'TIPO',
+            'PRECIO MIN',
+            'PRECIO MAX',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapeo de los datos a formato plano
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['mercado'] ?? ''),
+                strtoupper($d['tipo'] ?? ''),
+                $d['precioMin'] ?? '',
+                $d['precioMax'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (puedes adaptar a Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Alterno_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarEnteroAutoSerExcel()
+    {
+        $datos = $this->EnteroAutoser->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVEEDOR',
+            'PRECIO MAY. MIN',
+            'PRECIO MAY. MAX',
+            'PRECIO PUB. MIN',
+            'PRECIO PUB. MAX',
+            'COLOR',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapeo de los datos al formato del archivo
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['proveedor'] ?? ''),
+                $d['precioMayMin'] ?? '',
+                $d['precioMayMax'] ?? '',
+                $d['precioPubMin'] ?? '',
+                $d['precioPubMax'] ?? '',
+                strtoupper($d['color'] ?? ''),
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Llamar al método genérico para generar el archivo CSV
+        $this->outputCSV(
+            'Entero_AutoSer_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarTrozadoAutoserExcel()
+    {
+        $datos = $this->TrozadoAutoser->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'CORTE',
+            'PRECIO SUPERMERCADO',
+            'PRECIO PLAZA VEA',
+            'PRECIO TOTTUS',
+            'PRECIO METRO',
+            'PRECIO TIENDA PALOMAR',
+            'PRECIO TIENDA RICO POLLO',
+            'PRECIO AVELINO',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['corte'] ?? ''),
+                $d['precioSuper'] ?? '',
+                $d['precioPlazaVea'] ?? '',
+                $d['precioTottus'] ?? '',
+                $d['precioMetro'] ?? '',
+                $d['precioTiendaPalomar'] ?? '',
+                $d['precioTiendaRicoPollo'] ?? '',
+                $d['precioAvelino'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (o Excel)
+        $this->outputCSV(
+            'Trozado_Autoser_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarCriadorEmprendedorExcel()
+    {
+        // Obtener los datos desde el método findAll()
+        $datos = $this->Criador->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'PROVEEDOR',
+            'TIPO',
+            'CANTIDAD',
+            'PRECIO',
+            'OBSERVACIONES',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['proveedor'] ?? ''),
+                strtoupper($d['tipo'] ?? ''),
+                $d['cantidad'] ?? '',
+                $d['precio'] ?? '',
+                strtoupper($d['observaciones'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (o Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Criador_Emprendedor_' . date('Y-m-d') . '.csv',
             $headers,
             $datos,
             $mapper
