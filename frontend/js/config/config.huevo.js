@@ -1,13 +1,13 @@
 const HuevoConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/huevo/all',
             FILTRO: '/huevo/filtro',
             CREAR: '/huevo/crear',
             ACTUALIZAR: '/huevo/actualizar',
             ELIMINAR: '/huevo/borrar',
-            EXCEL: '/reporte/huevo/exportar'
+            EXCEL: '/huevo/exportar'
         }
     },
 

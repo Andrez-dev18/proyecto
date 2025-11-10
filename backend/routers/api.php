@@ -25,6 +25,7 @@ require_once __DIR__ . '/../controllers/CriadorEmprendedorController.php';
 require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
 require_once __DIR__ . '/../controllers/TipoPolloController.php';
 require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
+require_once __DIR__ . '/../controllers/CorteController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -68,6 +69,7 @@ $EnteroAutoserController = new EnteroAutoserController($db);
 $TrozadoAutoserController = new TrozadoAutoserController($db);
 $CriadorEmprendedorController = new CriadorEmprendedorController($db);
 $TamaMerDiaController = new TamaMerDiaController($db);
+$CorteController = new CorteController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -292,6 +294,10 @@ elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
     ################ RUTA TIPO POLLO VIVO #########################
 }elseif (strpos($path, "/tipoPolloVivo/all") !== false && $request == "GET") {
     $TipoPolloVivoController->getAll();
+    exit;
+    ############## RUTA CORTES###################
+}elseif (strpos($path, "/corte/all") !== false && $request == "GET") {
+    $CorteController->getAll();
     exit;
 }
 

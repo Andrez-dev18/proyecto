@@ -1,6 +1,6 @@
 const BeneficioProvinciaConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/beneficioProvincia/all',
             FILTRO: '/beneficioProvincia/filtro',

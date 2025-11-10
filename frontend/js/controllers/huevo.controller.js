@@ -382,10 +382,16 @@ class HuevoController {
 
     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/huevo/exportar`, '_blank');
+
+        try {
+            this.service.exportarCSV();
+            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+        } catch (error) {
+            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+        }
     }
 
 
