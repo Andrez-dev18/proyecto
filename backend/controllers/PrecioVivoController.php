@@ -27,7 +27,7 @@ class PrecioVivoController
         $this->service->save($data);
         echo json_encode(["message" => "Registro creado correctamente"]);
     }
-
+    
     public function update()
     {
         $data = json_decode(file_get_contents("php://input"), true);

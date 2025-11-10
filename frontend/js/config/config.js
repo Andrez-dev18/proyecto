@@ -27,13 +27,22 @@ const AppConfig = {
                 BENEFICIADO_AREQUIPA: '/reporte/beneficiado/arequipa/excel',
                 BENEFICIADO_PROVINCIA: '/reporte/beneficiado/provincia/excel'
             },
-            TAMAMERDIA:{
+            TAMAMERDIA: {
                 ALL: '/tamamerdia/all',
                 CREAR: '/tamamerdia/crear',
                 EDITAR: '/tamamerdia/actualizar',
                 BORRAR: '/tamamerdia/borrar',
                 FILTRO: '/tamamerdia/filtro?',
                 EXPORTA: '/tamamerdia/exportar',
+            },
+
+            PRECIOVIVO: {
+                ALL: '/preciovivo/all',
+                CREAR: '/preciovivo/crear',
+                EDITAR: '/preciovivo/actualizar',
+                BORRAR: '/preciovivo/borrar',
+                FILTRO: '/preciovivo/filtro?',
+                EXPORTA: '/preciovivo/exportar',
             },
         }
     },
