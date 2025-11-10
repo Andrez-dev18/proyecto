@@ -7,7 +7,7 @@ const GallinaConfig = {
             CREAR: '/gallina/crear',
             ACTUALIZAR: '/gallina/actualizar',
             ELIMINAR: '/gallina/borrar',
-            EXCEL: '/reporte/gallina/excel'
+            EXCEL: '/reporte/gallina/exportar'
         }
     },
 

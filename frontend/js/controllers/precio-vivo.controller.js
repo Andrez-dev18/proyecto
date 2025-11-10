@@ -365,7 +365,7 @@ class PrecioVivoController {
             this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/precioVivo/excel`, '_blank');
+        window.open(`${this.service.baseURL}/reporte/precioVivo/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {

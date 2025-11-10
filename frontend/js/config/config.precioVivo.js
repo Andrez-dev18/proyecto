@@ -7,7 +7,7 @@ const PrecioVivoConfig = {
             CREAR: '/precioVivo/crear',
             ACTUALIZAR: '/precioVivo/actualizar',
             ELIMINAR: '/precioVivo/borrar',
-            EXCEL: '/reporte/precioVivo/excel'
+            EXCEL: '/reporte/precioVivo/exportar'
         }
     },
 

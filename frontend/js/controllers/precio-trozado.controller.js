@@ -404,7 +404,7 @@ class PrecioTrozadoController {
             this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/precioTrozado/excel`, '_blank');
+        window.open(`${this.service.baseURL}/reporte/precioTrozado/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {

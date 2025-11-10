@@ -7,7 +7,7 @@ const TrozadoAutoserConfig = {
             CREAR: '/trozadoAutoser/crear',
             ACTUALIZAR: '/trozadoAutoser/actualizar',
             ELIMINAR: '/trozadoAutoser/borrar',
-            EXCEL: '/reporte/trozadoAutoser/excel'
+            EXCEL: '/reporte/trozadoAutoser/exportar'
         }
     },
 

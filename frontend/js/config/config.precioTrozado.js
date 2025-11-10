@@ -7,7 +7,7 @@ const PrecioTrozadoConfig = {
             CREAR: '/precioTrozado/crear',
             ACTUALIZAR: '/precioTrozado/actualizar',
             ELIMINAR: '/precioTrozado/borrar',
-            EXCEL: '/reporte/precioTrozado/excel'
+            EXCEL: '/reporte/precioTrozado/exportar'
         }
     },
 
