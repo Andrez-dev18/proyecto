@@ -1,14 +1,14 @@
 <?php
-require_once __DIR__ . '/../services/beneficioProvinciaService.php';
+require_once __DIR__ . '/../services/TamaMerDiaService.php';
 
-class beneficioProvinciaController
+class TamaMerDiaController
 {
 
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new beneficioProvinciaService($db);
+        $this->service = new TamaMerDiaService($db);
     }
 
     public function getAll()
@@ -21,7 +21,7 @@ class beneficioProvinciaController
         $data = json_decode(file_get_contents("php://input"), true);
         if (isset($data["id"]) && !empty(trim($data["id"]))) {
             http_response_code(400);
-            echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
+            echo json_encode(["error" => "El ID no debe ser enviado para crear nuevo registro."]);
             return;
         }
         $this->service->save($data);
@@ -63,10 +63,15 @@ class beneficioProvinciaController
         // Obtener parámetros desde la query string
         $fechaInicio = $_GET['fechaInicio'] ?? null;
         $fechaFin = $_GET['fechaFin'] ?? null;
+        $tipo = $_GET['tipo'] ?? null;
+        $linea = $_GET['linea'] ?? null;
         $provincia = $_GET['provincia'] ?? null;
+        $zona = $_GET['zona'] ?? null;
+        $empresa = $_GET['empresa'] ?? null;
         $proveedor = $_GET['proveedor'] ?? null;
+        $producto = $_GET['producto'] ?? null;
 
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $provincia, $proveedor);
+        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $tipo, $linea, $provincia, $zona, $empresa, $proveedor, $producto);
 
         header('Content-Type: application/json');
         echo json_encode([

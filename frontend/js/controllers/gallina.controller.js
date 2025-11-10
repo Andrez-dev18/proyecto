@@ -349,8 +349,8 @@ class GallinaController {
             fechaFin: document.getElementById('filterFechaFin').value,
             tipo: document.getElementById('filterTipo').value
         };
-        
         this.service.exportToExcel(filtros);
+        window.open(`${this.service.baseURL}/reporte/gallina/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {

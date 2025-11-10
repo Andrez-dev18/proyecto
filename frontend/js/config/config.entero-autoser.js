@@ -7,7 +7,7 @@ const EnteroAutoserConfig = {
             CREAR: '/enteroAutoser/crear',
             ACTUALIZAR: '/enteroAutoser/actualizar',
             ELIMINAR: '/enteroAutoser/borrar',
-            EXCEL: '/reporte/enteroAutoser/excel'
+            EXCEL: '/reporte/enteroAutoser/exportar'
         }
     },
 

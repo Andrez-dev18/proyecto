@@ -7,7 +7,7 @@ const BeneficioProvinciaConfig = {
             CREAR: '/beneficioProvincia/crear',
             ACTUALIZAR: '/beneficioProvincia/actualizar',
             ELIMINAR: '/beneficioProvincia/borrar',
-            EXCEL: '/reporte/BseneficioProvincia/excel'
+            EXCEL: '/reporte/beneficioProvincia/exportar'
         }
     },
 

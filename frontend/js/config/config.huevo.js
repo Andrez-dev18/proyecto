@@ -7,7 +7,7 @@ const HuevoConfig = {
             CREAR: '/huevo/crear',
             ACTUALIZAR: '/huevo/actualizar',
             ELIMINAR: '/huevo/borrar',
-            EXCEL: '/reporte/huevo/excel'
+            EXCEL: '/reporte/huevo/exportar'
         }
     },
 

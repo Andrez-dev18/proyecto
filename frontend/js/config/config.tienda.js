@@ -7,7 +7,7 @@ const TiendaConfig = {
             CREAR: '/tienda/crear',
             ACTUALIZAR: '/tienda/actualizar',
             ELIMINAR: '/tienda/borrar',
-            EXCEL: '/reporte/tienda/excel'
+            EXCEL: '/reporte/tienda/exportar'
         }
     },
 

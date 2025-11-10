@@ -371,7 +371,7 @@ class TrozadoAutoserController {
             this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/trozadoAutoser/excel`, '_blank');
+        window.open(`${this.service.baseURL}/reporte/trozadoAutoser/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {
