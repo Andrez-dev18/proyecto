@@ -32,7 +32,35 @@ const Constants = {
         'vivo-provincia': 'Provincia Vivo',
         'beneficiado-arequipa': 'Arequipa Beneficiado',
         'beneficiado-provincia': 'Provincia Beneficiado'
+    },
+
+    BENEFICIO_PROVINCIA: {
+        TIPOS_PRECIO: {
+            MAYORISTA: ['precioMayEntero', 'precioMayMejorado', 'precioMayCarcasa'],
+            PUBLICO: ['precioPubMejorado', 'precioPubCarcasa']
+        },
+        TIPOS_PESO: {
+            PROMEDIO: ['pesoPromMenor', 'pesoPromMayor']
+        },
+        TIPOS_COLOR: {
+            RANGO: ['colorMin', 'colorMax']
+        }
+    },
+
+    FORMATO: {
+        FECHA: 'YYYY-MM-DD',
+        FECHA_HORA: 'YYYY-MM-DD HH:mm:ss',
+        MONEDA: 'S/. ',
+        DECIMAL_2: 2,
+        DECIMAL_1: 1
+    },
+
+    USUARIO_SISTEMA: {
+        DEFECTO: 'admin',
+        TRANSFERENCIA: 'sistema'
     }
+
 };
+
 
 window.Constants = Constants;

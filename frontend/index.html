@@ -159,10 +159,33 @@
                 </button>
 
                 <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
-                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
-                        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
-                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
-                        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
+                     <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
+        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
+    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
+        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
+
+                            <!-- Reemplaza la línea de Beneficiado Provincias en el menú -->
+<a href="#" onclick="loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
+    class="block text-gray-400 hover:text-white">Beneficiado Provincias</a>
+
+
+    <a href="#" onclick="loadDashboardAndData('precio-vivo.html','precio-vivo')"
+        class="block text-gray-400 hover:text-white">Precio Vivo</a>
+    <a href="#" onclick="loadDashboardAndData('precio-trozado.html','precio-trozado')"
+        class="block text-gray-400 hover:text-white">Precio Trozado</a>
+    <a href="#" onclick="loadDashboardAndData('dashboard-tienda.html','tienda')"
+        class="block text-gray-400 hover:text-white">Tienda</a>
+
+    <a href="#" onclick="loadDashboardAndData('dashboard-huevo.html','huevo')"
+        class="block text-gray-400 hover:text-white">Huevo</a>
+    <a href="#" onclick="loadDashboardAndData('dashboard-gallina.html','gallina')"
+        class="block text-gray-400 hover:text-white">Gallina</a>
+
+    <a href="#" onclick="loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
+        class="block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
+    <a href="#" onclick="loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
+        class="block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
+
                 </div>
             </div>
 
@@ -171,7 +194,7 @@
                     onclick="toggleSubmenu('submenu-2')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">2.- DataBase</span>
+                        <span class="font-medium">2.- Criaderos Emprendedores</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
@@ -223,12 +246,11 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">7.- DataBase</span>
+                        <span class="font-medium">7.- Tamaño Mercado</span>
                     </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
                 </button>
             </div>
 
@@ -500,12 +522,20 @@
         if (window.innerWidth >= 1024) {
             document.getElementById('sidebar').classList.add('open');
         }
+
     </script>
+
     <script src="js/services/comercializacion.service.js"></script>
     <script src="js/controllers/comercializacion.controller.js"></script>
     <script src="js/config/config.js"></script>
     <script src="js/services/auth.service.js"></script>
     <script src="js/controllers/session.controller.js"></script>
+
+
+<script src="js/config/config.comercializacion.js"></script>
+    <script src="js/services/beneficiadoProvincia.service.js"></script>
+<script src="js/controllers/beneficiadoProvincia.controller.js"></script>
+
 </body>
 
 </html>
