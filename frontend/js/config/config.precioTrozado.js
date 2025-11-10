@@ -1,6 +1,6 @@
 const PrecioTrozadoConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/precioTrozado/all',
             FILTRO: '/precioTrozado/filtro',
