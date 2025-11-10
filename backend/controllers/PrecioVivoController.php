@@ -16,17 +16,24 @@ class PrecioVivoController
         echo json_encode($this->service->getAll());
     }
 
-    public function create()
-    {
-        $data = json_decode(file_get_contents("php://input"), true);
-        if (!isset($data["id"]) || empty(trim($data["id"]))) {
-            http_response_code(400);
-            echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
-            return;
-        }
-        $this->service->save($data);
-        echo json_encode(["message" => "Registro creado correctamente"]);
+public function create()
+{
+    $data = json_decode(file_get_contents("php://input"), true);
+    
+    // CORREGIDO: Permitir crear sin ID o con ID vacío
+    if (isset($data["id"]) && !empty($data["id"])) {
+        http_response_code(400);
+        echo json_encode(["error" => "No debe enviar ID para crear un nuevo registro."]);
+        return;
     }
+    
+    // Eliminar el ID si viene vacío
+    unset($data['id']);
+    
+    $this->service->save($data);
+    echo json_encode(["message" => "Registro creado correctamente"]);
+}
+
 
     public function update()
     {

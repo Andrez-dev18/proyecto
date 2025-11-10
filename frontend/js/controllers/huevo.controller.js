@@ -385,18 +385,9 @@ class HuevoController {
             this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-        
-        const filtros = {
-            fechaInicio: document.getElementById('filterFechaInicio').value,
-            fechaFin: document.getElementById('filterFechaFin').value,
-            provincia: document.getElementById('filterProvincia').value,
-            tipo: document.getElementById('filterTipo').value,
-            mercado: document.getElementById('filterMercado').value,
-            proveedor: document.getElementById('filterProveedor').value
-        };
-        
-        this.service.exportToExcel(filtros);
+        window.open(`${this.service.baseURL}/reporte/huevo/exportar`, '_blank');
     }
+
 
     mostrarCargando(mostrar) {
         const loading = document.getElementById('loading');

@@ -17,6 +17,14 @@ require_once __DIR__ . '/../controllers/PrecioVivoController.php';
 require_once __DIR__ . '/../controllers/PrecioTrozadoController.php';
 require_once __DIR__ . '/../controllers/TiendaController.php';
 require_once __DIR__ . '/../controllers/HuevoController.php';
+require_once __DIR__ . '/../controllers/GallinaController.php';
+require_once __DIR__ . '/../controllers/AlternoController.php';
+require_once __DIR__ . '/../controllers/EnteroAutoserController.php';
+require_once __DIR__ . '/../controllers/TrozadoAutoserController.php';
+require_once __DIR__ . '/../controllers/CriadorEmprendedorController.php';
+require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
+require_once __DIR__ . '/../controllers/TipoPolloController.php';
+require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -46,12 +54,20 @@ $MercadoController = new MercadoController($db);
 $ProveedorController = new ProveedorController($db);
 $ProvinciaController = new ProvinciaController($db);
 $TipoController = new TipoController($db);
+$TipoPolloController = new TipoPolloController($db);
+$TipoPolloVivoController = new TipoPolloVivoController($db);
 $VivoProvinciaController = new VivoProvinciaController($db);
 $BeneficioProvincia = new beneficioProvinciaController($db);
 $PrecioVivoController = new PrecioVivoController($db);
 $PrecioTrozadoController = new PrecioTrozadoController($db);
 $TiendaController = new TiendaController($db);
 $HuevoController = new HuevoController($db);
+$GallinaController = new GallinaController($db);
+$AlternoController = new AlternoController($db);
+$EnteroAutoserController = new EnteroAutoserController($db);
+$TrozadoAutoserController = new TrozadoAutoserController($db);
+$CriadorEmprendedorController = new CriadorEmprendedorController($db);
+$TamaMerDiaController = new TamaMerDiaController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -269,6 +285,14 @@ elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
 }elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
     $TipoController->getAll();
     exit;
+    ############### RUTA TIPO POLLO ####################
+}elseif (strpos($path, "/tipoPollo/all") !== false && $request == "GET") {
+    $TipoPolloController->getAll();
+    exit;
+    ################ RUTA TIPO POLLO VIVO #########################
+}elseif (strpos($path, "/tipoPolloVivo/all") !== false && $request == "GET") {
+    $TipoPolloVivoController->getAll();
+    exit;
 }
 
 
@@ -299,6 +323,10 @@ elseif (preg_match("/\/beneficioProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $m
 }elseif (strpos($path, "/beneficioProvincia/filtro") !== false && $request == "GET") {
     $BeneficioProvincia->obtenerDatosFiltrados();
     exit;
+    //EXPORTAR EN FORMATO EXCEL
+}elseif (strpos($path, "/beneficioProvincia/exportar") !== false && $request == "GET") {
+    $reporteController->exportarBeneficioProvinciaExcel();
+    exit;
 }
 
 ######### RUTAS PRECIO VIVO #########
@@ -323,6 +351,10 @@ elseif (preg_match("/\/precioVivo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&empresa=2
 }elseif (strpos($path, "/precioVivo/filtro") !== false && $request == "GET") {
     $PrecioVivoController->obtenerDatosFiltrados();
+    exit;
+  //EXPORTAR EN FORMATO EXCEL
+}elseif (strpos($path, "/precioVivo/exportar") !== false && $request == "GET") {
+    $reporteController->exportarPrecioVivoExcel();
     exit;
 }
 
@@ -349,6 +381,10 @@ elseif (preg_match("/\/precioTrozado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
 }elseif (strpos($path, "/precioTrozado/filtro") !== false && $request == "GET") {
     $PrecioTrozadoController->obtenerDatosFiltrados();
     exit;
+    //EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/precioTrozado/exportar") !== false && $request == "GET") {
+    $reporteController->exportarPrecioTrozadoExcel();
+    exit;
 }
 
 ######### RUTAS COM_TIENDA #########
@@ -374,6 +410,10 @@ elseif (preg_match("/\/tienda\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && (
 }elseif (strpos($path, "/tienda/filtro") !== false && $request == "GET") {
     $TiendaController->obtenerDatosFiltrados();
     exit;
+   //EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/tienda/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTiendaExcel();
+    exit;
 }
 
 ######### RUTAS COM_HUEVO #########
@@ -398,6 +438,184 @@ elseif (preg_match("/\/huevo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&tipo=3&mercado=2&proveedor=2
 }elseif (strpos($path, "/huevo/filtro") !== false && $request == "GET") {
     $HuevoController->obtenerDatosFiltrados();
+    exit;
+  //EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/huevo/exportar") !== false && $request == "GET") {
+    $reporteController->exportarHuevoExcel();
+    exit;
+}
+
+######### RUTAS COM_GALLINA#########
+// obtener todos
+elseif (strpos($path, "/gallina/all") !== false && $request == "GET") {
+    $GallinaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/gallina/crear") !== false && $request == "POST") {
+    $GallinaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/gallina/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $GallinaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/gallina\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $GallinaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=3
+}elseif (strpos($path, "/gallina/filtro") !== false && $request == "GET") {
+    $GallinaController->obtenerDatosFiltrados();
+    exit;
+ //EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/gallina/exportar") !== false && $request == "GET") {
+    $reporteController->exportarGallinaExcel();
+    exit;
+}
+
+######### RUTAS COM_ALTERNO #########
+// obtener todos
+elseif (strpos($path, "/alterno/all") !== false && $request == "GET") {
+    $AlternoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/alterno/crear") !== false && $request == "POST") {
+    $AlternoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/alterno/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $AlternoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/alterno\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $AlternoController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&mercado=2tipo=3
+}elseif (strpos($path, "/alterno/filtro") !== false && $request == "GET") {
+    $AlternoController->obtenerDatosFiltrados();
+    exit;
+ //EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/alterno/exportar") !== false && $request == "GET") {
+    $reporteController->exportarAlternoExcel();
+    exit;
+}
+
+######### RUTAS COM_ENTERO_AUTOSER #########
+// obtener todos
+elseif (strpos($path, "/enteroAutoser/all") !== false && $request == "GET") {
+    $EnteroAutoserController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/enteroAutoser/crear") !== false && $request == "POST") {
+    $EnteroAutoserController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/enteroAutoser/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $EnteroAutoserController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/enteroAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $EnteroAutoserController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
+}elseif (strpos($path, "/enteroAutoser/filtro") !== false && $request == "GET") {
+    $EnteroAutoserController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/enteroAutoser/exportar") !== false && $request == "GET") {
+    $reporteController->exportarEnteroAutoSerExcel();
+    exit;
+}
+
+######### RUTAS COM_TROZADO_AUTOSER #########
+// obtener todos
+elseif (strpos($path, "/trozadoAutoser/all") !== false && $request == "GET") {
+    $TrozadoAutoserController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/trozadoAutoser/crear") !== false && $request == "POST") {
+    $TrozadoAutoserController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/trozadoAutoser/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $TrozadoAutoserController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/trozadoAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $TrozadoAutoserController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&corte=1
+}elseif (strpos($path, "/trozadoAutoser/filtro") !== false && $request == "GET") {
+    $TrozadoAutoserController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/trozadoAutoser/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoAutoserExcel();
+    exit;
+}
+
+######### RUTAS COM_CRIADOR_EMPRENDEDOR #########
+// obtener todos
+elseif (strpos($path, "/criador/all") !== false && $request == "GET") {
+    $CriadorEmprendedorController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/criador/crear") !== false && $request == "POST") {
+    $CriadorEmprendedorController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/criador/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $CriadorEmprendedorController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/criador\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $CriadorEmprendedorController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&corte=1
+}elseif (strpos($path, "/criador/filtro") !== false && $request == "GET") {
+    $CriadorEmprendedorController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/criador/exportar") !== false && $request == "GET") {
+    $reporteController->exportarCriadorEmprendedorExcel();
+    exit;
+}
+
+######### RUTAS COM_DB_TAMA_MER_DIA #########
+// obtener todos
+elseif (strpos($path, "/tamamerdia/all") !== false && $request == "GET") {
+    $TamaMerDiaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/tamamerdia/crear") !== false && $request == "POST") {
+    $TamaMerDiaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/tamamerdia/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $TamaMerDiaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $TamaMerDiaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
+}elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
+    $TamaMerDiaController->obtenerDatosFiltrados();
+    exit;
+    // EXPORTAR A EXCEL
+}elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTamanoMercadoExcel();
     exit;
 }
 

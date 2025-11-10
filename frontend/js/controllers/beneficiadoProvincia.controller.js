@@ -390,18 +390,12 @@ class BeneficioProvinciaController {
         this.registroSeleccionado = null;
     }
 
-    exportarExcel() {
+     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-
-        try {
-            this.service.exportarCSV();
-            this.mostrarNotificacion('✅ Iniciando descarga de Excel...', 'success');
-        } catch (error) {
-            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
-        }
+        window.open(`${this.service.baseURL}/reporte/beneficioProvincia/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {

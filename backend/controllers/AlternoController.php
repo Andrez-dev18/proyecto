@@ -1,14 +1,14 @@
 <?php
-require_once __DIR__ . '/../services/beneficioProvinciaService.php';
+require_once __DIR__ . '/../services/AlternoService.php';
 
-class beneficioProvinciaController
+class AlternoController
 {
 
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new beneficioProvinciaService($db);
+        $this->service = new AlternoService($db);
     }
 
     public function getAll()
@@ -19,9 +19,9 @@ class beneficioProvinciaController
     public function create()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (isset($data["id"]) && !empty(trim($data["id"]))) {
+        if (isset($data["id"]) &&  !empty(trim($data["id"]))) {
             http_response_code(400);
-            echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
+            echo json_encode(["error" => "No se debe enviar un ID al crear un nuevo registro."]);
             return;
         }
         $this->service->save($data);
@@ -64,9 +64,10 @@ class beneficioProvinciaController
         $fechaInicio = $_GET['fechaInicio'] ?? null;
         $fechaFin = $_GET['fechaFin'] ?? null;
         $provincia = $_GET['provincia'] ?? null;
-        $proveedor = $_GET['proveedor'] ?? null;
+        $mercado = $_GET['mercado'] ?? null;
+        $tipo = $_GET['tipo'] ?? null;
 
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $provincia, $proveedor);
+        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $provincia, $mercado, $tipo);
 
         header('Content-Type: application/json');
         echo json_encode([
@@ -74,5 +75,4 @@ class beneficioProvinciaController
             'data' => $resultados
         ]);
     }
-
 }
