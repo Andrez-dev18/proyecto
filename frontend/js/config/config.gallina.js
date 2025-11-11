@@ -1,6 +1,6 @@
 const GallinaConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/gallina/all',
             FILTRO: '/gallina/filtro',

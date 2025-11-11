@@ -159,46 +159,52 @@
                 </button>
 
                 <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
-                     <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
-        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
-    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
-        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
+                        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
+                        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
 
-                            <!-- Reemplaza la línea de Beneficiado Provincias en el menú -->
-<a href="#" onclick="loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
-    class="block text-gray-400 hover:text-white">Beneficiado Provincias</a>
-
-
-    <a href="#" onclick="loadDashboardAndData('precio-vivo.html','precio-vivo')"
-        class="block text-gray-400 hover:text-white">Precio Vivo</a>
-    <a href="#" onclick="loadDashboardAndData('precio-trozado.html','precio-trozado')"
-        class="block text-gray-400 hover:text-white">Precio Trozado</a>
-    <a href="#" onclick="loadDashboardAndData('dashboard-tienda.html','tienda')"
-        class="block text-gray-400 hover:text-white">Tienda</a>
-
-    <a href="#" onclick="loadDashboardAndData('dashboard-huevo.html','huevo')"
-        class="block text-gray-400 hover:text-white">Huevo</a>
-    <a href="#" onclick="loadDashboardAndData('dashboard-gallina.html','gallina')"
-        class="block text-gray-400 hover:text-white">Gallina</a>
-
-    <a href="#" onclick="loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
-        class="block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
-    <a href="#" onclick="loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
-        class="block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
+                    <!-- Provincias  menú -->
+                    <a href="#"
+                        onclick="loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
+                        class="block text-gray-400 hover:text-white">Beneficiado Provincias</a>
+                    <a href="#" onclick="loadDashboardAndData('precio-vivo.html','precio-vivo')"
+                        class="block text-gray-400 hover:text-white">Precio Vivo</a>
+                    <a href="#" onclick="loadDashboardAndData('precio-trozado.html','precio-trozado')"
+                        class="block text-gray-400 hover:text-white">Precio Trozado</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-tienda.html','tienda')"
+                        class="block text-gray-400 hover:text-white">Tienda</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-huevo.html','huevo')"
+                        class="block text-gray-400 hover:text-white">Huevo</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-gallina.html','gallina')"
+                        class="block text-gray-400 hover:text-white">Gallina</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
+                        class="block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
+                    <a href="#" onclick="loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
+                        class="block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
 
                 </div>
             </div>
 
-            <div class="menu-group">
-                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
-                    <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">2.- Criaderos Emprendedores</span>
-                    </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
-                </button>
-            </div>
+
+<!-- CRIADEROS EMPRENDEDORES -->
+<div class="menu-group">
+    <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+        onclick="toggleSubmenu('submenu-criaderos')">
+        <span class="flex items-center gap-3">
+            <i class="fas fa-seedling w-5"></i>
+            <span class="font-medium">2.- Criaderos Emprendedores</span>
+        </span>
+        <i class="fas fa-chevron-down text-sm"></i>
+    </button>
+
+    <div id="submenu-criaderos" class="submenu hidden pl-10 mt-2 space-y-2">
+        <a href="#" onclick="loadDashboardAndData('dashboard-criadores-emprendedores.html','criador-emprendedor')"
+            class="block text-gray-400 hover:text-white">Criaderos Emprendedores</a>
+    </div>
+</div>
+
+
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
@@ -244,6 +250,7 @@
                 </button>
             </div>
 
+            <!-- TAMAÑO MERCADO -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')">
@@ -260,7 +267,7 @@
                     onclick="toggleSubmenu('submenu-capturas')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-camera w-5"></i>
-                        <span class="font-medium">8.- Capturas de Pantalla</span>
+                        <span class="font-medium">8.- Potencial de Venta</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
@@ -404,7 +411,8 @@
                             <i class="fas fa-user text-gray-500 mr-2"></i> Perfil
                         </a>
                         <hr class="border-gray-200 my-1" />
-                        <a href="#" onclick="cerrarSesion()" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                        <a href="#" onclick="cerrarSesion()"
+                            class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
                             <i class="fas fa-sign-out-alt mr-2"></i> Cerrar sesión
                         </a>
                     </div>
@@ -465,17 +473,37 @@
             }
         }
 
-
+        //FUNCION CLAVE PARA CARGAR LAS VENTANAS 
+        //SE LE PASA EL NOMBRE DEL ARCHIVO QUE SE DESEA CARGAR Y SI TIENE SUB TIPOS LE VAMOS EL TIPO
+        //COMO POR EJEMPLO ('DASHBOARD-COMERCIO', 'TIPOCOMERCIO')
         function loadDashboardAndData(dashboardUrl, tipo) {
             const frame = document.getElementById('dashboardFrame');
             const titulo = document.getElementById('dashboardTitle');
+            //se adiciona el dashboard al array de titulos para cargar el titulo
             const titles = {
-                'dashboard-capturas.html': 'Capturas de Pantalla',
-                'dashboard-comercializacion.html': 'Información del Mercado'
+                'dashboard-capturas.html': 'Potencial de ventas',
+                'dashboard-comercializacion.html': 'Información del Mercado',
+                'dashboard_tamanoMercado.html': 'Tamaño de Mercado',
+                'dashboard-beneficiado-provincia.html': 'Beneficio provincia',
+                'precio-vivo.html': 'Precio vivo',
+                'precio-trozado.html': 'Precio Trozado',
+                'dashboard-tienda.html': 'Tienda',
+                'dashboard-gallina.html': 'Gallina',
+                'dashboard-huevo.html': 'Huevo',
+                'dashboard-entero-autoser.html': 'Pollo Entero Autoser',
+                'dashboard-trozado-autoser.html': 'Pollo Trozado Autoser',
+                'dashboard-criadores-emprendedores.html': 'Criadores Emprendedores',
+
             };
 
             titulo.textContent = titles[dashboardUrl] || 'Dashboard';
             showLoading();
+
+            /*Aqui tener en cuenta que el dashboard cargado debe tener la funcion
+                "cargarDatos()" esta se encarga de cargar la tabla y demas data que se
+                desea mostrar, tener en cuenta la esctructua de JS
+                dashboarh.html -> controller -> service-> config
+            */
 
             const run = () => {
                 try {
@@ -525,16 +553,15 @@
 
     </script>
 
+    <script src="js/config/config.js"></script>
     <script src="js/services/comercializacion.service.js"></script>
     <script src="js/controllers/comercializacion.controller.js"></script>
-    <script src="js/config/config.js"></script>
+
     <script src="js/services/auth.service.js"></script>
     <script src="js/controllers/session.controller.js"></script>
 
 
-<script src="js/config/config.comercializacion.js"></script>
-    <script src="js/services/beneficiadoProvincia.service.js"></script>
-<script src="js/controllers/beneficiadoProvincia.controller.js"></script>
+    
 
 </body>
 

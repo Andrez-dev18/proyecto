@@ -1,6 +1,6 @@
 const PrecioVivoConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/precioVivo/all',
             FILTRO: '/precioVivo/filtro',

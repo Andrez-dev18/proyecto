@@ -380,13 +380,41 @@ class HuevoController {
         this.registroSeleccionado = null;
     }
 
+<<<<<<< HEAD
+   exportarExcel() {
+    if (this.datos.length === 0) {
+        this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+        return;
+=======
     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/huevo/exportar`, '_blank');
+
+        try {
+            this.service.exportarCSV();
+            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+        } catch (error) {
+            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+        }
+>>>>>>> 8a35369a1c45c83d3d25ced5ded726b8d69aa528
     }
+    
+    // ✅ Obtener filtros actuales aplicados
+    const filtros = {
+        fechaInicio: document.getElementById('filterFechaInicio').value,
+        fechaFin: document.getElementById('filterFechaFin').value,
+        provincia: document.getElementById('filterProvincia').value,
+        tipo: document.getElementById('filterTipo').value,
+        mercado: document.getElementById('filterMercado').value,
+        proveedor: document.getElementById('filterProveedor').value
+    };
+    
+    // ✅ Llamar al service pasando los filtros
+    this.service.exportToExcel(filtros);
+    this.mostrarNotificacion('✅ Exportando datos...', 'success');
+}
 
 
     mostrarCargando(mostrar) {

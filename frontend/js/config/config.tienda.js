@@ -1,6 +1,6 @@
 const TiendaConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/tienda/all',
             FILTRO: '/tienda/filtro',

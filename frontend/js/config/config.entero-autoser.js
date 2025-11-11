@@ -1,6 +1,6 @@
 const EnteroAutoserConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/enteroAutoser/all',
             FILTRO: '/enteroAutoser/filtro',

@@ -158,6 +158,18 @@ class HuevoService {
             throw error;
         }
     }
+
+    async exportarCSV() {
+        try {     
+            // Abrir en nueva pestaña para descargar
+            window.open(`${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`,'_blank');
+            
+        } catch (error) {
+            console.error('Error en exportar:', error);
+            throw error;
+        }
+    }
+
 }
 
 window.HuevoService = HuevoService;

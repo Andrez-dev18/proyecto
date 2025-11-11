@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Gallinas</title>
+    <title>Dashboard - Criadores Emprendedores</title>
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="css/dashboard-sstyles.css">
+    <link rel="stylesheet" href="css/dashboard-style.css">
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -43,6 +43,26 @@
                     </label>
                     <input type="date" id="filterFechaFin"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Provincia
+                    </label>
+                    <select id="filterProvincia"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las provincias</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-truck mr-1 text-purple-600"></i>
+                        Proveedor
+                    </label>
+                    <select id="filterProveedor"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los proveedores</option>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -81,7 +101,7 @@
         <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
             <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
                 <i class="fas fa-table text-purple-600"></i>
-                Registros de Gallinas
+                Registros de Criadores Emprendedores
             </h2>
             <div class="table-scroll">
                 <table class="min-w-full">
@@ -89,12 +109,12 @@
                         <tr>
                             <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-12">#</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">FECHA</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">PROVINCIA</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">PROVEEDOR</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">TIPO</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY MIN</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY MAX</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MIN</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MAX</th>
                             <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">CANTIDAD</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PRECIO</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">OBSERVACIONES</th>
                             <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES</th>
                         </tr>
                     </thead>
@@ -111,7 +131,7 @@
     <!-- Modal -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
         style="display: none; overflow-y: auto;">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8">
             <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
                 <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
             </div>
@@ -123,6 +143,20 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Provincia *</label>
+                        <select id="modalProvincia" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                        <select id="modalProveedor"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
                         <select id="modalTipo" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
@@ -130,29 +164,19 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mayorista Mín</label>
-                        <input type="number" id="modalPrecioMayMin" step="0.01"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mayorista Máx</label>
-                        <input type="number" id="modalPrecioMayMax" step="0.01"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Público Mín</label>
-                        <input type="number" id="modalPrecioPubMin" step="0.01"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Público Máx</label>
-                        <input type="number" id="modalPrecioPubMax" step="0.01"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                         <input type="number" id="modalCantidad" step="1"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                        <input type="number" id="modalPrecio" step="0.01"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                        <textarea id="modalObservaciones" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></textarea>
                     </div>
                 </div>
 
@@ -185,40 +209,39 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 
-    <script src="js/config/config.js"></script>
-    <script src="js/config/config.gallina.js"></script>
-    <script src="js/services/gallina.service.js"></script>
-    <script src="js/controllers/gallina.controller.js"></script>
+    <script src="js/config/config.criador-emprendedor.js"></script>
+    <script src="js/services/criador-emprendedor.service.js"></script>
+    <script src="js/controllers/criador-emprendedor.controller.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 DOM Cargado, inicializando Gallina controller...');
+            console.log('🚀 DOM Cargado, inicializando CriadorEmprendedor controller...');
             
-            if (typeof GallinaConfig === 'undefined') {
-                console.error('❌ GallinaConfig no cargado');
+            if (typeof CriadorEmprendedorConfig === 'undefined') {
+                console.error('❌ CriadorEmprendedorConfig no cargado');
                 return;
             }
-            console.log('✅ Config cargado:', GallinaConfig);
+            console.log('✅ Config cargado:', CriadorEmprendedorConfig);
             
-            if (typeof GallinaService === 'undefined') {
-                console.error('❌ GallinaService no cargado');
+            if (typeof CriadorEmprendedorService === 'undefined') {
+                console.error('❌ CriadorEmprendedorService no cargado');
                 return;
             }
             console.log('✅ Service cargado');
             
-            if (typeof GallinaController === 'undefined') {
-                console.error('❌ GallinaController no cargado');
+            if (typeof CriadorEmprendedorController === 'undefined') {
+                console.error('❌ CriadorEmprendedorController no cargado');
                 return;
             }
             console.log('✅ Controller cargado');
             
-            console.log('✅ Todos los scripts de Gallina cargados correctamente');
+            console.log('✅ Todos los scripts de CriadorEmprendedor cargados correctamente');
             
-            if (window.gallinaController) {
-                console.log('🎯 Inicializando gallinaController...');
-                window.gallinaController.init();
+            if (window.criadorEmprendedorController) {
+                console.log('🎯 Inicializando criadorEmprendedorController...');
+                window.criadorEmprendedorController.init();
             } else {
-                console.error('❌ gallinaController no está disponible en window');
+                console.error('❌ criadorEmprendedorController no está disponible en window');
             }
         });
     </script>

@@ -1,10 +1,12 @@
-class TrozadoAutoserController {
+// js/controllers/criador-emprendedor.controller.js
+
+class CriadorEmprendedorController {
     constructor() {
-        this.service = new TrozadoAutoserService();
+        this.service = new CriadorEmprendedorService();
         this.registroSeleccionado = null;
         this.datos = [];
         this.catalogos = {};
-        this.config = window.TrozadoAutoserConfig;
+        this.config = window.CriadorEmprendedorConfig;
     }
 
     async init() {
@@ -16,14 +18,14 @@ class TrozadoAutoserController {
     async cargarCatalogos() {
         try {
             console.log('📦 Cargando catálogos...');
+            const [provincias, proveedores, tipos] = await Promise.all([
+                this.service.getProvincias(),
+                this.service.getProveedores(),
+                this.service.getTipos()
+            ]);
             
-            // Cargar cortes desde el backend o usar valores por defecto
-            const cortes = await this.service.getCortes();
-            
-            this.catalogos = { cortes };
-            
-            console.log('✅ Cortes configurados:', cortes);
-            
+            this.catalogos = { provincias, proveedores, tipos };
+            console.log('✅ Catálogos cargados:', this.catalogos);
             this.poblarSelects();
         } catch (error) {
             console.error('❌ Error al cargar catálogos:', error);
@@ -31,9 +33,13 @@ class TrozadoAutoserController {
     }
 
     poblarSelects() {
-        // Poblar select del modal y filtro con los cortes
-        this.poblarSelect('filterCorte', this.catalogos.cortes, 'id', 'corte');
-        this.poblarSelect('modalCorte', this.catalogos.cortes, 'id', 'corte');
+        this.poblarSelect('filterProvincia', this.catalogos.provincias, 'codigo', 'nombre');
+        this.poblarSelect('filterProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
+        this.poblarSelect('filterTipo', this.catalogos.tipos, 'codigo', 'nombre');
+        
+        this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
+        this.poblarSelect('modalProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
+        this.poblarSelect('modalTipo', this.catalogos.tipos, 'codigo', 'nombre');
     }
 
     poblarSelect(selectId, datos, valueField, textField) {
@@ -60,17 +66,21 @@ class TrozadoAutoserController {
 
         document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterCorte')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('filterTipo')?.addEventListener('change', () => this.aplicarFiltros());
     }
 
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
+            console.log('📊 Cargando datos...');
             this.datos = await this.service.getAll();
+            console.log('✅ Datos cargados:', this.datos.length);
             this.renderizarTabla();
             this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('Error:', error);
+            console.error('❌ Error:', error);
             this.mostrarNotificacion('❌ Error al cargar datos', 'error');
             this.datos = [];
             this.renderizarTabla();
@@ -87,21 +97,25 @@ class TrozadoAutoserController {
             const filtros = {};
             const fechaInicio = document.getElementById('filterFechaInicio').value;
             const fechaFin = document.getElementById('filterFechaFin').value;
-            const corteId = document.getElementById('filterCorte').value;
+            const provinciaId = document.getElementById('filterProvincia').value;
+            const proveedorId = document.getElementById('filterProveedor').value;
+            const tipoId = document.getElementById('filterTipo').value;
 
             if (fechaInicio) filtros.fechaInicio = fechaInicio;
             if (fechaFin) filtros.fechaFin = fechaFin;
-            if (corteId) filtros.corte = parseInt(corteId);
+            if (provinciaId) filtros.provincia = parseInt(provinciaId);
+            if (proveedorId) filtros.proveedor = parseInt(proveedorId);
+            if (tipoId) filtros.tipo = parseInt(tipoId);
 
             console.log('📤 Filtros a aplicar:', filtros);
             
-            if (!fechaInicio && !fechaFin && !corteId) {
+            if (!fechaInicio && !fechaFin && !provinciaId && !proveedorId && !tipoId) {
                 console.log('📊 Sin filtros, cargando todos los datos');
                 await this.cargarDatos();
                 return;
             }
             
-            const resultado = await this.service.filtrar(filtros);
+            const resultado = await this.service.getFiltered(filtros);
             
             if (Array.isArray(resultado)) {
                 this.datos = resultado;
@@ -128,7 +142,9 @@ class TrozadoAutoserController {
     limpiarFiltros() {
         document.getElementById('filterFechaInicio').value = '';
         document.getElementById('filterFechaFin').value = '';
-        document.getElementById('filterCorte').value = '';
+        document.getElementById('filterProvincia').value = '';
+        document.getElementById('filterProveedor').value = '';
+        document.getElementById('filterTipo').value = '';
         this.cargarDatos();
     }
 
@@ -149,33 +165,22 @@ class TrozadoAutoserController {
         tbody.innerHTML = '';
         
         if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
             return;
         }
 
         this.datos.forEach((registro, i) => {
-            // Obtener el nombre del corte correctamente
-            let nombreCorte = registro.corte;
-            
-            // Si registro.corte es un número, buscar el nombre
-            if (!isNaN(registro.corte)) {
-                const corteObj = this.catalogos.cortes.find(c => c.id == registro.corte);
-                nombreCorte = corteObj ? corteObj.corte : registro.corte;
-            }
-            
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-blue-50 transition-colors';
+            tr.className = 'hover:bg-orange-50 transition-colors';
             tr.innerHTML = `
                 <td class="px-2 py-1 border-b text-sm text-center">${i + 1}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.fecha || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm">${nombreCorte || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioSuper || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioPlazaVea || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioTottus || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioMetro || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioTiendaPalomar || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioTiendaRicoPollo || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precioAvelino || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.provincia || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.proveedor || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.tipo || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">${registro.cantidad || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">${registro.precio || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.observaciones || '-'}</td>
                 <td class="px-2 py-1 border-b text-sm text-center space-x-2">
                     <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
                         <i class="fas fa-edit"></i>
@@ -209,12 +214,12 @@ class TrozadoAutoserController {
                 $('.min-w-full').DataTable({
                     pageLength: 10,
                     language: {
-                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+                        url: this.config.UI.DATATABLES_LANGUAGE
                     },
                     responsive: true,
-                    order: [[1, 'desc']],
-                    scrollX: true
+                    order: [[1, 'desc']]
                 });
+                console.log('✅ DataTable inicializado');
             } catch (error) {
                 console.error('Error al inicializar DataTable:', error);
             }
@@ -246,7 +251,7 @@ class TrozadoAutoserController {
 
         try {
             this.mostrarCargando(true);
-            await this.service.eliminar(this.registroSeleccionado.id);
+            await this.service.delete(this.registroSeleccionado.id);
             this.mostrarNotificacion('✅ Registro eliminado', 'success');
             await this.cargarDatos();
         } catch (error) {
@@ -263,31 +268,21 @@ class TrozadoAutoserController {
         
         document.getElementById('modalFecha').value = r.fecha || '';
         
-        // Para el corte, manejar ambos casos (nombre o ID)
-        let corteId = '';
-        if (!isNaN(r.corte)) {
-            // Si es un número, usarlo directamente
-            corteId = r.corte;
-        } else {
-            // Si es texto, buscar el ID
-            const corteObj = this.catalogos.cortes.find(c => c.corte === r.corte);
-            corteId = corteObj ? corteObj.id : '';
-        }
-        document.getElementById('modalCorte').value = corteId;
+        const provinciaObj = this.catalogos.provincias.find(p => p.nombre === r.provincia);
+        const proveedorObj = this.catalogos.proveedores.find(p => p.nombre === r.proveedor);
+        const tipoObj = this.catalogos.tipos.find(t => t.nombre === r.tipo);
         
-        document.getElementById('modalPrecioSuper').value = r.precioSuper || '';
-        document.getElementById('modalPrecioPlazaVea').value = r.precioPlazaVea || '';
-        document.getElementById('modalPrecioTottus').value = r.precioTottus || '';
-        document.getElementById('modalPrecioMetro').value = r.precioMetro || '';
-        document.getElementById('modalPrecioTiendaPalomar').value = r.precioTiendaPalomar || '';
-        document.getElementById('modalPrecioTiendaRicoPollo').value = r.precioTiendaRicoPollo || '';
-        document.getElementById('modalPrecioAvelino').value = r.precioAvelino || '';
+        document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.codigo : '';
+        document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.codigo : '';
+        document.getElementById('modalTipo').value = tipoObj ? tipoObj.codigo : '';
         
-        console.log('✅ Corte ID cargado:', document.getElementById('modalCorte').value);
+        document.getElementById('modalCantidad').value = r.cantidad || '';
+        document.getElementById('modalPrecio').value = r.precio || '';
+        document.getElementById('modalObservaciones').value = r.observaciones || '';
     }
 
     limpiarFormulario() {
-        document.querySelectorAll('#modalForm input, #modalForm select').forEach(input => {
+        document.querySelectorAll('#modalForm input, #modalForm select, #modalForm textarea').forEach(input => {
             if (input.type === 'date') {
                 input.value = new Date().toISOString().split('T')[0];
             } else {
@@ -303,59 +298,64 @@ class TrozadoAutoserController {
 
         try {
             this.mostrarCargando(true);
+            console.log('💾 Guardando registro:', data);
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                await this.service.actualizar(data);
+                console.log('📝 Actualizando registro ID:', data.id);
+                await this.service.update(data);
                 this.mostrarNotificacion('✅ Registro actualizado', 'success');
             } else {
-                await this.service.crear(data);
+                console.log('➕ Creando nuevo registro');
+                await this.service.create(data);
                 this.mostrarNotificacion('✅ Registro creado', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al guardar', 'error');
+            console.error('❌ Error al guardar:', error);
+            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     obtenerDatosFormulario() {
-        // Obtener directamente el ID del corte
-        const corteId = document.getElementById('modalCorte').value;
-        
-        console.log('📤 Datos del formulario:');
-        console.log('  - Corte ID:', corteId, 'Tipo:', typeof corteId);
+        const provinciaId = document.getElementById('modalProvincia').value;
+        const proveedorId = document.getElementById('modalProveedor').value;
+        const tipoId = document.getElementById('modalTipo').value;
         
         return {
             fecha: document.getElementById('modalFecha').value,
-            corte: parseInt(corteId) || null,
-            precioSuper: parseFloat(document.getElementById('modalPrecioSuper').value) || 0,
-            precioPlazaVea: parseFloat(document.getElementById('modalPrecioPlazaVea').value) || 0,
-            precioTottus: parseFloat(document.getElementById('modalPrecioTottus').value) || 0,
-            precioMetro: parseFloat(document.getElementById('modalPrecioMetro').value) || 0,
-            precioTiendaPalomar: parseFloat(document.getElementById('modalPrecioTiendaPalomar').value) || 0,
-            precioTiendaRicoPollo: parseFloat(document.getElementById('modalPrecioTiendaRicoPollo').value) || 0,
-            precioAvelino: parseFloat(document.getElementById('modalPrecioAvelino').value) || 0,
+            provincia: parseInt(provinciaId) || null,
+            proveedor: parseInt(proveedorId) || null,
+            tipo: parseInt(tipoId) || null,
+            cantidad: parseInt(document.getElementById('modalCantidad').value) || 0,
+            precio: parseFloat(document.getElementById('modalPrecio').value) || 0,
+            observaciones: document.getElementById('modalObservaciones').value || '',
             usuarioRegistro: 'admin',
-            fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' '),
-            usuarioTransferencia: 'sistema',
-            fechaHoraTransferencia: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' ')
         };
     }
 
     validarFormulario(data) {
+        console.log('🔍 Validando formulario:', data);
+        
         if (!data.fecha) {
             this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.corte) {
-            this.mostrarNotificacion('⚠️ El corte es obligatorio', 'warning');
+        if (!data.provincia) {
+            this.mostrarNotificacion('⚠️ La provincia es obligatoria', 'warning');
             return false;
         }
+        if (!data.tipo) {
+            this.mostrarNotificacion('⚠️ El tipo es obligatorio', 'warning');
+            return false;
+        }
+        
+        console.log('✅ Validación exitosa');
         return true;
     }
 
@@ -371,7 +371,7 @@ class TrozadoAutoserController {
             this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/trozadoAutoser/exportar`, '_blank');
+        window.open(`${this.service.baseUrl}/reporte/criador/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {
@@ -415,19 +415,7 @@ class TrozadoAutoserController {
 
         setTimeout(() => notif.remove(), 4000);
     }
-
-    obtenerNombreCorte(corteId) {
-        if (!corteId) return '-';
-        
-        // Si ya es un nombre (string), devolverlo
-        if (isNaN(corteId)) {
-            return corteId;
-        }
-        
-        // Si es un ID, buscar el nombre
-        const corte = this.catalogos.cortes.find(c => c.id == corteId);
-        return corte ? corte.corte : '-';
-    }
 }
 
-window.trozadoAutoserController = new TrozadoAutoserController();
+window.criadorEmprendedorController = new CriadorEmprendedorController();
+

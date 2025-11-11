@@ -1,6 +1,8 @@
-class GallinaService {
+// js/services/criador-emprendedor.service.js
+
+class CriadorEmprendedorService {
     constructor() {
-        this.config = window.GallinaConfig;
+        this.config = window.CriadorEmprendedorConfig;
         this.baseUrl = this.config.API.BASE_URL;
     }
 
@@ -73,6 +75,8 @@ class GallinaService {
             const params = new URLSearchParams();
             if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
             if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+            if (filters.provincia) params.append('provincia', filters.provincia);
+            if (filters.proveedor) params.append('proveedor', filters.proveedor);
             if (filters.tipo) params.append('tipo', filters.tipo);
 
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
@@ -83,6 +87,32 @@ class GallinaService {
         } catch (error) {
             console.error('❌ Error en getFiltered:', error);
             throw error;
+        }
+    }
+
+    async getProvincias() {
+        try {
+            const url = `${this.baseUrl}${this.config.CATALOGOS.PROVINCIAS}`;
+            console.log('📡 Fetching provincias:', url);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al cargar provincias');
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Error en getProvincias:', error);
+            return [];
+        }
+    }
+
+    async getProveedores() {
+        try {
+            const url = `${this.baseUrl}${this.config.CATALOGOS.PROVEEDORES}`;
+            console.log('📡 Fetching proveedores:', url);
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al cargar proveedores');
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Error en getProveedores:', error);
+            return [];
         }
     }
 
@@ -104,6 +134,8 @@ class GallinaService {
             const params = new URLSearchParams();
             if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
             if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+            if (filters.provincia) params.append('provincia', filters.provincia);
+            if (filters.proveedor) params.append('proveedor', filters.proveedor);
             if (filters.tipo) params.append('tipo', filters.tipo);
 
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
@@ -115,4 +147,4 @@ class GallinaService {
     }
 }
 
-window.GallinaService = GallinaService;
+window.CriadorEmprendedorService = CriadorEmprendedorService;

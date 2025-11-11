@@ -27,8 +27,7 @@ const AppConfig = {
                 BENEFICIADO_AREQUIPA: '/reporte/beneficiado/arequipa/excel',
                 BENEFICIADO_PROVINCIA: '/reporte/beneficiado/provincia/excel'
             },
-
-            TAMAMERDIA:{
+            TAMAMERDIA: {
                 ALL: '/tamamerdia/all',
                 CREAR: '/tamamerdia/crear',
                 EDITAR: '/tamamerdia/actualizar',
@@ -37,7 +36,7 @@ const AppConfig = {
                 EXPORTA: '/tamamerdia/exportar',
             },
 
-PRECIOVIVO:{
+            PRECIOVIVO: {
                 ALL: '/preciovivo/all',
                 CREAR: '/preciovivo/crear',
                 EDITAR: '/preciovivo/actualizar',
