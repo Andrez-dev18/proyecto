@@ -43,7 +43,8 @@ class VivoProvinciaRepository
         LEFT JOIN com_provincia p ON v.provincia = p.codigo
         LEFT JOIN com_proveedor pr ON v.proveedor = pr.codigo
         LEFT JOIN com_tipo t ON v.tipo = t.codigo
-        ORDER BY v.id DESC
+        WHERE v.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+        ORDER BY v.fechaHoraRegistro DESC;
     ";
 
         return $this->executeQuery($query);
@@ -53,7 +54,7 @@ class VivoProvinciaRepository
     public function save($data)
     {
         // If id exists, perform UPDATE; otherwise INSERT
-        if (isset($data['id']) && $data['id'] > 0) {
+        if (!empty($data['id'])) {
             $query = "
             UPDATE com_db_vivo_provincia SET
                 fecha = :fecha,
@@ -112,6 +113,7 @@ class VivoProvinciaRepository
         } else {
             $query = "
             INSERT INTO com_db_vivo_provincia (
+                id,
                 fecha,
                 provincia,
                 proveedor,
@@ -136,6 +138,7 @@ class VivoProvinciaRepository
                 usuarioTransferencia,
                 fechaHoraTransferencia
             ) VALUES (
+                :id,
                 :fecha,
                 :provincia,
                 :proveedor,
@@ -162,8 +165,11 @@ class VivoProvinciaRepository
             )
             ";
 
+            $data['id'] = $this->generateUuid();
+
             $stmt = $this->conn->prepare($query);
             $params = [
+                ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
                 ':provincia' => $data['provincia'] ?? null,
                 ':proveedor' => $data['proveedor'] ?? null,
@@ -256,6 +262,23 @@ class VivoProvinciaRepository
     {
         $query = "DELETE FROM com_db_vivo_provincia WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
+
+    private function generateUuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
+
 }

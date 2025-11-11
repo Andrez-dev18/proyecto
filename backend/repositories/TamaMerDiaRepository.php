@@ -42,6 +42,7 @@ class TamaMerDiaRepository
             LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
             LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
             LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
+            WHERE tmd.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
             ORDER BY tmd.fecha DESC;
         ";
         return $this->executeQuery($query);

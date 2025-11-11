@@ -35,7 +35,8 @@ class CriadorEmprendedorRepository
             LEFT JOIN com_provincia p ON a.provincia = p.codigo
             LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
             LEFT JOIN com_tipo t ON a.tipo = t.codigo
-            ORDER BY a.fechaHoraRegistro DESC
+            WHERE a.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+            ORDER BY a.fechaHoraRegistro DESC;
 
         ";
         return $this->executeQuery($query);

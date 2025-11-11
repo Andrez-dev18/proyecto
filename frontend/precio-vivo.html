@@ -15,6 +15,26 @@
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
 
+        <!-- Acciones -->
+        <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-purple-600"></i>
+                Acciones
+            </h2>
+            <div class="flex flex-wrap gap-3">
+                <button id="btnNuevo"
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-plus mr-2"></i>
+                    Nuevo Registro
+                </button>
+                <button id="btnExportar"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fas fa-file-excel mr-2"></i>
+                    Exportar Excel
+                </button>
+            </div>
+        </section>
+
         <!-- Filtros -->
         <section id="filterSection" class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
             <div class="flex items-center justify-between mb-4">
@@ -22,12 +42,16 @@
                     <i class="fas fa-sliders-h text-purple-600"></i>
                     Filtros
                 </h2>
+                <!-- Botón para ocultar/mostrar filtros -->
+                <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
                 <button id="btnLimpiarFiltros" class="text-purple-600 hover:text-purple-700 font-semibold">
                     <i class="fas fa-times-circle mr-1"></i>
                     Limpiar filtros
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div id="filterContent" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
@@ -57,25 +81,7 @@
             </div>
         </section>
 
-        <!-- Acciones -->
-        <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
-            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                <i class="fas fa-tools text-purple-600"></i>
-                Acciones
-            </h2>
-            <div class="flex flex-wrap gap-3">
-                <button id="btnNuevo"
-                    class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
-                    <i class="fas fa-plus mr-2"></i>
-                    Nuevo Registro
-                </button>
-                <button id="btnExportar"
-                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
-                    <i class="fas fa-file-excel mr-2"></i>
-                    Exportar Excel
-                </button>
-            </div>
-        </section>
+
 
         <!-- Tabla -->
         <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
@@ -90,13 +96,20 @@
                             <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-12">#</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">FECHA</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">EMPRESA</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">C.ACOPIO MIN</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">C.ACOPIO MAX</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY.REP MIN</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY.REP MAX</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MIN</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MAX</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">C.ACOPIO
+                                MIN</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">C.ACOPIO
+                                MAX</th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY.REP MIN
+                            </th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">MAY.REP MAX
+                            </th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MIN
+                            </th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">PUB MAX
+                            </th>
+                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -186,51 +199,51 @@
         </div>
     </div>
 
-   <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
-<script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 
-<script src="js/config/config.js"></script>
-<script src="js/config/config.precioVivo.js"></script>
-<script src="js/services/precio-vivo.service.js"></script>
-<script src="js/controllers/precio-vivo.controller.js"></script>
+    <script src="js/config/config.js"></script>
+    <script src="js/config/config.precioVivo.js"></script>
+    <script src="js/services/precio-vivo.service.js"></script>
+    <script src="js/controllers/precio-vivo.controller.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 DOM Cargado, inicializando Precio Vivo controller...');
-        
-        // Verificar que los scripts se cargaron
-        if (typeof PrecioVivoConfig === 'undefined') {
-            console.error('❌ PrecioVivoConfig no cargado');
-            return;
-        }
-        console.log('✅ Config cargado:', PrecioVivoConfig);
-        
-        if (typeof PrecioVivoService === 'undefined') {
-            console.error('❌ PrecioVivoService no cargado');
-            return;
-        }
-        console.log('✅ Service cargado');
-        
-        if (typeof PrecioVivoController === 'undefined') {
-            console.error('❌ PrecioVivoController no cargado');
-            return;
-        }
-        console.log('✅ Controller cargado');
-        
-        console.log('✅ Todos los scripts de Precio Vivo cargados correctamente');
-        
-        // Inicializar el controller
-        if (window.precioVivoController) {
-            console.log('🎯 Inicializando precioVivoController...');
-            window.precioVivoController.init();
-        } else {
-            console.error('❌ precioVivoController no está disponible en window');
-        }
-    });
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM Cargado, inicializando Precio Vivo controller...');
 
+            // Verificar que los scripts se cargaron
+            if (typeof PrecioVivoConfig === 'undefined') {
+                console.error('❌ PrecioVivoConfig no cargado');
+                return;
+            }
+            console.log('✅ Config cargado:', PrecioVivoConfig);
+
+            if (typeof PrecioVivoService === 'undefined') {
+                console.error('❌ PrecioVivoService no cargado');
+                return;
+            }
+            console.log('✅ Service cargado');
+
+            if (typeof PrecioVivoController === 'undefined') {
+                console.error('❌ PrecioVivoController no cargado');
+                return;
+            }
+            console.log('✅ Controller cargado');
+
+            console.log('✅ Todos los scripts de Precio Vivo cargados correctamente');
+
+            // Inicializar el controller
+            if (window.precioVivoController) {
+                console.log('🎯 Inicializando precioVivoController...');
+                window.precioVivoController.init();
+            } else {
+                console.error('❌ precioVivoController no está disponible en window');
+            }
+        });
+    </script>
+    <script src="js/utils/funcionesVarias.js"></script>
 </body>
 
 </html>

@@ -46,7 +46,8 @@ class VivoArequipaRepository
         LEFT JOIN com_empresa e ON a.empresa = e.codigo
         LEFT JOIN com_condicion c ON a.condicion = c.codigo
         LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
-        ORDER BY a.fechaHoraRegistro DESC;;
+        WHERE a.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+        ORDER BY a.fechaHoraRegistro DESC;
     ";
         return $this->executeQuery($query);
     }
@@ -55,7 +56,7 @@ class VivoArequipaRepository
     public function save($data)
     {
         // If id exists, perform UPDATE; otherwise INSERT
-        if (isset($data['id']) && $data['id'] > 0) {
+        if (!empty($data['id'])) {
             $query = "
             UPDATE com_db_vivo_aqp SET
                 fecha = :fecha,
@@ -116,6 +117,7 @@ class VivoArequipaRepository
         } else {
             $query = "
             INSERT INTO com_db_vivo_aqp (
+                id,
                 fecha,
                 mercado,
                 empresa,
@@ -141,6 +143,7 @@ class VivoArequipaRepository
                 usuarioTransferencia,
                 fechaHoraTransferencia
             ) VALUES (
+                :id,
                 :fecha,
                 :mercado,
                 :empresa,
@@ -168,8 +171,11 @@ class VivoArequipaRepository
             )
             ";
 
+            $data['id'] = $this->generateUuid();
+
             $stmt = $this->conn->prepare($query);
             $params = [
+                ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
                 ':mercado' => $data['mercado'] ?? null,
                 ':empresa' => $data['empresa'] ?? null,
@@ -271,4 +277,20 @@ class VivoArequipaRepository
 
         return $this->executeQuery($query);
     }
+
+    private function generateUuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
+    }
+
 }

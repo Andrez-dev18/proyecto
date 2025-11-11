@@ -441,7 +441,7 @@ class ComercializacionController {
         document.getElementById('campoEmpresa').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoMercado').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoCondicion').style.display = esAqp ? 'block' : 'none';
-        document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
+        //document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
 
         // Campos de Provincia
         document.getElementById('campoProvincia').style.display = esAqp ? 'none' : 'block';
@@ -464,7 +464,7 @@ class ComercializacionController {
             const mercadoObj = this.catalogos.mercados.find(m => m.mercado === r.mercado);
             document.getElementById('modalMercado').value = mercadoObj ? mercadoObj.id : '';
 
-            document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
+            //document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
 
             // Buscar ID de condicion por nombre
             const condicionObj = this.catalogos.condiciones.find(c => c.condicion === r.condicion);
@@ -483,7 +483,7 @@ class ComercializacionController {
         const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
 
-        document.getElementById('modalRucProv').value = r.ruc_prov || '';
+       // document.getElementById('modalRucProv').value = r.ruc_prov || '';
 
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
@@ -564,7 +564,7 @@ class ComercializacionController {
             fecha: document.getElementById('modalFecha').value,
             // Enviar códigos (IDs) para relaciones en lugar de nombres
             proveedor: proveedorId,
-            ruc_prov: document.getElementById('modalRucProv').value || '',
+            //ruc_prov: document.getElementById('modalRucProv').value || '',
             precioMayMin: parseFloat(document.getElementById('modalPrecioMayMin').value) || 0,
             precioMayMax: parseFloat(document.getElementById('modalPrecioMayMax').value) || 0,
             precioPubMin: parseFloat(document.getElementById('modalPrecioPubMin').value) || 0,
@@ -594,7 +594,7 @@ class ComercializacionController {
 
             data.mercado = mercadoId;
             data.empresa = empresaId;
-            data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
+           // data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
             data.condicion = condicionId;
         } else {
             // Enviar IDs para provincia/tipo

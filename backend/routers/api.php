@@ -205,7 +205,7 @@ elseif (strpos($path, "/beneficiado/actualizar") !== false && $request == "PUT")
 }
 
 // DELETE Beneficiado Borrar
-elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
+elseif (preg_match("/\/beneficiado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && $request == "DELETE") {
     $beneficiadoController->delete($matches[1]);
     exit;
 }
@@ -231,7 +231,7 @@ elseif (strpos($path, "/vivoArequipa/actualizar") !== false && ($request == "PUT
     exit;
 }
 // DELETE Vivo Arequipa Borrar (aceptar DELETE o POST como fallback)
-elseif (preg_match("/\/vivoArequipa\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+elseif (preg_match("/\/vivoArequipa\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $VivoArequipaController->delete($matches[1]);
     exit;
 }
@@ -256,7 +256,7 @@ elseif (strpos($path, "/vivoProvincia/actualizar") !== false && ($request == "PU
     exit;
 }
 // DELETE Vivo Provincia Borrar (aceptar DELETE o POST como fallback)
-elseif (preg_match("/\/vivoProvincia\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+elseif (preg_match("/\/vivoProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $VivoProvinciaController->delete($matches[1]);
     exit;
 }

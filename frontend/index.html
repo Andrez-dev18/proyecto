@@ -61,6 +61,24 @@
             border-left: 4px solid #60a5fa;
         }
 
+        /* estado activo para enlaces y botones */
+        .menu-link.active,
+        .menu-item.active,
+        .submenu-toggle.active {
+            color: white !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+            font-weight: 600;
+        }
+
+        /* alternativa visual: sombra / fondo para botones activos */
+        .menu-item.active,
+        .submenu-toggle.active {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 4 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
+
+
         /* Content area */
         .content-wrapper {
             transition: margin-left 0.3s ease;
@@ -142,7 +160,7 @@
 
         <!-- Menu -->
         <!-- Navbar actualizado -->
-        <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
+        <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 130px);">
             <div class="mb-4">
                 <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Dashboards</p>
             </div>
@@ -159,33 +177,38 @@
                 </button>
 
                 <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
-                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')"
-                        class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
-                    <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
-                        class="block text-gray-400 hover:text-white">Vivo Provincias</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp', 'Gestion Vivo Arequipa')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Arequipa</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia', 'Gestion Vivo Provincia')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
 
                     <!-- Reemplaza la línea de Beneficiado Provincias en el menú -->
                     <a href="#"
-                        onclick="loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
-                        class="block text-gray-400 hover:text-white">Beneficiado Provincias</a>
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
+                        class="menu-link block text-gray-400 hover:text-white">Beneficiado Provincias</a>
 
 
-                    <a href="#" onclick="loadDashboardAndData('precio-vivo.html','precio-vivo')"
-                        class="block text-gray-400 hover:text-white">Precio Vivo</a>
-                    <a href="#" onclick="loadDashboardAndData('precio-trozado.html','precio-trozado')"
-                        class="block text-gray-400 hover:text-white">Precio Trozado</a>
-                    <a href="#" onclick="loadDashboardAndData('dashboard-tienda.html','tienda')"
-                        class="block text-gray-400 hover:text-white">Tienda</a>
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('precio-vivo.html','precio-vivo')"
+                        class="menu-link block text-gray-400 hover:text-white">Precio Vivo</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('precio-trozado.html','precio-trozado')"
+                        class="menu-link block text-gray-400 hover:text-white">Precio Trozado</a>
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tienda.html','tienda')"
+                        class="menu-link block text-gray-400 hover:text-white">Tienda</a>
 
-                    <a href="#" onclick="loadDashboardAndData('dashboard-huevo.html','huevo')"
-                        class="block text-gray-400 hover:text-white">Huevo</a>
-                    <a href="#" onclick="loadDashboardAndData('dashboard-gallina.html','gallina')"
-                        class="block text-gray-400 hover:text-white">Gallina</a>
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-huevo.html','huevo')"
+                        class="menu-link block text-gray-400 hover:text-white">Huevo</a>
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-gallina.html','gallina')"
+                        class="menu-link block text-gray-400 hover:text-white">Gallina</a>
 
-                    <a href="#" onclick="loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
-                        class="block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
-                    <a href="#" onclick="loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
-                        class="block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
+                        class="menu-link block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
+                        class="menu-link block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
 
                 </div>
             </div>
@@ -248,7 +271,7 @@
             <!-- TAMAÑO MERCADO -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')">
+                    onclick="activateAndLoad(this, 'dashboard_tamanoMercado.html','tamanoMercado', 'Gestion Tamaño de Mercado')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
                         <span class="font-medium">7.- Tamaño Mercado</span>
@@ -270,32 +293,35 @@
                 <div id="submenu-capturas" class="submenu hidden pl-10 mt-2 space-y-2">
                     <!-- VIVO -->
                     <div>
-                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
+                        <button class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
                             onclick="toggleSubmenu('submenu-capturas-vivo')">
                             <span>Vivo</span>
                             <i class="fas fa-chevron-right text-xs"></i>
                         </button>
                         <div id="submenu-capturas-vivo" class="submenu hidden pl-4 mt-1 space-y-1">
-                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','vivo-arequipa')"
-                                class="block text-gray-400 hover:text-white">Arequipa</a>
-                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','vivo-provincia')"
-                                class="block text-gray-400 hover:text-white">Provincias</a>
+                            <a href="#"
+                                onclick="selectMenuItem(this); loadDashboardAndData('dashboard-capturas.html','vivo-arequipa', 'Vivo Arequipa')"
+                                class="menu-link block text-gray-400 hover:text-white">Arequipa</a>
+                            <a href="#"
+                                onclick="selectMenuItem(this); loadDashboardAndData('dashboard-capturas.html','vivo-provincia', 'Vivo Provincia')"
+                                class="menu-link block text-gray-400 hover:text-white">Provincias</a>
                         </div>
                     </div>
 
                     <!-- BENEFICIADO -->
                     <div>
-                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
-                            onclick="toggleSubmenu('submenu-capturas-beneficiado')">
+                        <button class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
+                            onclick="toggleSubmenu('submenu-capturas-beneficiado', this)">
                             <span>Beneficiado</span>
                             <i class="fas fa-chevron-right text-xs"></i>
                         </button>
                         <div id="submenu-capturas-beneficiado" class="submenu hidden pl-4 mt-1 space-y-1">
-                            <a href="#" onclick="loadDashboardAndData('dashboard-capturas.html','beneficiado-arequipa')"
-                                class="block text-gray-400 hover:text-white">Arequipa</a>
                             <a href="#"
-                                onclick="loadDashboardAndData('dashboard-capturas.html','beneficiado-provincia')"
-                                class="block text-gray-400 hover:text-white">Provincias</a>
+                                onclick="selectMenuItem(this); loadDashboardAndData('dashboard-capturas.html','beneficiado-arequipa', 'Beneficiado Arequipa')"
+                                class="menu-link block text-gray-400 hover:text-white">Arequipa</a>
+                            <a href="#"
+                                onclick="selectMenuItem(this); loadDashboardAndData('dashboard-capturas.html','beneficiado-provincia', 'Beneficiado Provincia')"
+                                class="menu-link block text-gray-400 hover:text-white">Provincias</a>
                         </div>
                     </div>
                 </div>
@@ -359,9 +385,16 @@
 
 
         <script>
-            function toggleSubmenu(id) {
-                const submenu = document.getElementById(id);
-                submenu.classList.toggle('hidden');
+            function toggleSubmenu(id, btn) {
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                el.classList.toggle('hidden');
+
+                // si se pasó el botón, alternar su clase active (no limpiar los otros)
+                if (btn) {
+                    btn.classList.toggle('active');
+                }
             }
         </script>
 
@@ -383,8 +416,8 @@
                     </button>
 
                     <div>
-                        <h1 id="dashboardTitle" class="text-2xl font-bold text-gray-800">Capturas de Pantalla</h1>
-                        <p class="text-sm text-gray-500">Sistema de gestión de clientes y proveedores</p>
+                        <h1 id="" class="text-2xl font-bold text-gray-800">Sistema de Gestion GRS</h1>
+                        <p id="dashboardTitle" class="text-sm text-gray-500"></p>
                     </div>
                 </div>
 
@@ -471,22 +504,22 @@
         //FUNCION CLAVE PARA CARGAR LAS VENTANAS 
         //SE LE PASA EL NOMBRE DEL ARCHIVO QUE SE DESEA CARGAR Y SI TIENE SUB TIPOS LE VAMOS EL TIPO
         //COMO POR EJEMPLO ('DASHBOARD-COMERCIO', 'TIPOCOMERCIO')
-        function loadDashboardAndData(dashboardUrl, tipo) {
+        function loadDashboardAndData(dashboardUrl, tipo, title) {
             const frame = document.getElementById('dashboardFrame');
             const titulo = document.getElementById('dashboardTitle');
             //se adiciona el dashboard al array de titulos para cargar el titulo
             const titles = {
-                'dashboard-capturas.html': 'Potencial de ventas',
-                'dashboard-comercializacion.html': 'Información del Mercado',
-                'dashboard_tamanoMercado.html': 'Tamaño de Mercado',
-                'dashboard-beneficiado-provincia.html': 'Beneficio provincia',
-                'precio-vivo.html': 'Precio vivo',
-                'precio-trozado.html': 'Precio Trozado',
-                'dashboard-tienda.html': 'Tienda',
-                'dashboard-gallina.html': 'Gallina',
-                'dashboard-huevo.html': 'Huevo',
-                'dashboard-entero-autoser.html': 'Pollo Entero Autoser',
-                'dashboard-trozado-autoser.html': 'Pollo Trozado Autoser',
+                'dashboard-capturas.html': 'Gestion ' + title,
+                'dashboard-comercializacion.html': title,
+                'dashboard_tamanoMercado.html': 'Gestion Tamaño de Mercado',
+                'dashboard-beneficiado-provincia.html': 'Gestion Beneficio provincia',
+                'precio-vivo.html': 'Gestion Precio vivo',
+                'precio-trozado.html': 'Gestion Precio Trozado',
+                'dashboard-tienda.html': 'Gestion Tienda',
+                'dashboard-gallina.html': 'Gestion Gallina',
+                'dashboard-huevo.html': 'Gestion Huevo',
+                'dashboard-entero-autoser.html': 'Gestion Pollo Entero Autoser',
+                'dashboard-trozado-autoser.html': 'Gestion Pollo Trozado Autoser',
 
             };
 
@@ -545,8 +578,68 @@
             document.getElementById('sidebar').classList.add('open');
         }
 
+        // limpia y marca el elemento activo y su posible padre toggle
+        function markActiveElement(element) {
+            // quitar active de todos
+            document.querySelectorAll('.menu-link.active, .menu-item.active, .submenu-toggle.active')
+                .forEach(el => el.classList.remove('active'));
+
+            if (!element) return;
+
+            // marca el elemento clickeado (si es link o botón)
+            element.classList.add('active');
+
+            // si el elemento es un link dentro de un submenu, marcar también el botón padre que abre ese submenu
+            const parentToggle = findParentToggleButton(element);
+            if (parentToggle) parentToggle.classList.add('active');
+
+            // además marcar el menu-group superior (si existe un .menu-item dentro del grupo)
+            const menuGroup = element.closest('.menu-group');
+            if (menuGroup) {
+                const topMenuItem = menuGroup.querySelector('.menu-item');
+                if (topMenuItem) topMenuItem.classList.add('active');
+            }
+        }
+
+        // buscar el botón toggle que controla el submenu donde está el elemento
+        function findParentToggleButton(el) {
+            let node = el;
+            while (node && node !== document) {
+                // si el padre más cercano es un submenu, intentamos buscar un botón anterior en ese mismo contenedor
+                if (node.classList && node.classList.contains('submenu')) {
+                    // buscar botón previo (por ejemplo: <button ...> </button> seguido por <div class="submenu">)
+                    let prev = node.previousElementSibling;
+                    if (prev && prev.tagName === 'BUTTON') return prev;
+                }
+                node = node.parentElement;
+            }
+
+            // alternativa: buscar un botón con clase .submenu-toggle dentro el ancestro directo
+            node = el.closest('.menu-group');
+            if (node) {
+                const innerToggle = node.querySelector('.submenu-toggle');
+                if (innerToggle) return innerToggle;
+            }
+
+            return null;
+        }
+
+        // función que usan tus links (ya la tenías, la adaptamos a markActiveElement)
+        function selectMenuItem(element) {
+            markActiveElement(element);
+        }
+
+        // función que usaremos en botones que cargan dashboard directamente
+        function activateAndLoad(buttonOrLink, dashboardUrl, tipo, title) {
+            // marcar UI
+            markActiveElement(buttonOrLink);
+
+            // llamar a tu función existente que carga el iframe
+            loadDashboardAndData(dashboardUrl, tipo, title);
+        }
+
     </script>
-    
+
     <script src="js/config/config.js"></script>
     <script src="js/services/comercializacion.service.js"></script>
     <script src="js/controllers/comercializacion.controller.js"></script>
@@ -555,7 +648,7 @@
     <script src="js/controllers/session.controller.js"></script>
 
 
-    
+
 
 </body>
 
