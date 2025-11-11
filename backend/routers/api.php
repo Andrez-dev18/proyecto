@@ -26,6 +26,7 @@ require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
 require_once __DIR__ . '/../controllers/TipoPolloController.php';
 require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 require_once __DIR__ . '/../controllers/CorteController.php';
+require_once __DIR__ . '/../controllers/ETL_Controller.php';
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -70,6 +71,7 @@ $TrozadoAutoserController = new TrozadoAutoserController($db);
 $CriadorEmprendedorController = new CriadorEmprendedorController($db);
 $TamaMerDiaController = new TamaMerDiaController($db);
 $CorteController = new CorteController($db);
+$ETLController = new ETL_Controller($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -622,6 +624,10 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     // EXPORTAR A EXCEL
 }elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
     $reporteController->exportarTamanoMercadoExcel();
+    exit;
+    ################# FUNCION PARA EJECUTAR ETL DE TABLA TAMAÑO MERCADO  ##########################
+}elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
+    $ETLController->run();
     exit;
 }
 

@@ -134,6 +134,11 @@ class TamanoMercadoController {
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
+        //etl
+        document.getElementById('btnETL').addEventListener('click', () => this.abrirModalETL());
+        document.getElementById('cancelarETL').addEventListener('click', () => this.cerrarModalETL());
+        document.getElementById('confirmarETL').addEventListener('click', () => this.ejecutarETL());
+
         // Filtros
         document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
         document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
@@ -165,7 +170,7 @@ class TamanoMercadoController {
                 const resultado = await this.service.actualizar(data);
                 console.log('Resultado actualización:', resultado);
 
-                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
@@ -173,14 +178,14 @@ class TamanoMercadoController {
                 const resultado = await this.service.crear(data);
                 console.log('Resultado creación:', resultado);
 
-                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
+                this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos(this.tipoActual);
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -240,10 +245,10 @@ class TamanoMercadoController {
                 throw new Error('La respuesta no es un array válido');
             }
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
             console.error('Error detallado:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
+            this.mostrarNotificacion(error.message, 'error');
             this.datos = []; // Resetear datos en caso de error
             this.renderizarTabla(); // Mostrar tabla vacía
         } finally {
@@ -347,7 +352,7 @@ class TamanoMercadoController {
 
         try {
             this.service.exportarCSV();
-            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+            this.mostrarNotificacion('Iniciando descarga de CSV...', 'success');
         } catch (error) {
             this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
         }
@@ -412,7 +417,7 @@ class TamanoMercadoController {
         console.log('Tabla actual:', this.tablaActual);
 
         if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('⚠️ Selecciona un registro de la tabla', 'warning');
+            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
             return;
         }
 
@@ -423,12 +428,12 @@ class TamanoMercadoController {
             console.log('Eliminando ID:', this.registroSeleccionado.id);
 
             await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado exitosamente', 'success');
+            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             this.registroSeleccionado = null;
             await this.cargarDatos(this.tipoActual);
         } catch (error) {
             console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('❌ Error al eliminar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -509,13 +514,13 @@ class TamanoMercadoController {
 
             if (tipoPollo) filtros.tipo = tipoPollo;
             if (tipoLinea) filtros.linea = tipoLinea;
-            if(provincia) filtros.provincia = provincia;
+            if (provincia) filtros.provincia = provincia;
             if (zona) filtros.zona = zona;
             if (empresa) filtros.empresa = empresa;
             if (proveedor) filtros.proveedor = proveedor;
             if (producto) filtros.producto = producto;
-     
-            const result = await this.service.filtrar(filtros);      
+
+            const result = await this.service.filtrar(filtros);
             this.datos = result.data || [];
             this.renderizarTabla();
             this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
@@ -541,7 +546,111 @@ class TamanoMercadoController {
         document.getElementById('filterProducto').value = '';
 
         this.cargarDatos(this.tipoActual);
-        
+
+    }
+
+    abrirModalETL() {
+        document.getElementById('modalETL').classList.remove('hidden');
+    }
+
+    cerrarModalETL() {
+        document.getElementById('modalETL').classList.add('hidden');
+    }
+
+    async ejecutarETL() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+
+        if (!fechaInicio || !fechaFin) {
+            this.mostrarNotificacion('Debe ingresar ambas fechas inicio y fin.', 'warning');
+            return;
+        }
+
+        try {
+            this.mostrarCargando(true);
+
+            const resultado = await this.service.ejecutarETL({ fechaInicio, fechaFin });
+            console.log('Resultado ETL:', resultado);
+
+            if (resultado.success) {
+                const total = resultado.resumen?.total_registros_procesados ?? 0;
+                this.mostrarAlertaETL(total);
+                this.cerrarModalETL();
+                await this.cargarDatos(); // Recarga tabla
+            } else {
+                this.mostrarNotificacion('Error en la ejecución del ETL.', 'error');
+            }
+
+        } catch (error) {
+            console.error('Error en ETL:', error);
+            this.mostrarNotificacion('Error al ejecutar ETL: ' + error.message, 'error');
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+    
+
+    mostrarAlertaETL(total) {
+        // Crear fondo oscuro
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+
+        // Crear ventana modal
+        const modal = document.createElement('div');
+        modal.style.backgroundColor = '#fff';
+        modal.style.borderRadius = '12px';
+        modal.style.padding = '25px 35px';
+        modal.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
+        modal.style.textAlign = 'center';
+        modal.style.maxWidth = '400px';
+        modal.style.fontFamily = 'Arial, sans-serif';
+        modal.style.animation = 'fadeIn 0.3s ease';
+
+        // Contenido del mensaje
+        modal.innerHTML = `
+    <h3 style="color: #2e7d32; margin-bottom: 10px;">✅ ETL completado exitosamente</h3>
+    <p style="margin-bottom: 20px; font-size: 15px; color: #333;">
+      Se procesaron un total de <strong>${total}</strong> registros.<br><br>
+      Todo se ejecutó correctamente.
+    </p>
+    <button id="cerrarModal" style="
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    ">Cerrar</button>
+  `;
+
+        // Insertar modal al overlay
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Cerrar modal al hacer clic en el botón
+        document.getElementById('cerrarModal').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+
+        // Animación de aparición (opcional)
+        const style = document.createElement('style');
+        style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  `;
+        document.head.appendChild(style);
     }
 
 }

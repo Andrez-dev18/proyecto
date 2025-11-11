@@ -119,6 +119,11 @@
                     <i class="fas fa-file-excel mr-2"></i>
                     Exportar Excel
                 </button>
+                <button id="btnETL"
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                    <i class="fa-solid fa-rotate mr-2"></i>
+                    Cargar ETL
+                </button>
             </div>
         </section>
 
@@ -375,6 +380,37 @@
         </div>
     </div>
 
+    <!-- Modal ETL -->
+    <div id="modalETL" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Ejecutar ETL</h2>
+            <p class="text-gray-600 mb-4">Ingrese el rango de fechas para procesar los datos.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="fechaInicio" class="block text-sm font-semibold text-gray-700">Fecha inicio</label>
+                    <input type="date" id="fechaInicio"
+                        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                </div>
+                <div>
+                    <label for="fechaFin" class="block text-sm font-semibold text-gray-700">Fecha fin</label>
+                    <input type="date" id="fechaFin"
+                        class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <button id="cancelarETL" class="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded-lg shadow">
+                    Cancelar
+                </button>
+                <button id="confirmarETL" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow">
+                    Ejecutar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Loading -->
     <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
         style="display: none;">
@@ -411,6 +447,26 @@
                 console.error("tamanoMercadoController.cargarDatos no está definido");
             }
         };
+
+        // 👉 Agrega esto dentro de tu script actual
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnETL = document.getElementById('btnETL');
+            const fechaInicioInput = document.getElementById('fechaInicio');
+            const fechaFinInput = document.getElementById('fechaFin');
+
+            const formatDate = (date) => date.toISOString().split('T')[0];
+
+            btnETL.addEventListener('click', () => {
+                const hoy = new Date();
+                const ayer = new Date();
+                ayer.setDate(hoy.getDate() - 1);
+
+                fechaInicioInput.value = formatDate(ayer);
+                fechaFinInput.value = formatDate(hoy);
+            });
+        });
+
+
     </script>
     <script src="js/utils/funcionesVarias.js"></script>
 </body>
