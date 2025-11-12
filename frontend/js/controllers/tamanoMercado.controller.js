@@ -139,16 +139,9 @@ class TamanoMercadoController {
         document.getElementById('cancelarETL').addEventListener('click', () => this.cerrarModalETL());
         document.getElementById('confirmarETL').addEventListener('click', () => this.ejecutarETL());
 
-        // Filtros
-        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipoPollo')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipoLinea')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterZona')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterEmpresa')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProducto')?.addEventListener('change', () => this.aplicarFiltros());
+        // Filtro btn
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
+
         // Modal
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
@@ -225,10 +218,6 @@ class TamanoMercadoController {
             this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.proveedor) {
-            this.mostrarNotificacion('El proveedor es obligatorio', 'warning');
-            return false;
-        }
         return true;
     }
 
@@ -236,21 +225,12 @@ class TamanoMercadoController {
         try {
             this.mostrarCargando(true);
 
-            this.datos = await this.service.getAll();
+            this.renderizarTablaInicial();
 
-            console.log(`Datos cargados:`, this.datos);
-
-            // Verificar si los datos son un array
-            if (!Array.isArray(this.datos)) {
-                throw new Error('La respuesta no es un array válido');
-            }
-            this.renderizarTabla();
-            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
         } catch (error) {
             console.error('Error detallado:', error);
             this.mostrarNotificacion(error.message, 'error');
-            this.datos = []; // Resetear datos en caso de error
-            this.renderizarTabla(); // Mostrar tabla vacía
         } finally {
             this.mostrarCargando(false);
         }
@@ -263,92 +243,166 @@ class TamanoMercadoController {
         }
     }
 
-    renderizarTabla() {
-        const table = $('.min-w-full'); // referencia rápida
-        const tbody = document.getElementById('tableBody');
+    renderizarTablaInicial() {
+        const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
-        if (!tbody || !thead) return;
+        if (!thead) return;
 
-        // 🧹 Si la tabla ya tiene un DataTable activo, destruirlo antes de regenerar contenido
+        // Destruir cualquier instancia anterior de DataTable
         if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
+            table.DataTable().destroy();
         }
 
-        tbody.innerHTML = '';
-        if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
-            return;
-        }
-
-        // Detectar columnas según tipo
-        let columnas = [];
-        columnas = [
+        // Definir columnas
+        const columnas = [
             'id', 'fecha', 'tipo', 'linea', 'provincia', 'zona',
             'empresa', 'proveedor',
             'producto', 'cantidad', 'peso', 'prom',
             'precio', 'info_mercado', 'nom_db'
         ];
-        // Agregar columna "Opciones"
+
         const columnasConOpciones = [...columnas, 'Opciones'];
 
-        // Generar encabezado
+        //  Generar encabezado dinámico
         thead.innerHTML = columnasConOpciones
             .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
             .join('');
 
-        // Generar filas con botones de acción
-        tbody.innerHTML = this.datos
-            .map((registro, i) => `
-            <tr class="hover:bg-blue-50 transition-colors">
-                ${columnas.map(col => `<td class="px-2 py-1 border-b text-sm text-gray-700">${registro[col] ?? '-'}</td>`).join('')}
-                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${i}">
-                        <i class="fas fa-edit"></i> 
-                    </button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${i}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `)
-            .join('');
-
-        // Asignar eventos a los botones Editar y Eliminar
-        tbody.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                this.modificarSeleccionado();
-            });
-        });
-
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                await this.eliminarSeleccionado();
-            });
-        });
-        // 🟢 Inicializar DataTable (después de renderizar filas)
-        if ($.fn.DataTable.isDataTable('.min-w-full')) {
-            $('.min-w-full').DataTable().destroy(); // evitar duplicar instancias
-        }
-        $('.min-w-full').DataTable({
+        // Inicializar DataTable en modo Server-Side
+        this.tabla = table.DataTable({
+            processing: true,  // muestra spinner de carga
+            serverSide: true,  // DataTables consulta directamente al backend
+            ajax: {
+                url: this.service.baseURL + AppConfig.API.ENDPOINTS.TAMAMERDIA.ALL,
+                type: 'POST',
+                error: function (xhr, error, thrown) {
+                    console.error('Error al cargar datos:', error, thrown);
+                }
+            },
+            columns: [
+                ...columnas.map(col => ({ data: col })),
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row) => `
+                    <div class="text-center space-x-2">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-id="${row.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-id="${row.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `
+                }
+            ],
+            order: [[0, 'desc']],
+            responsive: true,
             pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            }
+        });
+        // 🟢 Delegar eventos para botones de acción (funcionan incluso con renderizado dinámico)
+        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = this.tabla.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = this.tabla.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
+        });
+    }
+
+    renderizarTablaFiltrada() {
+        const table = $('.min-w-full');
+
+        // Limpiar cualquier DataTable previo
+        if ($.fn.DataTable.isDataTable(table)) {
+            table.DataTable().clear().destroy();
+        }
+
+        // Inicializar DataTable con AJAX y delegación de eventos
+        const dt = $('.min-w-full').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: this.service.baseURL + AppConfig.API.ENDPOINTS.TAMAMERDIA.FILTRO,
+                type: 'GET',
+                data: function (d) {
+                    const filtros = {};
+                    const campos = [
+                        'FechaInicio', 'FechaFin', 'TipoPollo', 'TipoLinea',
+                        'Provincia', 'Zona', 'Empresa', 'Proveedor', 'Producto'
+                    ];
+
+                    campos.forEach(campo => {
+                        const el = document.getElementById(`filter${campo}`);
+                        if (el && el.value) {
+                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
+                            filtros[key] = el.value.trim();
+                        }
+                    });
+
+                    return Object.assign(d, filtros);
+                },
+                dataSrc: json => json.data
             },
+            columns: [
+                { data: 'id' },
+                { data: 'fecha' },
+                { data: 'tipo' },
+                { data: 'linea' },
+                { data: 'provincia' },
+                { data: 'zona' },
+                { data: 'empresa' },
+                { data: 'proveedor' },
+                { data: 'producto' },
+                { data: 'cantidad' },
+                { data: 'peso' },
+                { data: 'prom' },
+                { data: 'precio' },
+                { data: 'info_mercado' },
+                { data: 'nom_db' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: (data, type, row, meta) => `
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `
+                }
+            ],
+            order: [[1, 'desc']],
             responsive: true,
-            order: [[0, 'desc']],
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            }
+        });
+
+        // 🟢 Delegar eventos para botones de acción (funcionan incluso con renderizado dinámico)
+        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
         });
     }
 
     exportarExcel() {
-
-        if (this.datos.length === 0) {
-            this.mostrarNotificacion('No hay datos para exportar', 'warning');
-            return;
-        }
 
         try {
             this.service.exportarCSV();
@@ -366,7 +420,6 @@ class TamanoMercadoController {
 
         document.getElementById('modalTitle').textContent = 'Modificar Registro';
         this.cargarDatosEnFormulario();
-        // this.mostrarCamposSegunTipo();
         const modal = document.getElementById('modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
@@ -493,45 +546,7 @@ class TamanoMercadoController {
     }
 
     async aplicarFiltros() {
-        try {
-            this.mostrarCargando(true);
-
-            const filtros = {};
-            const fechaInicio = document.getElementById('filterFechaInicio').value;
-            const fechaFin = document.getElementById('filterFechaFin').value;
-
-            // Solo agregar si tiene valor
-            if (fechaInicio) filtros.fechaInicio = fechaInicio;
-            if (fechaFin) filtros.fechaFin = fechaFin;
-
-            const tipoPollo = document.getElementById('filterTipoPollo').value;
-            const tipoLinea = document.getElementById('filterTipoLinea').value;
-            const provincia = document.getElementById('filterProvincia').value;
-            const zona = document.getElementById('filterZona').value;
-            const empresa = document.getElementById('filterEmpresa').value;
-            const proveedor = document.getElementById('filterProveedor').value;
-            const producto = document.getElementById('filterProducto').value;
-
-            if (tipoPollo) filtros.tipo = tipoPollo;
-            if (tipoLinea) filtros.linea = tipoLinea;
-            if (provincia) filtros.provincia = provincia;
-            if (zona) filtros.zona = zona;
-            if (empresa) filtros.empresa = empresa;
-            if (proveedor) filtros.proveedor = proveedor;
-            if (producto) filtros.producto = producto;
-
-            const result = await this.service.filtrar(filtros);
-            this.datos = result.data || [];
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
-        } catch (error) {
-            console.error('Error completo:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
-            this.datos = [];
-            this.renderizarTabla();
-        } finally {
-            this.mostrarCargando(false);
-        }
+        this.renderizarTablaFiltrada();
     }
 
     limpiarFiltros() {
@@ -588,7 +603,7 @@ class TamanoMercadoController {
             this.mostrarCargando(false);
         }
     }
-    
+
 
     mostrarAlertaETL(total) {
         // Crear fondo oscuro

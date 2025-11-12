@@ -601,7 +601,7 @@ elseif (preg_match("/\/criador\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
 
 ######### RUTAS COM_DB_TAMA_MER_DIA #########
 // obtener todos
-elseif (strpos($path, "/tamamerdia/all") !== false && $request == "GET") {
+elseif (strpos($path, "/tamamerdia/all") !== false && $request == "POST") {
     $TamaMerDiaController->getAll();
     exit;
     //crear

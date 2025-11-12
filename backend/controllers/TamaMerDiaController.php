@@ -11,9 +11,20 @@ class TamaMerDiaController
         $this->service = new TamaMerDiaService($db);
     }
 
-    public function getAll()
+    public function getAllSimple()
     {
         echo json_encode($this->service->getAll());
+    }
+
+    public function getAll()
+    {
+        $start = $_POST['start'] ?? 0;
+        $length = $_POST['length'] ?? 10;
+        $search = $_POST['search']['value'] ?? '';
+
+        $response = $this->service->getPaginated($start, $length, $search);
+        header('Content-Type: application/json');
+        echo json_encode($response);
     }
 
     public function create()
@@ -60,24 +71,31 @@ class TamaMerDiaController
 
     public function obtenerDatosFiltrados()
     {
-        // Obtener parámetros desde la query string
-        $fechaInicio = $_GET['fechaInicio'] ?? null;
-        $fechaFin = $_GET['fechaFin'] ?? null;
-        $tipo = $_GET['tipo'] ?? null;
-        $linea = $_GET['linea'] ?? null;
-        $provincia = $_GET['provincia'] ?? null;
-        $zona = $_GET['zona'] ?? null;
-        $empresa = $_GET['empresa'] ?? null;
-        $proveedor = $_GET['proveedor'] ?? null;
-        $producto = $_GET['producto'] ?? null;
+        $params = [
+            'fechaInicio' => $_GET['fechaInicio'] ?? null,
+            'fechaFin'    => $_GET['fechaFin'] ?? null,
+            'tipo'        => $_GET['tipoPollo'] ?? null,
+            'linea'       => $_GET['tipoLinea'] ?? null,
+            'provincia'   => $_GET['provincia'] ?? null,
+            'zona'        => $_GET['zona'] ?? null,
+            'empresa'     => $_GET['empresa'] ?? null,
+            'proveedor'   => $_GET['proveedor'] ?? null,
+            'producto'    => $_GET['producto'] ?? null,
+            'start'       => intval($_GET['start'] ?? 0),
+            'length'      => intval($_GET['length'] ?? 10)
+        ];
 
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $tipo, $linea, $provincia, $zona, $empresa, $proveedor, $producto);
+        $datos = $this->service->obtenerDatosFiltrados($params);
+        $recordsTotal = $this->service->obtenerTotalRegistros();
+        $recordsFiltered = $this->service->obtenerTotalFiltrados($params);
 
         header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
-            'data' => $resultados
+            'params:' => $params,
+            'data' => $datos,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered
         ]);
     }
-
 }

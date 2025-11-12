@@ -228,23 +228,21 @@ class ComercializacionController {
     }
 
     renderizarTabla() {
-        const table = $('.min-w-full'); // referencia rápida
-        const tbody = document.getElementById('tableBody');
+        const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
-        if (!tbody || !thead) return;
+        if (!thead) return;
 
-        // 🧹 Si la tabla ya tiene un DataTable activo, destruirlo antes de regenerar contenido
+        // 🔄 Destruir DataTable anterior si existe
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        tbody.innerHTML = '';
-        if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
+        if (!this.datos || this.datos.length === 0) {
+            table.find('tbody').html('<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>');
             return;
         }
 
-        // Detectar columnas según tipo
+        // 📋 Definir columnas según tipo actual
         let columnas = [];
         if (this.tipoActual === 'vivo-aqp') {
             columnas = [
@@ -273,58 +271,54 @@ class ComercializacionController {
             ];
         }
 
-        // Agregar columna "Opciones"
-        const columnasConOpciones = [...columnas, 'Opciones'];
+        // Agregar columna de opciones al final
+        const columnasConOpciones = [
+            ...columnas.map(c => ({ data: c, title: c.replace(/([A-Z])/g, ' $1') })),
+            {
+                data: null,
+                title: 'Opciones',
+                orderable: false,
+                render: (data, type, row, meta) => `
+                <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `
+            }
+        ];
 
-        // Generar encabezado
+        // 🧱 Renderizar encabezado
         thead.innerHTML = columnasConOpciones
-            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.title}</th>`)
             .join('');
 
-        // Generar filas con botones de acción
-        tbody.innerHTML = this.datos
-            .map((registro, i) => `
-            <tr class="hover:bg-blue-50 transition-colors">
-                ${columnas.map(col => `<td class="px-2 py-1 border-b text-sm text-gray-700">${registro[col] ?? '-'}</td>`).join('')}
-                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${i}">
-                        <i class="fas fa-edit"></i> 
-                    </button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${i}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `)
-            .join('');
-
-        // Asignar eventos a los botones Editar y Eliminar
-        tbody.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                this.modificarSeleccionado();
-            });
-        });
-
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                await this.eliminarSeleccionado();
-            });
-        });
-        // 🟢 Inicializar DataTable (después de renderizar filas)
-        if ($.fn.DataTable.isDataTable('.min-w-full')) {
-            $('.min-w-full').DataTable().destroy(); // evitar duplicar instancias
-        }
-        $('.min-w-full').DataTable({
-            pageLength: 10,
+        // 🚀 Inicializar DataTable con deferRender
+        const dt = table.DataTable({
+            data: this.datos,
+            columns: columnasConOpciones,
+            deferRender: true,           // ⚡ Renderiza solo lo visible
+            pageLength: 25,              // Muestra menos filas por página
+            responsive: true,
+            order: [[0, 'desc']],
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
             },
-            responsive: true,
-            order: [[0, 'desc']],
+            destroy: true
+        });
+
+        // 🎯 Delegar eventos (sin perderlos al paginar)
+        table.find('tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        table.find('tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
         });
     }
 
@@ -483,7 +477,7 @@ class ComercializacionController {
         const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
 
-       // document.getElementById('modalRucProv').value = r.ruc_prov || '';
+        // document.getElementById('modalRucProv').value = r.ruc_prov || '';
 
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
@@ -594,7 +588,7 @@ class ComercializacionController {
 
             data.mercado = mercadoId;
             data.empresa = empresaId;
-           // data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
+            // data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
             data.condicion = condicionId;
         } else {
             // Enviar IDs para provincia/tipo

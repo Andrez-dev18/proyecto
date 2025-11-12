@@ -4,7 +4,7 @@ require_once __DIR__ . '/../repositories/TamaMerDiaRepository.php';
 
 class TamaMerDiaService
 {
-     private $repo;
+    private $repo;
 
     public function __construct($db)
     {
@@ -16,7 +16,21 @@ class TamaMerDiaService
         return $this->repo->findAll();
     }
 
-     public function save($data)
+    public function getPaginated($start, $length, $search)
+    {
+        $data = $this->repo->findPaginated($start, $length, $search);
+        $recordsTotal = $this->repo->countGetAll();
+        $recordsFiltered = $this->repo->countGetAllFiltered($search);
+
+        return [
+            "draw" => intval($_POST['draw'] ?? 0),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $data
+        ];
+    }
+
+    public function save($data)
     {
         return $this->repo->save($data);
     }
@@ -26,11 +40,18 @@ class TamaMerDiaService
         return $this->repo->delete($id);
     }
 
-    public function obtenerDatosFiltrados($fechaInicio = null, $fechaFin = null, $tipo = null, $linea = null, $provincia = null, $zona = null, $empresa = null, $proveedor = null, $producto = null)
+    public function obtenerDatosFiltrados($params = [])
     {
-        return $this->repo->findByFilters($fechaInicio, $fechaFin, $tipo, $linea, $provincia, $zona, $empresa, $proveedor, $producto);
+        return $this->repo->findByFilters($params);
     }
 
+    public function obtenerTotalRegistros()
+    {
+        return $this->repo->countAll();
+    }
 
+    public function obtenerTotalFiltrados($params = [])
+    {
+        return $this->repo->countFiltered($params);
+    }
 }
-
