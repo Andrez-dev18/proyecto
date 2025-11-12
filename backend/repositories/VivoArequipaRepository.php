@@ -49,7 +49,51 @@ class VivoArequipaRepository
         WHERE a.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
         ORDER BY a.fechaHoraRegistro DESC;
     ";
-        return $this->executeQuery($query);
+        $result = $this->executeQuery($query);
+
+    // Si no hay resultados, traer los últimos 100 registros
+    if (empty($result)) {
+        $queryFallback = "
+            SELECT
+            a.id,
+            a.fecha,
+            m.nombre AS mercado,
+            e.nombre AS empresa,
+            e.ruc AS ruc_empresa,
+            c.nombre AS condicion,
+            pr.nombre AS proveedor,
+            pr.ruc AS ruc_proveedor,
+            a.precioMayMin,
+            a.precioMayMax,
+            a.precioPubMin,
+            a.precioPubMax,
+            a.pesoMachoMin,
+            a.pesoMachoMax,
+            a.pesoHembMin,
+            a.pesoHembMax,
+            a.colorMin,
+            a.colorMax,
+            a.pesoMachoPromMin,
+            a.pesoMachoPromMax,
+            a.pesoHembraPromMin,
+            a.pesoHembraPromMax,
+            a.cantidad,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_vivo_aqp a
+        LEFT JOIN com_mercado m ON a.mercado = m.codigo
+        LEFT JOIN com_empresa e ON a.empresa = e.codigo
+        LEFT JOIN com_condicion c ON a.condicion = c.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        ORDER BY a.fechaHoraRegistro DESC
+        LIMIT 100;
+        ";
+        $result = $this->executeQuery($queryFallback);
+    }
+
+    return $result;
     }
 
 

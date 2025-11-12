@@ -17,8 +17,35 @@ class CriadorEmprendedorRepository
 
     public function findAll()
     {
-        $query = "
-           SELECT
+        // Primer intento: últimos 30 días
+    $query = "
+        SELECT
+            a.id,
+            a.fecha,
+            p.nombre AS provincia,
+            pr.nombre AS proveedor,
+            t.nombre AS tipo,
+            a.cantidad,
+            a.precio,
+            a.observaciones,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_criador_emprendedor a
+        LEFT JOIN com_provincia p ON a.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON a.tipo = t.codigo
+        WHERE a.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+        ORDER BY a.fechaHoraRegistro DESC
+    ";
+
+    $result = $this->executeQuery($query);
+
+    // Si no hay resultados, traer los últimos 100 registros
+    if (empty($result)) {
+        $queryFallback = "
+            SELECT
                 a.id,
                 a.fecha,
                 p.nombre AS provincia,
@@ -35,11 +62,13 @@ class CriadorEmprendedorRepository
             LEFT JOIN com_provincia p ON a.provincia = p.codigo
             LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
             LEFT JOIN com_tipo t ON a.tipo = t.codigo
-            WHERE a.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
-            ORDER BY a.fechaHoraRegistro DESC;
-
+            ORDER BY a.fechaHoraRegistro DESC
+            LIMIT 100
         ";
-        return $this->executeQuery($query);
+        $result = $this->executeQuery($queryFallback);
+    }
+
+    return $result;
     }
 
     public function save($data)

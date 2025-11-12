@@ -215,13 +215,19 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-criador')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-seedling w-5"></i>
                         <span class="font-medium">2.- Criaderos Emprendedores</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
+
+                <div id="submenu-criador" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-criadores-emprendedores.html','criador-emprendedor', 'Gestion Criador Emprendedor')"
+                        class="menu-link block text-gray-400 hover:text-white">Criador Emprendedores</a>                  
+                </div>
             </div>
 
             <div class="menu-group">
@@ -520,6 +526,7 @@
                 'dashboard-huevo.html': 'Gestion Huevo',
                 'dashboard-entero-autoser.html': 'Gestion Pollo Entero Autoser',
                 'dashboard-trozado-autoser.html': 'Gestion Pollo Trozado Autoser',
+                'dashboard-criadores-emprendedores.html': title,
 
             };
 
