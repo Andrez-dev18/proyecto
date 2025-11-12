@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Inicio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+        }
+
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="container mx-auto px-6 py-12">
+        
+        <!-- Header con Logo -->
+        <div class="text-center mb-12">
+            <!-- Logo -->
+            <div class="logo-container">
+                <img src="assets/img/Favicon.jpg" alt="Logo Granja Rinconada" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <!-- Fallback si no hay logo -->
+                <div style="display: none; width: 80%; height: 80%; background: #1e40af; border-radius: 50%; align-items: center; justify-content: center; font-size: 2.5rem; color: white; font-weight: 900;">
+                    GR
+                </div>
+            </div>
+            
+            <!-- Título -->
+            <h1 class="text-4xl font-bold text-gray-800 uppercase tracking-wide">
+                Granja Rinconada Del Sur S.A.
+            </h1>
+        </div>
+
+        <!-- Grid de Opciones -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            
+            <!-- Card 1: Información del Mercado -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-blue-100 text-blue-600">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Información del Mercado</h3>
+            </a>
+
+            <!-- Card 2: Criadores Emprendedores -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-criadores-emprendedores.html','criador')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-green-100 text-green-600">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Criadores Emprendedores</h3>
+            </a>
+
+            <!-- Card 3: Huevos -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-huevo.html','huevo')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-egg"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Gestión de Huevos</h3>
+            </a>
+
+            <!-- Card 4: Tamaño de Mercado -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-purple-100 text-purple-600">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Tamaño de Mercado</h3>
+            </a>
+
+            <!-- Card 5: Potencial de Venta -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-capturas.html','vivo-arequipa')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-pink-100 text-pink-600">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Potencial de Venta</h3>
+            </a>
+
+            <!-- Card 6: Gallinas -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-gallina.html','gallina')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-red-100 text-red-600">
+                    <i class="fas fa-drumstick-bite"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Gestión de Gallinas</h3>
+            </a>
+
+            <!-- Card 7: Precio Vivo -->
+            <a href="#" onclick="parent.loadDashboardAndData('precio-vivo.html','precio-vivo')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-indigo-100 text-indigo-600">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Precio Vivo</h3>
+            </a>
+
+            <!-- Card 8: Precio Trozado -->
+            <a href="#" onclick="parent.loadDashboardAndData('precio-trozado.html','precio-trozado')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-teal-100 text-teal-600">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Precio Trozado</h3>
+            </a>
+
+            <!-- Card 9: Tienda -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-tienda.html','tienda')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-orange-100 text-orange-600">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Gestión de Tienda</h3>
+            </a>
+
+            <!-- Card 10: Beneficiado Provincias -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-cyan-100 text-cyan-600">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Beneficiado Provincias</h3>
+            </a>
+
+            <!-- Card 11: Pollo Entero Autoservicio -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-lime-100 text-lime-600">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Pollo Entero Autoservicio</h3>
+            </a>
+
+            <!-- Card 12: Pollo Trozado Autoservicio -->
+            <a href="#" onclick="parent.loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')" 
+               class="card bg-white rounded-xl p-8 text-center shadow-md">
+                <div class="icon-box bg-rose-100 text-rose-600">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Pollo Trozado Autoservicio</h3>
+            </a>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12">
+            <p class="text-gray-500 text-sm">
+                Sistema desarrollado para <strong>Granja Rinconada Del Sur S.A.</strong> - © 2025
+            </p>
+        </div>
+
+    </div>
+</body>
+
+</html>

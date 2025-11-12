@@ -131,7 +131,7 @@
                     </div>
                     <div>
                         <h2 class="text-white font-bold text-lg">Sistema</h2>
-                        <p class="text-blue-300 text-xs">Gestión </p>
+                        <p class="text-blue-300 text-xs">Gestión</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="lg:hidden text-white hover:text-blue-200">
@@ -141,13 +141,12 @@
         </div>
 
         <!-- Menu -->
-        <!-- Navbar actualizado -->
         <nav class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100vh - 140px);">
             <div class="mb-4">
                 <p class="text-blue-300 text-xs uppercase font-semibold mb-2 px-3">Dashboards</p>
             </div>
 
-            <!-- INFORMACIÓN DEL MERCADO -->
+            <!-- 1. INFORMACIÓN DEL MERCADO -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="toggleSubmenu('submenu-mercado')">
@@ -163,8 +162,6 @@
                         class="block text-gray-400 hover:text-white">Vivo Arequipa</a>
                     <a href="#" onclick="loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia')"
                         class="block text-gray-400 hover:text-white">Vivo Provincias</a>
-
-                    <!-- Provincias  menú -->
                     <a href="#"
                         onclick="loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
                         class="block text-gray-400 hover:text-white">Beneficiado Provincias</a>
@@ -182,35 +179,35 @@
                         class="block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
                     <a href="#" onclick="loadDashboardAndData('dashboard-trozado-autoser.html','pollo-trozado')"
                         class="block text-gray-400 hover:text-white">Pollo Trozado auto servicio</a>
-
                 </div>
             </div>
 
-
-<!-- CRIADEROS EMPRENDEDORES -->
-<div class="menu-group">
-    <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-        onclick="toggleSubmenu('submenu-criaderos')">
-        <span class="flex items-center gap-3">
-            <i class="fas fa-seedling w-5"></i>
-            <span class="font-medium">2.- Criaderos Emprendedores</span>
-        </span>
-        <i class="fas fa-chevron-down text-sm"></i>
-    </button>
-
-    <div id="submenu-criaderos" class="submenu hidden pl-10 mt-2 space-y-2">
-        <a href="#" onclick="loadDashboardAndData('dashboard-criadores-emprendedores.html','criador-emprendedor')"
-            class="block text-gray-400 hover:text-white">Criaderos Emprendedores</a>
-    </div>
-</div>
-
-
-
+            <!-- 2. CRIADEROS EMPRENDEDORES -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-criaderos')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-seedling w-5"></i>
+                        <span class="font-medium">2.- Criaderos Emprendedores</span>
+                    </span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+
+                <div id="submenu-criaderos" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#" onclick="loadDashboardAndData('dashboard-criadores-emprendedores.html','criador')"
+                        class="block text-gray-400 hover:text-white">
+                        <i class="fas fa-egg mr-2"></i>
+                        Criaderos Emprendedores
+                    </a>
+                </div>
+            </div>
+
+            <!-- 3-6. DATABASE -->
+            <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="toggleSubmenu('submenu-database-3')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">3.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -219,9 +216,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-4')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">4.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -230,9 +227,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-5')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">5.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -241,27 +238,27 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-6')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">6.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
             </div>
 
-            <!-- TAMAÑO MERCADO -->
+            <!-- 7. TAMAÑO MERCADO -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-chart-pie w-5"></i>
                         <span class="font-medium">7.- Tamaño Mercado</span>
                     </span>
                 </button>
             </div>
 
-            <!-- CAPTURAS DE PANTALLA -->
+            <!-- 8. POTENCIAL DE VENTA -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="toggleSubmenu('submenu-capturas')">
@@ -275,7 +272,7 @@
                 <div id="submenu-capturas" class="submenu hidden pl-10 mt-2 space-y-2">
                     <!-- VIVO -->
                     <div>
-                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
+                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white py-1"
                             onclick="toggleSubmenu('submenu-capturas-vivo')">
                             <span>Vivo</span>
                             <i class="fas fa-chevron-right text-xs"></i>
@@ -290,7 +287,7 @@
 
                     <!-- BENEFICIADO -->
                     <div>
-                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white"
+                        <button class="flex items-center justify-between w-full text-gray-300 hover:text-white py-1"
                             onclick="toggleSubmenu('submenu-capturas-beneficiado')">
                             <span>Beneficiado</span>
                             <i class="fas fa-chevron-right text-xs"></i>
@@ -306,11 +303,12 @@
                 </div>
             </div>
 
+            <!-- 9-13. DATABASE -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-9')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">9.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -319,9 +317,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-10')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">10.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -330,9 +328,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-11')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">11.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -341,9 +339,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-12')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">12.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -352,9 +350,9 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('submenu-database-13')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">13.- DataBase</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
@@ -362,14 +360,12 @@
             </div>
         </nav>
 
-
         <script>
             function toggleSubmenu(id) {
                 const submenu = document.getElementById(id);
                 submenu.classList.toggle('hidden');
             }
         </script>
-
     </aside>
 
     <!-- Overlay -->
@@ -388,7 +384,7 @@
                     </button>
 
                     <div>
-                        <h1 id="dashboardTitle" class="text-2xl font-bold text-gray-800">Capturas de Pantalla</h1>
+                        <h1 id="dashboardTitle" class="text-2xl font-bold text-gray-800">Sistema de Gestión</h1>
                         <p class="text-sm text-gray-500">Sistema de gestión de clientes y proveedores</p>
                     </div>
                 </div>
@@ -397,8 +393,8 @@
                 <details class="relative">
                     <summary class="flex items-center gap-3 cursor-pointer select-none list-none">
                         <div class="text-right">
-                            <p id="userName" class="text-sm font-semibold text-gray-700">Usuario Admin</p>
-                            <p id="rolUser" class="text-xs text-gray-500">Administrador</p>
+                            <p id="userName" class="text-sm font-semibold text-gray-700">SYSTEM</p>
+                            <p id="rolUser" class="text-xs text-gray-500">ADMINISTRADOR DE SISTEMAS</p>
                         </div>
                         <div
                             class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
@@ -420,14 +416,15 @@
             </div>
         </header>
 
-
         <!-- Dashboard Content -->
         <main class="p-6 relative">
             <div id="loadingIndicator" class="loading hidden">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
 
-            <iframe id="dashboardFrame" src="dashboard-capturas.html" onload="hideLoading()">
+            <!-- ✅ Iframe sin src inicial -->
+            <iframe id="dashboardFrame"
+                style="width: 100%; min-height: calc(100vh - 80px); border: none; background: #f9fafb;">
             </iframe>
         </main>
     </div>
@@ -437,49 +434,16 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
         }
 
-        // Load Dashboard
-        function loadDashboard(url, element) {
-            // Prevenir comportamiento por defecto del enlace
-            event.preventDefault();
-
-            // Mostrar loading
-            showLoading();
-
-            // Actualizar menu activo
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            element.classList.add('active');
-
-            // Cargar dashboard
-            const frame = document.getElementById('dashboardFrame');
-            frame.src = url;
-
-            // Actualizar título
-            const titles = {
-                'dashboard-capturas.html': 'Capturas de Pantalla',
-                'dashboard-comercializacion.html': 'Información del Mercado'
-            };
-            document.getElementById('dashboardTitle').textContent = titles[url] || 'Dashboard';
-
-            // Cerrar sidebar en móvil
-            if (window.innerWidth < 1024) {
-                toggleSidebar();
-            }
-        }
-
-        //FUNCION CLAVE PARA CARGAR LAS VENTANAS 
-        //SE LE PASA EL NOMBRE DEL ARCHIVO QUE SE DESEA CARGAR Y SI TIENE SUB TIPOS LE VAMOS EL TIPO
-        //COMO POR EJEMPLO ('DASHBOARD-COMERCIO', 'TIPOCOMERCIO')
+        // Función principal para cargar dashboards
         function loadDashboardAndData(dashboardUrl, tipo) {
             const frame = document.getElementById('dashboardFrame');
             const titulo = document.getElementById('dashboardTitle');
-            //se adiciona el dashboard al array de titulos para cargar el titulo
+
+            // Títulos de los dashboards
             const titles = {
                 'dashboard-capturas.html': 'Potencial de ventas',
                 'dashboard-comercializacion.html': 'Información del Mercado',
@@ -493,17 +457,10 @@
                 'dashboard-entero-autoser.html': 'Pollo Entero Autoser',
                 'dashboard-trozado-autoser.html': 'Pollo Trozado Autoser',
                 'dashboard-criadores-emprendedores.html': 'Criadores Emprendedores',
-
             };
 
             titulo.textContent = titles[dashboardUrl] || 'Dashboard';
             showLoading();
-
-            /*Aqui tener en cuenta que el dashboard cargado debe tener la funcion
-                "cargarDatos()" esta se encarga de cargar la tabla y demas data que se
-                desea mostrar, tener en cuenta la esctructua de JS
-                dashboarh.html -> controller -> service-> config
-            */
 
             const run = () => {
                 try {
@@ -518,10 +475,8 @@
             };
 
             if (frame.src.includes(dashboardUrl)) {
-                // ya está cargado ese dashboard
                 run();
             } else {
-                // esperar a que el nuevo dashboard se cargue
                 frame.onload = run;
                 frame.src = dashboardUrl;
             }
@@ -538,7 +493,7 @@
             document.getElementById('loadingIndicator').classList.add('hidden');
         }
 
-        // Responsive: cerrar sidebar al hacer clic fuera
+        // Responsive
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 1024) {
                 document.getElementById('sidebar').classList.add('open');
@@ -546,23 +501,44 @@
             }
         });
 
+        // CARGAR DASHBOARD POR DEFECTO AL INICIAR
+        window.addEventListener('DOMContentLoaded', () => {
+            // MODIFICAR DASHBOARD POR DEFECTO
+
+            // loadDashboardAndData('dashboard-comercializacion.html', 'vivo-aqp');
+            // loadDashboardAndData('dashboard-comercializacion.html', 'vivo-provincia');
+            // loadDashboardAndData('dashboard-huevo.html', 'huevo');
+
+            // Criaderos Emprendedores:
+            //loadDashboardAndData('dashboard-criadores-emprendedores.html', 'criador');
+
+            // Tamaño de Mercado:
+            // loadDashboardAndData('dashboard_tamanoMercado.html', 'tamanoMercado');
+
+            // Potencial de Venta:
+            // loadDashboardAndData('dashboard-capturas.html', 'vivo-arequipa');
+
+            const frame = document.getElementById('dashboardFrame');
+            frame.src = 'dashboard-home1.html';
+            document.getElementById('dashboardTitle').textContent = 'Dashboard Principal';
+
+            // Ocultar loading cuando cargue
+            frame.onload = () => {
+                hideLoading();
+            };
+        });
         // Inicializar sidebar abierto en desktop
         if (window.innerWidth >= 1024) {
             document.getElementById('sidebar').classList.add('open');
         }
-
     </script>
 
+    <!-- Scripts necesarios -->
     <script src="js/config/config.js"></script>
     <script src="js/services/comercializacion.service.js"></script>
     <script src="js/controllers/comercializacion.controller.js"></script>
-
     <script src="js/services/auth.service.js"></script>
     <script src="js/controllers/session.controller.js"></script>
-
-
-    
-
 </body>
 
 </html>
