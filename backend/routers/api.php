@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../middleware/security.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
@@ -28,10 +29,10 @@ require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 require_once __DIR__ . '/../controllers/CorteController.php';
 require_once __DIR__ . '/../controllers/ETL_Controller.php';
 
-header("Access-Control-Allow-Origin: *");
+/*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Credentials: true");*/
 
 // Manejo del preflight (OPTIONS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
