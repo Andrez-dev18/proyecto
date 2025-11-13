@@ -645,6 +645,32 @@
             loadDashboardAndData(dashboardUrl, tipo, title);
         }
 
+         window.addEventListener('DOMContentLoaded', () => {
+            // MODIFICAR DASHBOARD POR DEFECTO
+
+            // loadDashboardAndData('dashboard-comercializacion.html', 'vivo-aqp');
+            // loadDashboardAndData('dashboard-comercializacion.html', 'vivo-provincia');
+            // loadDashboardAndData('dashboard-huevo.html', 'huevo');
+
+            // Criaderos Emprendedores:
+            //loadDashboardAndData('dashboard-criadores-emprendedores.html', 'criador');
+
+            // Tamaño de Mercado:
+            // loadDashboardAndData('dashboard_tamanoMercado.html', 'tamanoMercado');
+
+            // Potencial de Venta:
+            // loadDashboardAndData('dashboard-capturas.html', 'vivo-arequipa');
+
+            const frame = document.getElementById('dashboardFrame');
+            frame.src = 'dashboard-home1.html';
+            document.getElementById('dashboardTitle').textContent = 'Dashboard Principal';
+
+            // Ocultar loading cuando cargue
+            frame.onload = () => {
+                hideLoading();
+            };
+        });
+
     </script>
 
     <script src="js/config/config.js"></script>
