@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../middleware/security.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../controllers/VivoController.php';
 require_once __DIR__ . '/../controllers/BeneficiadoController.php';
@@ -26,11 +27,12 @@ require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
 require_once __DIR__ . '/../controllers/TipoPolloController.php';
 require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 require_once __DIR__ . '/../controllers/CorteController.php';
+require_once __DIR__ . '/../controllers/ETL_Controller.php';
 
-header("Access-Control-Allow-Origin: *");
+/*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Credentials: true");*/
 
 // Manejo del preflight (OPTIONS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -70,6 +72,7 @@ $TrozadoAutoserController = new TrozadoAutoserController($db);
 $CriadorEmprendedorController = new CriadorEmprendedorController($db);
 $TamaMerDiaController = new TamaMerDiaController($db);
 $CorteController = new CorteController($db);
+$ETLController = new ETL_Controller($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -205,7 +208,7 @@ elseif (strpos($path, "/beneficiado/actualizar") !== false && $request == "PUT")
 }
 
 // DELETE Beneficiado Borrar
-elseif (preg_match("/\/beneficiado\/borrar\/(\d+)/", $path, $matches) && $request == "DELETE") {
+elseif (preg_match("/\/beneficiado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && $request == "DELETE") {
     $beneficiadoController->delete($matches[1]);
     exit;
 }
@@ -231,7 +234,7 @@ elseif (strpos($path, "/vivoArequipa/actualizar") !== false && ($request == "PUT
     exit;
 }
 // DELETE Vivo Arequipa Borrar (aceptar DELETE o POST como fallback)
-elseif (preg_match("/\/vivoArequipa\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+elseif (preg_match("/\/vivoArequipa\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $VivoArequipaController->delete($matches[1]);
     exit;
 }
@@ -256,7 +259,7 @@ elseif (strpos($path, "/vivoProvincia/actualizar") !== false && ($request == "PU
     exit;
 }
 // DELETE Vivo Provincia Borrar (aceptar DELETE o POST como fallback)
-elseif (preg_match("/\/vivoProvincia\/borrar\/(\d+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+elseif (preg_match("/\/vivoProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $VivoProvinciaController->delete($matches[1]);
     exit;
 }
@@ -598,7 +601,7 @@ elseif (preg_match("/\/criador\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
 
 ######### RUTAS COM_DB_TAMA_MER_DIA #########
 // obtener todos
-elseif (strpos($path, "/tamamerdia/all") !== false && $request == "GET") {
+elseif (strpos($path, "/tamamerdia/all") !== false && $request == "POST") {
     $TamaMerDiaController->getAll();
     exit;
     //crear
@@ -617,11 +620,15 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
 }elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
-    $TamaMerDiaController->obtenerDatosFiltrados();
+    $TamaMerDiaController->obtenerTodosDatosFiltro();
     exit;
     // EXPORTAR A EXCEL
 }elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
     $reporteController->exportarTamanoMercadoExcel();
+    exit;
+    ################# FUNCION PARA EJECUTAR ETL DE TABLA TAMAÑO MERCADO  ##########################
+}elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
+    $ETLController->run();
     exit;
 }
 

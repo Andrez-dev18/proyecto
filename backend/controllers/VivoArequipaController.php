@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . '/../services/VivoArequipaService.php';
 
 class VivoArequipaController
@@ -19,9 +19,9 @@ class VivoArequipaController
     public function create()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (isset($data["id"]) && $data["id"] != 0) {
+        if (isset($data["id"]) && !empty(trim($data["id"]))) {
             http_response_code(400);
-            echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
+            echo json_encode(["error" => "No se debe enviar un ID al crear un nuevo registro."]);
             return;
         }
         $this->service->save($data);
@@ -31,7 +31,7 @@ class VivoArequipaController
     public function update()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (!isset($data["id"]) || $data["id"] <= 0) {
+        if (!isset($data["id"]) || empty(trim($data["id"]))) {
             http_response_code(400);
             echo json_encode(["error" => "ID inválido para actualizar el registro."]);
             return;
@@ -42,34 +42,47 @@ class VivoArequipaController
 
     public function delete($id)
     {
-        if (!$id || $id <= 0) {
+        if (!$id || empty(trim($id))) {
             http_response_code(400);
             echo json_encode(["error" => "ID inválido para eliminar el registro."]);
             return;
         }
-        $this->service->delete($id);
-        echo json_encode(["message" => "Registro eliminado correctamente"]);
+
+        $deletedRows = $this->service->delete($id);
+
+        if ($deletedRows > 0) {
+            echo json_encode(["message" => "Registro eliminado correctamente"]);
+        } else {
+            http_response_code(404);
+            echo json_encode(["error" => "No se encontró el registro con el ID especificado."]);
+        }
     }
 
     public function obtenerDatosFiltrados()
     {
         // Obtener parámetros desde la query string
-        $fechaInicio = $_GET['fechaInicio'] ?? null;
-        $fechaFin = $_GET['fechaFin'] ?? null;
-        $mercado = $_GET['mercado'] ?? null;
-        $empresa = $_GET['empresa'] ?? null;
-        $condicion = $_GET['condicion'] ?? null;
-        $proveedor = $_GET['proveedor'] ?? null;
-
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $mercado, $empresa, $condicion, $proveedor);
+        $params = [
+            'fechaInicio' => $_GET['fechaInicio'] ?? null,
+            'fechaFin' => $_GET['fechaFin'] ?? null,
+            'mercado' => $_GET['mercado'] ?? null,
+            'empresa' => $_GET['empresa'] ?? null,
+            'condicion' => $_GET['condicion'] ?? null,
+            'proveedor' => $_GET['proveedor'] ?? null,
+            'start'       => intval($_GET['start'] ?? 0),
+            'length'      => intval($_GET['length'] ?? 10),
+            'search'      => $_GET['search'] ?? ['value' => '']
+        ];
+        $datos = $this->service->obtenerDatosFiltrados($params);
+        $recordsTotal = $this->service->obtenerTotalRegistros();
+        $recordsFiltered = $this->service->obtenerTotalFiltrados($params);
 
         header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
-            'data' => $resultados
+            'params:' => $params,
+            'data' => $datos,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered
         ]);
     }
-
 }
-
-?>

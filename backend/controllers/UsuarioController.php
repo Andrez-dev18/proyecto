@@ -9,9 +9,9 @@ class UsuarioController
     {
         $this->service = new UsuarioService($db);
     }
-    
-    public function login($data) {
-        session_start();
+
+    public function login($data)
+    {
 
         $usuario = $data['usuario'] ?? '';
         $password = $data['password'] ?? '';

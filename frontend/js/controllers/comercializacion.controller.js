@@ -96,14 +96,8 @@ class ComercializacionController {
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
-        // Filtros
-        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterMercado')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterCondicion')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipo')?.addEventListener('change', () => this.aplicarFiltros());
+        // Filtro btn
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
 
         // Modal
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
@@ -117,30 +111,22 @@ class ComercializacionController {
 
             this.mostrarCargando(true);
 
-            console.log(`Cargando datos de tipo: ${tipo}`);
+            console.log(`Cargando vista de tipo: ${tipo}`);
 
+            // 🔹 Mostrar los filtros correspondientes según el tipo
             if (tipo === 'vivo-aqp') {
-                this.datos = await this.service.getVivoAqp();
                 this.mostrarFiltrosAqp();
             } else {
-                this.datos = await this.service.getVivoProvincia();
                 this.mostrarFiltrosProvincia();
             }
 
-            console.log(`Datos cargados:`, this.datos);
+            this.renderizarTablaServerSide();
 
-            // Verificar si los datos son un array
-            if (!Array.isArray(this.datos)) {
-                throw new Error('La respuesta no es un array válido');
-            }
+            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
 
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('Error detallado:', error);
+            console.error('Error al inicializar tabla:', error);
             this.mostrarNotificacion('❌ ' + error.message, 'error');
-            this.datos = []; // Resetear datos en caso de error
-            this.renderizarTabla(); // Mostrar tabla vacía
         } finally {
             this.mostrarCargando(false);
         }
@@ -161,56 +147,7 @@ class ComercializacionController {
     }
 
     async aplicarFiltros() {
-        if (!this.tipoActual) return;
-
-        try {
-            this.mostrarCargando(true);
-
-            const filtros = {};
-            const fechaInicio = document.getElementById('filterFechaInicio').value;
-            const fechaFin = document.getElementById('filterFechaFin').value;
-
-            // Solo agregar si tiene valor
-            if (fechaInicio) filtros.fechaInicio = fechaInicio;
-            if (fechaFin) filtros.fechaFin = fechaFin;
-
-            if (this.tipoActual === 'vivo-aqp') {
-                const mercado = document.getElementById('filterMercado').value;
-                const proveedor = document.getElementById('filterProveedor').value;
-                const condicion = document.getElementById('filterCondicion').value;
-
-                if (mercado) filtros.mercado = mercado;
-                if (proveedor) filtros.proveedor = proveedor;
-                if (condicion) filtros.condicion = condicion;
-
-                console.log('Filtros Arequipa:', filtros);
-                const result = await this.service.filtrarVivoAqp(filtros);
-                console.log('Respuesta del servidor:', result);
-                this.datos = result.data || [];
-            } else {
-                const provincia = document.getElementById('filterProvincia').value;
-                const proveedor = document.getElementById('filterProveedor').value;
-                const tipo = document.getElementById('filterTipo').value;
-
-                if (provincia) filtros.provincia = provincia;
-                if (proveedor) filtros.proveedor = proveedor;
-                if (tipo) filtros.tipo = tipo;
-
-                console.log('Filtros Provincia:', filtros);
-                const response = await this.service.filtrarVivoProvincia(filtros);
-                this.datos = Array.isArray(response.data) ? response.data : [];
-            }
-
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
-        } catch (error) {
-            console.error('Error completo:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
-            this.datos = [];
-            this.renderizarTabla();
-        } finally {
-            this.mostrarCargando(false);
-        }
+        this.renderizarTablaServerSide();
     }
 
     limpiarFiltros() {
@@ -227,24 +164,17 @@ class ComercializacionController {
         }
     }
 
-    renderizarTabla() {
-        const table = $('.min-w-full'); // referencia rápida
-        const tbody = document.getElementById('tableBody');
+    renderizarTablaServerSide() {
+        const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
-        if (!tbody || !thead) return;
+        if (!thead) return;
 
-        // 🧹 Si la tabla ya tiene un DataTable activo, destruirlo antes de regenerar contenido
+        //  Destruir cualquier DataTable previo
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        tbody.innerHTML = '';
-        if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>';
-            return;
-        }
-
-        // Detectar columnas según tipo
+        // Definir columnas según tipo actual
         let columnas = [];
         if (this.tipoActual === 'vivo-aqp') {
             columnas = [
@@ -273,60 +203,84 @@ class ComercializacionController {
             ];
         }
 
-        // Agregar columna "Opciones"
+        // 🔹 Agregar columna de opciones
         const columnasConOpciones = [...columnas, 'Opciones'];
 
-        // Generar encabezado
+        // 🔹 Generar dinámicamente las cabeceras del thead
         thead.innerHTML = columnasConOpciones
             .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
             .join('');
 
-        // Generar filas con botones de acción
-        tbody.innerHTML = this.datos
-            .map((registro, i) => `
-            <tr class="hover:bg-blue-50 transition-colors">
-                ${columnas.map(col => `<td class="px-2 py-1 border-b text-sm text-gray-700">${registro[col] ?? '-'}</td>`).join('')}
-                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${i}">
-                        <i class="fas fa-edit"></i> 
-                    </button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${i}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `)
-            .join('');
+        // 🚀 Inicializar DataTable con server-side processing
+        const dt = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:
+                    this.tipoActual === 'vivo-aqp'
+                        ? this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_AQP.FILTRO
+                        : this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_PROVINCIA.FILTRO,
+                type: 'GET',
+                data: function (d) {
+                    const filtros = {};
+                    const campos = [
+                        'FechaInicio', 'FechaFin', 'Provincia', 'Empresa',
+                        'Proveedor', 'Tipo', 'Linea', 'Condicion', 'Mercado',
+                    ];
 
-        // Asignar eventos a los botones Editar y Eliminar
-        tbody.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                this.modificarSeleccionado();
-            });
-        });
+                    campos.forEach(campo => {
+                        const el = document.getElementById(`filter${campo}`);
+                        if (el && el.value.trim() !== '') {
+                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
+                            filtros[key] = el.value.trim();
+                        }
+                    });
 
-        tbody.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const index = e.currentTarget.getAttribute('data-index');
-                this.registroSeleccionado = this.datos[index];
-                await this.eliminarSeleccionado();
-            });
-        });
-        // 🟢 Inicializar DataTable (después de renderizar filas)
-        if ($.fn.DataTable.isDataTable('.min-w-full')) {
-            $('.min-w-full').DataTable().destroy(); // evitar duplicar instancias
-        }
-        $('.min-w-full').DataTable({
+                    // Combinar parámetros DataTable + filtros personalizados
+                    return Object.assign(d, filtros);
+                },
+                dataSrc: json => json.data
+            },
+            columns: [
+                ...columnas.map(col => ({ data: col })),
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row, meta) => `
+                    <div class="text-center space-x-2">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `
+                }
+            ],
+            order: [[1, 'desc']],
+            responsive: true,
             pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            },
-            responsive: true,
-            order: [[0, 'desc']],
+            }
+        });
+
+        // 🟢 Delegar eventos para los botones de acción
+        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
         });
     }
+
 
     toggleDetalle(event, el) {
         // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
@@ -441,7 +395,7 @@ class ComercializacionController {
         document.getElementById('campoEmpresa').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoMercado').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoCondicion').style.display = esAqp ? 'block' : 'none';
-        document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
+        //document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
 
         // Campos de Provincia
         document.getElementById('campoProvincia').style.display = esAqp ? 'none' : 'block';
@@ -464,7 +418,7 @@ class ComercializacionController {
             const mercadoObj = this.catalogos.mercados.find(m => m.mercado === r.mercado);
             document.getElementById('modalMercado').value = mercadoObj ? mercadoObj.id : '';
 
-            document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
+            //document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
 
             // Buscar ID de condicion por nombre
             const condicionObj = this.catalogos.condiciones.find(c => c.condicion === r.condicion);
@@ -483,7 +437,7 @@ class ComercializacionController {
         const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
 
-        document.getElementById('modalRucProv').value = r.ruc_prov || '';
+        // document.getElementById('modalRucProv').value = r.ruc_prov || '';
 
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
@@ -526,13 +480,10 @@ class ComercializacionController {
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                console.log('Actualizando registro ID:', data.id);
-                console.log('Datos a enviar:', data);
-
+            
                 const resultado = await this.service.actualizar(this.tablaActual, data);
                 console.log('Resultado actualización:', resultado);
-
-                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
@@ -540,14 +491,14 @@ class ComercializacionController {
                 const resultado = await this.service.crear(this.tablaActual, data);
                 console.log('Resultado creación:', resultado);
 
-                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
+                this.mostrarNotificacion(' Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos(this.tipoActual);
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -564,7 +515,7 @@ class ComercializacionController {
             fecha: document.getElementById('modalFecha').value,
             // Enviar códigos (IDs) para relaciones en lugar de nombres
             proveedor: proveedorId,
-            ruc_prov: document.getElementById('modalRucProv').value || '',
+            //ruc_prov: document.getElementById('modalRucProv').value || '',
             precioMayMin: parseFloat(document.getElementById('modalPrecioMayMin').value) || 0,
             precioMayMax: parseFloat(document.getElementById('modalPrecioMayMax').value) || 0,
             precioPubMin: parseFloat(document.getElementById('modalPrecioPubMin').value) || 0,
@@ -594,7 +545,7 @@ class ComercializacionController {
 
             data.mercado = mercadoId;
             data.empresa = empresaId;
-            data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
+            // data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
             data.condicion = condicionId;
         } else {
             // Enviar IDs para provincia/tipo
@@ -620,10 +571,6 @@ class ComercializacionController {
             this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.proveedor) {
-            this.mostrarNotificacion('El proveedor es obligatorio', 'warning');
-            return false;
-        }
         return true;
     }
 
@@ -640,14 +587,9 @@ class ComercializacionController {
             return;
         }
 
-        if (this.datos.length === 0) {
-            this.mostrarNotificacion('No hay datos para exportar', 'warning');
-            return;
-        }
-
         try {
             this.service.exportarCSV(this.tablaActual);
-            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+            this.mostrarNotificacion(' Iniciando descarga de CSV...', 'success');
         } catch (error) {
             this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
         }

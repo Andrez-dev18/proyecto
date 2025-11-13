@@ -17,28 +17,31 @@ class CriadorEmprendedorRepository
 
     public function findAll()
     {
+        // Primer intento: últimos 30 días
         $query = "
-           SELECT
-                a.id,
-                a.fecha,
-                p.nombre AS provincia,
-                pr.nombre AS proveedor,
-                t.nombre AS tipo,
-                a.cantidad,
-                a.precio,
-                a.observaciones,
-                a.usuarioRegistro,
-                a.fechaHoraRegistro,
-                a.usuarioTransferencia,
-                a.fechaHoraTransferencia
-            FROM com_db_criador_emprendedor a
-            LEFT JOIN com_provincia p ON a.provincia = p.codigo
-            LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
-            LEFT JOIN com_tipo t ON a.tipo = t.codigo
-            ORDER BY a.fechaHoraRegistro DESC
+        SELECT
+            a.id,
+            a.fecha,
+            p.nombre AS provincia,
+            pr.nombre AS proveedor,
+            t.nombre AS tipo,
+            a.cantidad,
+            a.precio,
+            a.observaciones,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_criador_emprendedor a
+        LEFT JOIN com_provincia p ON a.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON a.tipo = t.codigo
+        ORDER BY a.fechaHoraRegistro DESC
+    ";
 
-        ";
-        return $this->executeQuery($query);
+        $result = $this->executeQuery($query);
+
+        return $result;
     }
 
     public function save($data)
@@ -142,30 +145,40 @@ class CriadorEmprendedorRepository
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $provincia = null, $proveedor, $tipo)
+    public function findByFilters($params = [])
     {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $provincia    = $params['provincia'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+        $tipo         = $params['tipo'] ?? null;
+
+        $start  = $params['start'] ?? 0;
+        $length = $params['length'] ?? 10;
+        $search = $params['search']['value'] ?? '';
+
         $query = "
         SELECT
-                a.id,
-                a.fecha,
-                p.nombre AS provincia,
-                pr.nombre AS proveedor,
-                t.nombre AS tipo,
-                a.cantidad,
-                a.precio,
-                a.observaciones,
-                a.usuarioRegistro,
-                a.fechaHoraRegistro,
-                a.usuarioTransferencia,
-                a.fechaHoraTransferencia
-            FROM com_db_criador_emprendedor a
-            LEFT JOIN com_provincia p ON a.provincia = p.codigo
-            LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
-            LEFT JOIN com_tipo t ON a.tipo = t.codigo
-            WHERE 1=1
+            a.id,
+            a.fecha,
+            p.nombre AS provincia,
+            pr.nombre AS proveedor,
+            t.nombre AS tipo,
+            a.cantidad,
+            a.precio,
+            a.observaciones,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_criador_emprendedor a
+        LEFT JOIN com_provincia p ON a.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON a.tipo = t.codigo
+        WHERE 1=1
     ";
 
-        // 🔹 Filtro de rango de fechas
+        // 🔹 Filtros
         if (!empty($fechaInicio) && !empty($fechaFin)) {
             $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
         } elseif (!empty($fechaInicio)) {
@@ -173,12 +186,91 @@ class CriadorEmprendedorRepository
         } elseif (!empty($fechaFin)) {
             $query .= " AND a.fecha <= '$fechaFin'";
         }
+
         if (!empty($provincia)) $query .= " AND a.provincia = $provincia";
         if (!empty($proveedor)) $query .= " AND a.proveedor = $proveedor";
         if (!empty($tipo)) $query .= " AND a.tipo = $tipo";
 
+        // 🔍 Búsqueda global
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            p.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            t.nombre LIKE '%$search%' OR
+            a.observaciones LIKE '%$search%' OR
+            a.usuarioRegistro LIKE '%$search%' OR
+            a.usuarioTransferencia LIKE '%$search%' OR
+            a.precio LIKE '%$search%' OR
+            a.cantidad LIKE '%$search%'
+        )";
+        }
+
+        // 🔹 Orden y paginación
+        $query .= " ORDER BY a.fecha DESC LIMIT $start, $length";
+
         return $this->executeQuery($query);
     }
+
+    // 🔹 Total registros sin filtros
+    public function countAll()
+    {
+        $query = "SELECT COUNT(*) AS total FROM com_db_criador_emprendedor";
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
+    // 🔹 Total registros con filtros
+    public function countFiltered($params = [])
+    {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $provincia    = $params['provincia'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+        $tipo         = $params['tipo'] ?? null;
+        $search       = $params['search']['value'] ?? '';
+
+        $query = "
+        SELECT COUNT(*) AS total
+        FROM com_db_criador_emprendedor a
+        LEFT JOIN com_provincia p ON a.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON a.tipo = t.codigo
+        WHERE 1=1
+    ";
+
+        // Filtros
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND a.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND a.fecha <= '$fechaFin'";
+        }
+
+        if (!empty($provincia)) $query .= " AND a.provincia = $provincia";
+        if (!empty($proveedor)) $query .= " AND a.proveedor = $proveedor";
+        if (!empty($tipo)) $query .= " AND a.tipo = $tipo";
+
+        // Búsqueda global
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            p.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            t.nombre LIKE '%$search%' OR
+            a.observaciones LIKE '%$search%' OR
+            a.usuarioRegistro LIKE '%$search%' OR
+            a.usuarioTransferencia LIKE '%$search%' OR
+            a.precio LIKE '%$search%' OR
+            a.cantidad LIKE '%$search%'
+        )";
+        }
+
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
 
     private function generateUuid()
     {

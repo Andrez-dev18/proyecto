@@ -282,4 +282,26 @@ class TamanoMercadoService {
         }));
     }
 
+    async ejecutarETL(data) {
+    try {
+        const response = await fetch(`${this.baseURL + '/tamamerdia/etl/run'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al ejecutar ETL');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error en ejecutarETL:', error);
+        throw error;
+    }
+}
+
+
+
 }

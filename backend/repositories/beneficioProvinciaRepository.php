@@ -40,7 +40,8 @@ class beneficioProvinciaRepository
             FROM com_db_beneficio_provincia b
             LEFT JOIN com_provincia p ON b.provincia = p.codigo
             LEFT JOIN com_proveedor pr ON b.proveedor = pr.codigo
-            ORDER BY b.fechaHoraRegistro DESC
+            WHERE b.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+            ORDER BY b.fechaHoraRegistro DESC;
         ";
         return $this->executeQuery($query);
     }

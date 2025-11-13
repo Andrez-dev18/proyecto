@@ -42,6 +42,7 @@ class TamaMerDiaRepository
             LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
             LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
             LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
+            
             ORDER BY tmd.fecha DESC;
         ";
         return $this->executeQuery($query);
@@ -143,8 +144,6 @@ class TamaMerDiaRepository
         return $stmt->execute($params);
     }
 
-
-
     public function delete($id)
     {
         $query = "DELETE FROM com_db_tama_mer_dia WHERE id = :id";
@@ -153,25 +152,106 @@ class TamaMerDiaRepository
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $tipo = null, $linea = null, $provincia = null, $zona = null, $empresa = null, $proveedor = null, $producto = null)
+    public function findByFilters($params = [])
     {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $tipo         = $params['tipo'] ?? null;
+        $linea        = $params['linea'] ?? null;
+        $provincia    = $params['provincia'] ?? null;
+        $zona         = $params['zona'] ?? null;
+        $empresa      = $params['empresa'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+        $producto     = $params['producto'] ?? null;
+
+        $start  = $params['start'] ?? 0;
+        $length = $params['length'] ?? 10; // registros por página
+        $search       = $params['search']['value'] ?? '';
+
         $query = "
-        SELECT 
-            tmd.id,
-            tmd.fecha,
-            tp.nombre AS tipo,
-            tl.nombre AS linea,
-            pv.nombre AS provincia,
-            pz.nombre AS zona,
-            e.nombre AS empresa,
-            pr.nombre AS proveedor,
-            pp.nombre AS producto,
-            tmd.cantidad,
-            tmd.peso,
-            tmd.prom,
-            tmd.precio,
-            tmd.info_mercado,
-            tmd.nom_db
+            SELECT 
+                tmd.id,
+                tmd.fecha,
+                tp.nombre AS tipo,
+                tl.nombre AS linea,
+                pv.nombre AS provincia,
+                pz.nombre AS zona,
+                e.nombre AS empresa,
+                pr.nombre AS proveedor,
+                pp.nombre AS producto,
+                tmd.cantidad,
+                tmd.peso,
+                tmd.prom,
+                tmd.precio,
+                tmd.info_mercado,
+                tmd.nom_db
+            FROM com_db_tama_mer_dia AS tmd
+            LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
+            LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
+            LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
+            LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
+            LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
+            LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
+            LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
+            WHERE 1=1
+        ";
+
+        // 🔹 Filtros
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND tmd.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND tmd.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND tmd.fecha <= '$fechaFin'";
+        }
+
+        if (!empty($tipo)) $query .= " AND tmd.tipo = $tipo";
+        if (!empty($linea)) $query .= " AND tmd.linea = $linea";
+        if (!empty($provincia)) $query .= " AND tmd.provincia = $provincia";
+        if (!empty($zona)) $query .= " AND tmd.zona = $zona";
+        if (!empty($empresa)) $query .= " AND tmd.empresa = $empresa";
+        if (!empty($proveedor)) $query .= " AND tmd.proveedor = $proveedor";
+        if (!empty($producto)) $query .= " AND tmd.producto = $producto";
+
+        //  Búsqueda global (search)
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            tp.nombre LIKE '%$search%' OR
+            tl.nombre LIKE '%$search%' OR
+            pv.nombre LIKE '%$search%' OR
+            pz.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pp.nombre LIKE '%$search%' OR
+            tmd.info_mercado LIKE '%$search%' OR
+            tmd.nom_db LIKE '%$search%' OR
+            tmd.precio LIKE '%$search%' OR
+            tmd.peso LIKE '%$search%'
+        )";
+        }
+
+        // Orden y paginación
+        $query .= " ORDER BY tmd.fecha DESC LIMIT $start, $length";
+
+        return $this->executeQuery($query);
+    }
+
+    // Total registros sin filtro
+    public function countAll()
+    {
+        $query = "SELECT COUNT(*) AS total FROM com_db_tama_mer_dia";
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
+    // Total registros con filtros
+    public function countFiltered($params = [])
+    {
+        $search = $params['search']['value'] ?? '';
+
+        $query = "
+        SELECT COUNT(*) AS total
         FROM com_db_tama_mer_dia AS tmd
         LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
         LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
@@ -183,25 +263,43 @@ class TamaMerDiaRepository
         WHERE 1=1
     ";
 
-        // 🔹 Filtro de fechas
-        if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $query .= " AND tmd.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
-        } elseif (!empty($fechaInicio)) {
-            $query .= " AND tmd.fecha >= '$fechaInicio'";
-        } elseif (!empty($fechaFin)) {
-            $query .= " AND tmd.fecha <= '$fechaFin'";
+        // Filtros (idéntico a findByFilters)
+        if (!empty($params['fechaInicio']) && !empty($params['fechaFin'])) {
+            $query .= " AND tmd.fecha BETWEEN '{$params['fechaInicio']}' AND '{$params['fechaFin']}'";
+        } elseif (!empty($params['fechaInicio'])) {
+            $query .= " AND tmd.fecha >= '{$params['fechaInicio']}'";
+        } elseif (!empty($params['fechaFin'])) {
+            $query .= " AND tmd.fecha <= '{$params['fechaFin']}'";
         }
 
-        // 🔹 Filtros adicionales
-        if (!empty($tipo)) $query .= " AND tmd.tipo = $tipo";
-        if (!empty($linea)) $query .= " AND tmd.linea = $linea";
-        if (!empty($provincia)) $query .= " AND tmd.provincia = $provincia";
-        if (!empty($zona)) $query .= " AND tmd.zona = $zona";
-        if (!empty($empresa)) $query .= " AND tmd.empresa = $empresa";
-        if (!empty($proveedor)) $query .= " AND tmd.proveedor = $proveedor";
-        if (!empty($producto)) $query .= " AND tmd.producto = $producto";
+        if (!empty($params['tipo'])) $query .= " AND tmd.tipo = {$params['tipo']}";
+        if (!empty($params['linea'])) $query .= " AND tmd.linea = {$params['linea']}";
+        if (!empty($params['provincia'])) $query .= " AND tmd.provincia = {$params['provincia']}";
+        if (!empty($params['zona'])) $query .= " AND tmd.zona = {$params['zona']}";
+        if (!empty($params['empresa'])) $query .= " AND tmd.empresa = {$params['empresa']}";
+        if (!empty($params['proveedor'])) $query .= " AND tmd.proveedor = {$params['proveedor']}";
+        if (!empty($params['producto'])) $query .= " AND tmd.producto = {$params['producto']}";
 
-        return $this->executeQuery($query);
+        // 🔍 Search global también aquí
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            tp.nombre LIKE '%$search%' OR
+            tl.nombre LIKE '%$search%' OR
+            pv.nombre LIKE '%$search%' OR
+            pz.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pp.nombre LIKE '%$search%' OR
+            tmd.info_mercado LIKE '%$search%' OR
+            tmd.nom_db LIKE '%$search%' OR
+            tmd.precio LIKE '%$search%' OR
+            tmd.peso LIKE '%$search%'
+        )";
+        }
+
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
     }
 
 

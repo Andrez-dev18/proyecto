@@ -43,7 +43,8 @@ class VivoProvinciaRepository
         LEFT JOIN com_provincia p ON v.provincia = p.codigo
         LEFT JOIN com_proveedor pr ON v.proveedor = pr.codigo
         LEFT JOIN com_tipo t ON v.tipo = t.codigo
-        ORDER BY v.id DESC
+        WHERE v.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
+        ORDER BY v.fechaHoraRegistro DESC;
     ";
 
         return $this->executeQuery($query);
@@ -53,7 +54,7 @@ class VivoProvinciaRepository
     public function save($data)
     {
         // If id exists, perform UPDATE; otherwise INSERT
-        if (isset($data['id']) && $data['id'] > 0) {
+        if (!empty($data['id'])) {
             $query = "
             UPDATE com_db_vivo_provincia SET
                 fecha = :fecha,
@@ -112,6 +113,7 @@ class VivoProvinciaRepository
         } else {
             $query = "
             INSERT INTO com_db_vivo_provincia (
+                id,
                 fecha,
                 provincia,
                 proveedor,
@@ -136,6 +138,7 @@ class VivoProvinciaRepository
                 usuarioTransferencia,
                 fechaHoraTransferencia
             ) VALUES (
+                :id,
                 :fecha,
                 :provincia,
                 :proveedor,
@@ -162,8 +165,11 @@ class VivoProvinciaRepository
             )
             ";
 
+            $data['id'] = $this->generateUuid();
+
             $stmt = $this->conn->prepare($query);
             $params = [
+                ':id' => $data['id'],
                 ':fecha' => $data['fecha'] ?? null,
                 ':provincia' => $data['provincia'] ?? null,
                 ':proveedor' => $data['proveedor'] ?? null,
@@ -193,8 +199,19 @@ class VivoProvinciaRepository
         return $stmt->execute($params);
     }
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $provincia = null, $proveedor = null, $tipo = null)
+
+    public function findByFilters($params = [])
     {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $provincia    = $params['provincia'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+        $tipo         = $params['tipo'] ?? null;
+
+        $start   = $params['start'] ?? 0;
+        $length  = $params['length'] ?? 10;
+        $search  = $params['search']['value'] ?? '';
+
         $query = "
         SELECT 
             v.id,
@@ -229,7 +246,8 @@ class VivoProvinciaRepository
         LEFT JOIN com_tipo t ON v.tipo = t.codigo
         WHERE 1=1
     ";
-        // 🔹 Filtro de rango de fechas
+
+        // 🔹 Filtros por fecha
         if (!empty($fechaInicio) && !empty($fechaFin)) {
             $query .= " AND v.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
         } elseif (!empty($fechaInicio)) {
@@ -237,11 +255,88 @@ class VivoProvinciaRepository
         } elseif (!empty($fechaFin)) {
             $query .= " AND v.fecha <= '$fechaFin'";
         }
+
+        // 🔹 Filtros por campos individuales
         if (!empty($provincia)) $query .= " AND v.provincia = $provincia";
         if (!empty($proveedor)) $query .= " AND v.proveedor = $proveedor";
         if (!empty($tipo)) $query .= " AND v.tipo = $tipo";
 
+        // 🔹 Búsqueda global
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            p.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            t.nombre LIKE '%$search%' OR
+            t.linea LIKE '%$search%' OR
+            v.precioMayCarMin LIKE '%$search%' OR
+            v.precioPubMin LIKE '%$search%' OR
+            v.colorMin LIKE '%$search%' OR
+            v.usuarioRegistro LIKE '%$search%'
+        )";
+        }
+
+        // 🔹 Orden y paginación
+        $query .= " ORDER BY v.fecha DESC LIMIT $start, $length";
+
         return $this->executeQuery($query);
+    }
+
+    public function countAll()
+    {
+        $query = "SELECT COUNT(*) AS total FROM com_db_vivo_provincia";
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
+    public function countFiltered($params = [])
+    {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $provincia    = $params['provincia'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+        $tipo         = $params['tipo'] ?? null;
+        $search       = $params['search']['value'] ?? '';
+
+        $query = "
+        SELECT COUNT(*) AS total
+        FROM com_db_vivo_provincia v
+        LEFT JOIN com_provincia p ON v.provincia = p.codigo
+        LEFT JOIN com_proveedor pr ON v.proveedor = pr.codigo
+        LEFT JOIN com_tipo t ON v.tipo = t.codigo
+        WHERE 1=1
+    ";
+
+        // 🔹 Filtros
+        if (!empty($fechaInicio) && !empty($fechaFin)) {
+            $query .= " AND v.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
+        } elseif (!empty($fechaInicio)) {
+            $query .= " AND v.fecha >= '$fechaInicio'";
+        } elseif (!empty($fechaFin)) {
+            $query .= " AND v.fecha <= '$fechaFin'";
+        }
+
+        if (!empty($provincia)) $query .= " AND v.provincia = $provincia";
+        if (!empty($proveedor)) $query .= " AND v.proveedor = $proveedor";
+        if (!empty($tipo)) $query .= " AND v.tipo = $tipo";
+
+        // 🔹 Búsqueda global
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            p.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            t.nombre LIKE '%$search%' OR
+            t.linea LIKE '%$search%' OR
+            v.precioMayCarMin LIKE '%$search%' OR
+            v.precioPubMin LIKE '%$search%' OR
+            v.colorMin LIKE '%$search%' OR
+            v.usuarioRegistro LIKE '%$search%'
+        )";
+        }
+
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
     }
 
 
@@ -256,6 +351,22 @@ class VivoProvinciaRepository
     {
         $query = "DELETE FROM com_db_vivo_provincia WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
+    }
+
+    private function generateUuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
+        );
     }
 }
