@@ -14,6 +14,9 @@ require_once __DIR__ . '/../services/AlternoService.php';
 require_once __DIR__ . '/../services/EnteroAutoserService.php';
 require_once __DIR__ . '/../services/TrozadoAutoserService.php';
 require_once __DIR__ . '/../services/CriadorEmprendedorService.php';
+require_once __DIR__ . '/../services/GallinaCDService.php';
+require_once __DIR__ . '/../services/IngresosLimaService.php';
+require_once __DIR__ . '/../services/ProductoSustitutoService.php';
 
 class ReporteController
 {
@@ -32,6 +35,9 @@ class ReporteController
     private $EnteroAutoser;
     private $TrozadoAutoser;
     private $Criador;
+    private $ProdSustituto;
+    private $Ingresolima;
+    private $GallinaCD;
 
     public function __construct($db)
     {
@@ -50,6 +56,9 @@ class ReporteController
         $this->EnteroAutoser = new EnteroAutoserService($db);
         $this->TrozadoAutoser = new TrozadoAutoserService($db);
         $this->Criador = new CriadorEmprendedorService($db);
+        $this->ProdSustituto = new ProductoSustitutoService($db);
+        $this->Ingresolima = new IngresosLimaService($db);
+        $this->GallinaCD = new GallinaCDService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1039,6 +1048,166 @@ class ReporteController
         // Exportar como CSV (o Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Criador_Emprendedor_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarProdSustitutoExcel()
+    {
+        // Obtener los datos desde el método findAll()
+        $datos = $this->ProdSustituto->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PRODUCTO',
+            'PESO',
+            'PRECIO',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['producto'] ?? ''),
+                $d['peso'] ?? '',
+                $d['precio'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (o Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Prod_Sustituto_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarGallinaCdExcel()
+    {
+        // Obtener los datos desde el método findAll()
+        $datos = $this->GallinaCD->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'TIPO',
+            'UNIDADES',
+            'KILOS',
+            'PESO',
+            'PRECIO GRANJA 1',
+            'PRECIO GRANJA 2',
+            'PRECIO GRANJA 3',
+            'PRECIO GRANJA 4',
+            'PRECIO GRANJA 5',
+            'PRECIO CD 1',
+            'PRECIO CD 2',
+            'PRECIO CD 3',
+            'PRECIO CD 4',
+            'PRECIO CD 5',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['tipo'] ?? ''),
+                $d['unidades'] ?? '',
+                $d['kilos'] ?? '',
+                $d['peso'] ?? '',
+                $d['precio_granja_1'] ?? '',
+                $d['precio_granja_2'] ?? '',
+                $d['precio_granja_3'] ?? '',
+                $d['precio_granja_4'] ?? '',
+                $d['precio_granja_5'] ?? '',
+                $d['precio_cd_1'] ?? '',
+                $d['precio_cd_2'] ?? '',
+                $d['precio_cd_3'] ?? '',
+                $d['precio_cd_4'] ?? '',
+                $d['precio_cd_5'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (puedes cambiar a Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Gallina_CD_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarIngreEmpLimaExcel()
+    {
+        // Obtener los datos desde el método findAll()
+        $datos = $this->Ingresolima->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'EMPRESA',
+            'UNIDAD FIJA',
+            'UNIDAD MOVIL',
+            'KILOS',
+            'PESO PROMEDIO',
+            'PRECIO CAMPO',
+            'PRECIO GRANJA',
+            'SOLES',
+            'PARTICIPACION',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['empresa'] ?? ''),
+                $d['unidad_fija'] ?? '',
+                $d['unidad_movil'] ?? '',
+                $d['kilos'] ?? '',
+                $d['peso_promedio'] ?? '',
+                $d['precio_campo'] ?? '',
+                $d['precio_granja'] ?? '',
+                $d['soles'] ?? '',
+                $d['participacion'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV (o Excel si usas PhpSpreadsheet)
+        $this->outputCSV(
+            'Ingre_Emp_Lima_' . date('Y-m-d') . '.csv',
             $headers,
             $datos,
             $mapper
