@@ -21,7 +21,7 @@ class CriadorEmprendedorController {
                 this.service.getProveedores(),
                 this.service.getTipos()
             ]);
-            
+
             this.catalogos = { provincias, proveedores, tipos };
             console.log('✅ Catálogos cargados:', this.catalogos);
             this.poblarSelects();
@@ -34,7 +34,7 @@ class CriadorEmprendedorController {
         this.poblarSelect('filterProvincia', this.catalogos.provincias, 'codigo', 'nombre');
         this.poblarSelect('filterProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
         this.poblarSelect('filterTipo', this.catalogos.tipos, 'codigo', 'nombre');
-        
+
         this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
         this.poblarSelect('modalProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
         this.poblarSelect('modalTipo', this.catalogos.tipos, 'codigo', 'nombre');
@@ -62,79 +62,27 @@ class CriadorEmprendedorController {
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
 
-        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipo')?.addEventListener('change', () => this.aplicarFiltros());
+        // Filtro btn
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
     }
 
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('📊 Cargando datos...');
-            this.datos = await this.service.getAll();
-            console.log('✅ Datos cargados:', this.datos.length);
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.renderizarTablaFiltro();
+            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
         } catch (error) {
-            console.error('❌ Error:', error);
-            this.mostrarNotificacion('❌ Error al cargar datos', 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion(' Error al cargar datos', 'error');
             this.datos = [];
-            this.renderizarTabla();
+            this.renderizarTablaFiltro();
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     async aplicarFiltros() {
-        try {
-            this.mostrarCargando(true);
-            console.log('🔍 === INICIANDO FILTRADO ===');
-
-            const filtros = {};
-            const fechaInicio = document.getElementById('filterFechaInicio').value;
-            const fechaFin = document.getElementById('filterFechaFin').value;
-            const provinciaId = document.getElementById('filterProvincia').value;
-            const proveedorId = document.getElementById('filterProveedor').value;
-            const tipoId = document.getElementById('filterTipo').value;
-
-            if (fechaInicio) filtros.fechaInicio = fechaInicio;
-            if (fechaFin) filtros.fechaFin = fechaFin;
-            if (provinciaId) filtros.provincia = parseInt(provinciaId);
-            if (proveedorId) filtros.proveedor = parseInt(proveedorId);
-            if (tipoId) filtros.tipo = parseInt(tipoId);
-
-            console.log('📤 Filtros a aplicar:', filtros);
-            
-            if (!fechaInicio && !fechaFin && !provinciaId && !proveedorId && !tipoId) {
-                console.log('📊 Sin filtros, cargando todos los datos');
-                await this.cargarDatos();
-                return;
-            }
-            
-            const resultado = await this.service.getFiltered(filtros);
-            
-            if (Array.isArray(resultado)) {
-                this.datos = resultado;
-            } else if (resultado && Array.isArray(resultado.data)) {
-                this.datos = resultado.data;
-            } else {
-                this.datos = [];
-            }
-            
-            console.log(`✅ Filtrado completado: ${this.datos.length} registros`);
-            
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
-            
-        } catch (error) {
-            console.error('❌ Error al filtrar:', error);
-            this.mostrarNotificacion('❌ Error al filtrar: ' + error.message, 'error');
-            await this.cargarDatos();
-        } finally {
-            this.mostrarCargando(false);
-        }
+        this.renderizarTablaFiltro();
     }
 
     limpiarFiltros() {
@@ -146,83 +94,107 @@ class CriadorEmprendedorController {
         this.cargarDatos();
     }
 
-    renderizarTabla() {
-        console.log('🔄 Renderizando tabla con', this.datos.length, 'registros');
-        
-        const tbody = document.getElementById('tableBody');
-        if (!tbody) {
-            console.error('❌ No se encontró tbody');
-            return;
-        }
-
+    renderizarTablaFiltro() {
         const table = $('.min-w-full');
+        const thead = document.querySelector('thead tr');
+        if (!thead) return;
+
+        //  Destruir DataTable previo si ya existe
         if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().destroy();
+            table.DataTable().clear().destroy();
         }
 
-        tbody.innerHTML = '';
-        
-        if (this.datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
-            return;
-        }
+        //  Definir las columnas de tu tabla (ajústalas según tu backend)
+        const columnas = [
+            'id', 'fecha', 'provincia', 'proveedor', 'tipo', 'cantidad', 'precio', 'observaciones'
+        ];
 
-        this.datos.forEach((registro, i) => {
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-orange-50 transition-colors';
-            tr.innerHTML = `
-                <td class="px-2 py-1 border-b text-sm text-center">${i + 1}</td>
-                <td class="px-2 py-1 border-b text-sm">${registro.fecha || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm">${registro.provincia || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm">${registro.proveedor || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm">${registro.tipo || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.cantidad || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precio || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm">${registro.observaciones || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" title="Eliminar">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            
-            const editBtn = tr.querySelector('.edit-btn');
-            const deleteBtn = tr.querySelector('.delete-btn');
-            
-            editBtn.onclick = () => {
-                this.registroSeleccionado = this.datos[i];
-                console.log('📝 Editando:', this.registroSeleccionado);
-                this.modificarSeleccionado();
-            };
-            
-            deleteBtn.onclick = async () => {
-                this.registroSeleccionado = this.datos[i];
-                console.log('🗑️ Eliminando:', this.registroSeleccionado);
-                await this.eliminarSeleccionado();
-            };
-            
-            tbody.appendChild(tr);
-        });
-        
-        setTimeout(() => {
-            try {
-                $('.min-w-full').DataTable({
-                    pageLength: 10,
-                    language: {
-                        url: this.config.UI.DATATABLES_LANGUAGE
-                    },
-                    responsive: true,
-                    order: [[1, 'desc']]
-                });
-                console.log('✅ DataTable inicializado');
-            } catch (error) {
-                console.error('Error al inicializar DataTable:', error);
+        //  Agregar columna de opciones
+        const columnasConOpciones = [...columnas, 'Opciones'];
+
+        //  Renderizar cabeceras
+        thead.innerHTML = columnasConOpciones
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c}</th>`)
+            .join('');
+
+        //  Inicializar DataTable con procesamiento del lado del servidor
+        const dt = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: `${this.config.API.BASE_URL}${this.config.API.ENDPOINTS.FILTRO}`,
+                type: 'GET',
+                data: function (d) {
+                    const filtros = {};
+                    const campos = [
+                        'FechaInicio', 'FechaFin', 'Provincia', 'Proveedor', 'Tipo'
+                    ];
+
+                    // Obtener valores de filtros (si existen)
+                    campos.forEach(campo => {
+                        const el = document.getElementById(`filter${campo}`);
+                        if (el && el.value.trim() !== '') {
+                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
+                            filtros[key] = el.value.trim();
+                        }
+                    });
+
+                    // Combinar parámetros del DataTable con los filtros personalizados
+                    return Object.assign(d, filtros);
+                },
+                dataSrc: json => json.data
+            },
+            columns: [
+                { data: 'id', className: 'text-center' },
+                { data: 'fecha', className: 'text-sm' },
+                { data: 'provincia', className: 'text-sm' },
+                { data: 'proveedor', className: 'text-sm' },
+                { data: 'tipo', className: 'text-sm' },
+                { data: 'cantidad', className: 'text-center text-sm' },
+                { data: 'precio', className: 'text-center text-sm' },
+                { data: 'observaciones', className: 'text-sm' },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center',
+                    render: (data, type, row, meta) => `
+                    <div class="space-x-2">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `
+                }
+            ],
+            order: [[1, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
             }
-        }, 100);
+        });
+
+        // Delegar eventos para botones (funcionan incluso tras recargar la tabla)
+        $('.min-w-full tbody')
+            .off('click')
+            .on('click', '.edit-btn', (e) => {
+                const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+                this.registroSeleccionado = rowData;
+                console.log('📝 Editando:', rowData);
+                this.modificarSeleccionado();
+            })
+            .on('click', '.delete-btn', async (e) => {
+                const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+                this.registroSeleccionado = rowData;
+                console.log('🗑️ Eliminando:', rowData);
+                await this.eliminarSeleccionado();
+            });
     }
+
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
@@ -250,11 +222,11 @@ class CriadorEmprendedorController {
         try {
             this.mostrarCargando(true);
             await this.service.delete(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado', 'success');
+            this.mostrarNotificacion('Registro eliminado', 'success');
             await this.cargarDatos();
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al eliminar', 'error');
+            this.mostrarNotificacion('Error al eliminar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -262,18 +234,18 @@ class CriadorEmprendedorController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        console.log('📝 Cargando en formulario:', r);
-        
+        console.log('Cargando en formulario:', r);
+
         document.getElementById('modalFecha').value = r.fecha || '';
-        
+
         const provinciaObj = this.catalogos.provincias.find(p => p.nombre === r.provincia);
         const proveedorObj = this.catalogos.proveedores.find(p => p.nombre === r.proveedor);
         const tipoObj = this.catalogos.tipos.find(t => t.nombre === r.tipo);
-        
+
         document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.codigo : '';
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.codigo : '';
         document.getElementById('modalTipo').value = tipoObj ? tipoObj.codigo : '';
-        
+
         document.getElementById('modalCantidad').value = r.cantidad || '';
         document.getElementById('modalPrecio').value = r.precio || '';
         document.getElementById('modalObservaciones').value = r.observaciones || '';
@@ -296,24 +268,23 @@ class CriadorEmprendedorController {
 
         try {
             this.mostrarCargando(true);
-            console.log('💾 Guardando registro:', data);
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                console.log('📝 Actualizando registro ID:', data.id);
+                
                 await this.service.update(data);
-                this.mostrarNotificacion('✅ Registro actualizado', 'success');
+                this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
-                console.log('➕ Creando nuevo registro');
+                
                 await this.service.create(data);
-                this.mostrarNotificacion('✅ Registro creado', 'success');
+                this.mostrarNotificacion('Registro creado', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('❌ Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            console.error(' Error al guardar:', error);
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -323,7 +294,7 @@ class CriadorEmprendedorController {
         const provinciaId = document.getElementById('modalProvincia').value;
         const proveedorId = document.getElementById('modalProveedor').value;
         const tipoId = document.getElementById('modalTipo').value;
-        
+
         return {
             fecha: document.getElementById('modalFecha').value,
             provincia: parseInt(provinciaId) || null,
@@ -339,21 +310,13 @@ class CriadorEmprendedorController {
 
     validarFormulario(data) {
         console.log('🔍 Validando formulario:', data);
-        
+
         if (!data.fecha) {
             this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.provincia) {
-            this.mostrarNotificacion('⚠️ La provincia es obligatoria', 'warning');
-            return false;
-        }
-        if (!data.tipo) {
-            this.mostrarNotificacion('⚠️ El tipo es obligatorio', 'warning');
-            return false;
-        }
-        
-        console.log('✅ Validación exitosa');
+
+        console.log('Validación exitosa');
         return true;
     }
 
@@ -365,10 +328,7 @@ class CriadorEmprendedorController {
     }
 
     exportarExcel() {
-        if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
-            return;
-        }
+        
         window.open(`${this.service.baseUrl}/reporte/criador/exportar`, '_blank');
     }
 

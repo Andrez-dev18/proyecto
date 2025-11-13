@@ -26,9 +26,19 @@ class CriadorEmprendedorService
         return $this->repo->delete($id);
     }
 
-    public function obtenerDatosFiltrados($fechaInicio = null, $fechaFin = null, $provincia = null, $proveedor, $tipo)
+    public function obtenerDatosFiltrados($params = [])
     {
-        return $this->repo->findByFilters($fechaInicio, $fechaFin, $provincia, $proveedor, $tipo);
+        return $this->repo->findByFilters($params);
+    }
+
+    public function obtenerTotalRegistros()
+    {
+        return $this->repo->countAll();
+    }
+
+    public function obtenerTotalFiltrados($params = [])
+    {
+        return $this->repo->countFiltered($params);
     }
 
 

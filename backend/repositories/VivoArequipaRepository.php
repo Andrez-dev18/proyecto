@@ -51,49 +51,7 @@ class VivoArequipaRepository
     ";
         $result = $this->executeQuery($query);
 
-    // Si no hay resultados, traer los últimos 100 registros
-    if (empty($result)) {
-        $queryFallback = "
-            SELECT
-            a.id,
-            a.fecha,
-            m.nombre AS mercado,
-            e.nombre AS empresa,
-            e.ruc AS ruc_empresa,
-            c.nombre AS condicion,
-            pr.nombre AS proveedor,
-            pr.ruc AS ruc_proveedor,
-            a.precioMayMin,
-            a.precioMayMax,
-            a.precioPubMin,
-            a.precioPubMax,
-            a.pesoMachoMin,
-            a.pesoMachoMax,
-            a.pesoHembMin,
-            a.pesoHembMax,
-            a.colorMin,
-            a.colorMax,
-            a.pesoMachoPromMin,
-            a.pesoMachoPromMax,
-            a.pesoHembraPromMin,
-            a.pesoHembraPromMax,
-            a.cantidad,
-            a.usuarioRegistro,
-            a.fechaHoraRegistro,
-            a.usuarioTransferencia,
-            a.fechaHoraTransferencia
-        FROM com_db_vivo_aqp a
-        LEFT JOIN com_mercado m ON a.mercado = m.codigo
-        LEFT JOIN com_empresa e ON a.empresa = e.codigo
-        LEFT JOIN com_condicion c ON a.condicion = c.codigo
-        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
-        ORDER BY a.fechaHoraRegistro DESC
-        LIMIT 100;
-        ";
-        $result = $this->executeQuery($queryFallback);
-    }
-
-    return $result;
+        return $result;
     }
 
 
@@ -265,8 +223,19 @@ class VivoArequipaRepository
     }
 
 
-    public function findByFilters($fechaInicio = null, $fechaFin = null, $mercado = null, $empresa = null, $condicion = null, $proveedor = null)
+    public function findByFilters($params = [])
     {
+        $fechaInicio = $params['fechaInicio'] ?? null;
+        $fechaFin     = $params['fechaFin'] ?? null;
+        $mercado      = $params['mercado'] ?? null;
+        $empresa      = $params['empresa'] ?? null;
+        $condicion    = $params['condicion'] ?? null;
+        $proveedor    = $params['proveedor'] ?? null;
+
+        $start   = $params['start'] ?? 0;
+        $length  = $params['length'] ?? 10;
+        $search  = $params['search']['value'] ?? '';
+
         $query = "
         SELECT
             a.id,
@@ -304,7 +273,7 @@ class VivoArequipaRepository
         WHERE 1=1
     ";
 
-        // 🔹 Filtro de rango de fechas
+        // 🔹 Filtros específicos
         if (!empty($fechaInicio) && !empty($fechaFin)) {
             $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin'";
         } elseif (!empty($fechaInicio)) {
@@ -313,14 +282,93 @@ class VivoArequipaRepository
             $query .= " AND a.fecha <= '$fechaFin'";
         }
 
-        // 🔹 Otros filtros
         if (!empty($mercado)) $query .= " AND a.mercado = $mercado";
         if (!empty($empresa)) $query .= " AND a.empresa = $empresa";
         if (!empty($condicion)) $query .= " AND a.condicion = $condicion";
         if (!empty($proveedor)) $query .= " AND a.proveedor = $proveedor";
 
+        // 🔍 Búsqueda global
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            m.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            e.ruc LIKE '%$search%' OR
+            c.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pr.ruc LIKE '%$search%' OR
+            a.precioMayMin LIKE '%$search%' OR
+            a.precioMayMax LIKE '%$search%' OR
+            a.precioPubMin LIKE '%$search%' OR
+            a.precioPubMax LIKE '%$search%' OR
+            a.cantidad LIKE '%$search%'
+        )";
+        }
+
+        // 🔹 Orden y paginación
+        $query .= " ORDER BY a.fecha DESC LIMIT $start, $length";
+
         return $this->executeQuery($query);
     }
+
+    public function countAll()
+    {
+        $query = "SELECT COUNT(*) AS total FROM com_db_vivo_aqp";
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
+    public function countFiltered($params = [])
+    {
+        $search = $params['search']['value'] ?? '';
+
+        $query = "
+        SELECT COUNT(*) AS total
+        FROM com_db_vivo_aqp a
+        LEFT JOIN com_mercado m ON a.mercado = m.codigo
+        LEFT JOIN com_empresa e ON a.empresa = e.codigo
+        LEFT JOIN com_condicion c ON a.condicion = c.codigo
+        LEFT JOIN com_proveedor pr ON a.proveedor = pr.codigo
+        WHERE 1=1
+    ";
+
+        // 🔹 Filtros (igual que findByFilters)
+        if (!empty($params['fechaInicio']) && !empty($params['fechaFin'])) {
+            $query .= " AND a.fecha BETWEEN '{$params['fechaInicio']}' AND '{$params['fechaFin']}'";
+        } elseif (!empty($params['fechaInicio'])) {
+            $query .= " AND a.fecha >= '{$params['fechaInicio']}'";
+        } elseif (!empty($params['fechaFin'])) {
+            $query .= " AND a.fecha <= '{$params['fechaFin']}'";
+        }
+
+        if (!empty($params['mercado'])) $query .= " AND a.mercado = {$params['mercado']}";
+        if (!empty($params['empresa'])) $query .= " AND a.empresa = {$params['empresa']}";
+        if (!empty($params['condicion'])) $query .= " AND a.condicion = {$params['condicion']}";
+        if (!empty($params['proveedor'])) $query .= " AND a.proveedor = {$params['proveedor']}";
+
+        // 🔍 Search global también aquí
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            m.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            e.ruc LIKE '%$search%' OR
+            c.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pr.ruc LIKE '%$search%' OR
+            a.precioMayMin LIKE '%$search%' OR
+            a.precioMayMax LIKE '%$search%' OR
+            a.precioPubMin LIKE '%$search%' OR
+            a.precioPubMax LIKE '%$search%' OR
+            a.cantidad LIKE '%$search%'
+        )";
+        }
+
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
+    }
+
+
 
     private function generateUuid()
     {
@@ -336,5 +384,4 @@ class VivoArequipaRepository
             mt_rand(0, 0xffff)
         );
     }
-
 }

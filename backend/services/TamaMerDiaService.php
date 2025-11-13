@@ -16,20 +16,6 @@ class TamaMerDiaService
         return $this->repo->findAll();
     }
 
-    public function getPaginated($start, $length, $search)
-    {
-        $data = $this->repo->findPaginated($start, $length, $search);
-        $recordsTotal = $this->repo->countGetAll();
-        $recordsFiltered = $this->repo->countGetAllFiltered($search);
-
-        return [
-            "draw" => intval($_POST['draw'] ?? 0),
-            "recordsTotal" => $recordsTotal,
-            "recordsFiltered" => $recordsFiltered,
-            "data" => $data
-        ];
-    }
-
     public function save($data)
     {
         return $this->repo->save($data);

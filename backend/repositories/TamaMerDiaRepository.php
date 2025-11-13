@@ -48,80 +48,6 @@ class TamaMerDiaRepository
         return $this->executeQuery($query);
     }
 
-    public function findPaginated($start, $length, $search = '')
-    {
-        $query = "
-        SELECT 
-            tmd.id,
-            tmd.fecha,
-            tp.nombre AS tipo,
-            tl.nombre AS linea,
-            pv.nombre AS provincia,
-            pz.nombre AS zona,
-            e.nombre AS empresa,
-            pr.nombre AS proveedor,
-            pp.nombre AS producto,
-            tmd.cantidad,
-            tmd.peso,
-            tmd.prom,
-            tmd.precio,
-            tmd.info_mercado,
-            tmd.nom_db
-        FROM com_db_tama_mer_dia AS tmd
-        LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
-        LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
-        LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
-        LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
-        LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
-        LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
-        LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
-        WHERE 
-            tp.nombre LIKE :search 
-            OR tl.nombre LIKE :search 
-            OR pv.nombre LIKE :search 
-            OR pr.nombre LIKE :search 
-        ORDER BY tmd.fecha DESC
-        LIMIT :start, :length
-    ";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
-        $stmt->bindValue(':start', (int)$start, PDO::PARAM_INT);
-        $stmt->bindValue(':length', (int)$length, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function countGetAll()
-    {
-        $stmt = $this->conn->query("SELECT COUNT(*) FROM com_db_tama_mer_dia");
-        return $stmt->fetchColumn();
-    }
-
-    public function countGetAllFiltered($search = '')
-    {
-        $stmt = $this->conn->prepare("
-        SELECT COUNT(*)
-        FROM com_db_tama_mer_dia AS tmd
-        LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
-        LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
-        LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
-        LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
-        LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
-        LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
-        LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
-        WHERE tp.nombre LIKE :search 
-           OR tl.nombre LIKE :search 
-           OR pv.nombre LIKE :search 
-           OR pr.nombre LIKE :search
-    ");
-        $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-
     public function save($data)
     {
         // Si existe ID, actualizamos
@@ -240,6 +166,7 @@ class TamaMerDiaRepository
 
         $start  = $params['start'] ?? 0;
         $length = $params['length'] ?? 10; // registros por página
+        $search       = $params['search']['value'] ?? '';
 
         $query = "
             SELECT 
@@ -286,6 +213,24 @@ class TamaMerDiaRepository
         if (!empty($proveedor)) $query .= " AND tmd.proveedor = $proveedor";
         if (!empty($producto)) $query .= " AND tmd.producto = $producto";
 
+        //  Búsqueda global (search)
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            tp.nombre LIKE '%$search%' OR
+            tl.nombre LIKE '%$search%' OR
+            pv.nombre LIKE '%$search%' OR
+            pz.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pp.nombre LIKE '%$search%' OR
+            tmd.info_mercado LIKE '%$search%' OR
+            tmd.nom_db LIKE '%$search%' OR
+            tmd.precio LIKE '%$search%' OR
+            tmd.peso LIKE '%$search%'
+        )";
+        }
+
         // Orden y paginación
         $query .= " ORDER BY tmd.fecha DESC LIMIT $start, $length";
 
@@ -303,10 +248,22 @@ class TamaMerDiaRepository
     // Total registros con filtros
     public function countFiltered($params = [])
     {
-        $query = "SELECT COUNT(*) AS total
-              FROM com_db_tama_mer_dia AS tmd
-              WHERE 1=1";
+        $search = $params['search']['value'] ?? '';
 
+        $query = "
+        SELECT COUNT(*) AS total
+        FROM com_db_tama_mer_dia AS tmd
+        LEFT JOIN com_tipo_pollo AS tp ON tmd.tipo = tp.codigo
+        LEFT JOIN com_tipo AS tl ON tmd.linea = tl.codigo
+        LEFT JOIN com_provincia AS pv ON tmd.provincia = pv.codigo
+        LEFT JOIN com_provincia AS pz ON tmd.zona = pz.codigo
+        LEFT JOIN com_empresa AS e ON tmd.empresa = e.codigo
+        LEFT JOIN com_proveedor AS pr ON tmd.proveedor = pr.codigo
+        LEFT JOIN com_tipo_pollo_vivo AS pp ON tmd.producto = pp.codigo
+        WHERE 1=1
+    ";
+
+        // Filtros (idéntico a findByFilters)
         if (!empty($params['fechaInicio']) && !empty($params['fechaFin'])) {
             $query .= " AND tmd.fecha BETWEEN '{$params['fechaInicio']}' AND '{$params['fechaFin']}'";
         } elseif (!empty($params['fechaInicio'])) {
@@ -322,6 +279,24 @@ class TamaMerDiaRepository
         if (!empty($params['empresa'])) $query .= " AND tmd.empresa = {$params['empresa']}";
         if (!empty($params['proveedor'])) $query .= " AND tmd.proveedor = {$params['proveedor']}";
         if (!empty($params['producto'])) $query .= " AND tmd.producto = {$params['producto']}";
+
+        // 🔍 Search global también aquí
+        if (!empty($search)) {
+            $search = addslashes($search);
+            $query .= " AND (
+            tp.nombre LIKE '%$search%' OR
+            tl.nombre LIKE '%$search%' OR
+            pv.nombre LIKE '%$search%' OR
+            pz.nombre LIKE '%$search%' OR
+            e.nombre LIKE '%$search%' OR
+            pr.nombre LIKE '%$search%' OR
+            pp.nombre LIKE '%$search%' OR
+            tmd.info_mercado LIKE '%$search%' OR
+            tmd.nom_db LIKE '%$search%' OR
+            tmd.precio LIKE '%$search%' OR
+            tmd.peso LIKE '%$search%'
+        )";
+        }
 
         $result = $this->executeQuery($query);
         return $result[0]['total'] ?? 0;

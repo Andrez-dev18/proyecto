@@ -60,19 +60,28 @@ class CriadorEmprendedorController
 
     public function obtenerDatosFiltrados()
     {
-        // Obtener parámetros desde la query string
-        $fechaInicio = $_GET['fechaInicio'] ?? null;
-        $fechaFin = $_GET['fechaFin'] ?? null;
-        $provincia = $_GET['provincia'] ?? null;
-        $proveedor = $_GET['proveedor'] ?? null;
-        $tipo = $_GET['tipo'] ?? null;
+        $params = [
+            'fechaInicio' => $_GET['fechaInicio'] ?? null,
+            'fechaFin'    => $_GET['fechaFin'] ?? null,
+            'provincia'   => $_GET['provincia'] ?? null,
+            'proveedor'   => $_GET['proveedor'] ?? null,
+            'tipo'    => $_GET['tipo'] ?? null,
+            'start'       => intval($_GET['start'] ?? 0),
+            'length'      => intval($_GET['length'] ?? 10),
+            'search'      => $_GET['search'] ?? ['value' => '']
+        ];
 
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $provincia, $proveedor, $tipo);
+        $datos = $this->service->obtenerDatosFiltrados($params);
+        $recordsTotal = $this->service->obtenerTotalRegistros();
+        $recordsFiltered = $this->service->obtenerTotalFiltrados($params);
 
         header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
-            'data' => $resultados
+            'params:' => $params,
+            'data' => $datos,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered
         ]);
     }
 }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . '/../services/VivoArequipaService.php';
 
 class VivoArequipaController
@@ -61,22 +61,28 @@ class VivoArequipaController
     public function obtenerDatosFiltrados()
     {
         // Obtener parámetros desde la query string
-        $fechaInicio = $_GET['fechaInicio'] ?? null;
-        $fechaFin = $_GET['fechaFin'] ?? null;
-        $mercado = $_GET['mercado'] ?? null;
-        $empresa = $_GET['empresa'] ?? null;
-        $condicion = $_GET['condicion'] ?? null;
-        $proveedor = $_GET['proveedor'] ?? null;
-
-        $resultados = $this->service->obtenerDatosFiltrados($fechaInicio, $fechaFin, $mercado, $empresa, $condicion, $proveedor);
+        $params = [
+            'fechaInicio' => $_GET['fechaInicio'] ?? null,
+            'fechaFin' => $_GET['fechaFin'] ?? null,
+            'mercado' => $_GET['mercado'] ?? null,
+            'empresa' => $_GET['empresa'] ?? null,
+            'condicion' => $_GET['condicion'] ?? null,
+            'proveedor' => $_GET['proveedor'] ?? null,
+            'start'       => intval($_GET['start'] ?? 0),
+            'length'      => intval($_GET['length'] ?? 10),
+            'search'      => $_GET['search'] ?? ['value' => '']
+        ];
+        $datos = $this->service->obtenerDatosFiltrados($params);
+        $recordsTotal = $this->service->obtenerTotalRegistros();
+        $recordsFiltered = $this->service->obtenerTotalFiltrados($params);
 
         header('Content-Type: application/json');
         echo json_encode([
             'status' => 'success',
-            'data' => $resultados
+            'params:' => $params,
+            'data' => $datos,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered
         ]);
     }
-
 }
-
-?>

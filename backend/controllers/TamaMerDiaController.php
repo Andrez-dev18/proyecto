@@ -11,20 +11,9 @@ class TamaMerDiaController
         $this->service = new TamaMerDiaService($db);
     }
 
-    public function getAllSimple()
-    {
-        echo json_encode($this->service->getAll());
-    }
-
     public function getAll()
     {
-        $start = $_POST['start'] ?? 0;
-        $length = $_POST['length'] ?? 10;
-        $search = $_POST['search']['value'] ?? '';
-
-        $response = $this->service->getPaginated($start, $length, $search);
-        header('Content-Type: application/json');
-        echo json_encode($response);
+        echo json_encode($this->service->getAll());
     }
 
     public function create()
@@ -69,7 +58,7 @@ class TamaMerDiaController
         }
     }
 
-    public function obtenerDatosFiltrados()
+    public function obtenerTodosDatosFiltro()
     {
         $params = [
             'fechaInicio' => $_GET['fechaInicio'] ?? null,
@@ -82,7 +71,8 @@ class TamaMerDiaController
             'proveedor'   => $_GET['proveedor'] ?? null,
             'producto'    => $_GET['producto'] ?? null,
             'start'       => intval($_GET['start'] ?? 0),
-            'length'      => intval($_GET['length'] ?? 10)
+            'length'      => intval($_GET['length'] ?? 10),
+            'search'      => $_GET['search'] ?? ['value' => '']
         ];
 
         $datos = $this->service->obtenerDatosFiltrados($params);

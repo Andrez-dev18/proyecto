@@ -96,14 +96,8 @@ class ComercializacionController {
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
-        // Filtros
-        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterMercado')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterCondicion')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipo')?.addEventListener('change', () => this.aplicarFiltros());
+        // Filtro btn
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
 
         // Modal
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
@@ -117,30 +111,22 @@ class ComercializacionController {
 
             this.mostrarCargando(true);
 
-            console.log(`Cargando datos de tipo: ${tipo}`);
+            console.log(`Cargando vista de tipo: ${tipo}`);
 
+            // 🔹 Mostrar los filtros correspondientes según el tipo
             if (tipo === 'vivo-aqp') {
-                this.datos = await this.service.getVivoAqp();
                 this.mostrarFiltrosAqp();
             } else {
-                this.datos = await this.service.getVivoProvincia();
                 this.mostrarFiltrosProvincia();
             }
 
-            console.log(`Datos cargados:`, this.datos);
+            this.renderizarTablaServerSide();
 
-            // Verificar si los datos son un array
-            if (!Array.isArray(this.datos)) {
-                throw new Error('La respuesta no es un array válido');
-            }
+            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
 
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('Error detallado:', error);
+            console.error('Error al inicializar tabla:', error);
             this.mostrarNotificacion('❌ ' + error.message, 'error');
-            this.datos = []; // Resetear datos en caso de error
-            this.renderizarTabla(); // Mostrar tabla vacía
         } finally {
             this.mostrarCargando(false);
         }
@@ -161,56 +147,7 @@ class ComercializacionController {
     }
 
     async aplicarFiltros() {
-        if (!this.tipoActual) return;
-
-        try {
-            this.mostrarCargando(true);
-
-            const filtros = {};
-            const fechaInicio = document.getElementById('filterFechaInicio').value;
-            const fechaFin = document.getElementById('filterFechaFin').value;
-
-            // Solo agregar si tiene valor
-            if (fechaInicio) filtros.fechaInicio = fechaInicio;
-            if (fechaFin) filtros.fechaFin = fechaFin;
-
-            if (this.tipoActual === 'vivo-aqp') {
-                const mercado = document.getElementById('filterMercado').value;
-                const proveedor = document.getElementById('filterProveedor').value;
-                const condicion = document.getElementById('filterCondicion').value;
-
-                if (mercado) filtros.mercado = mercado;
-                if (proveedor) filtros.proveedor = proveedor;
-                if (condicion) filtros.condicion = condicion;
-
-                console.log('Filtros Arequipa:', filtros);
-                const result = await this.service.filtrarVivoAqp(filtros);
-                console.log('Respuesta del servidor:', result);
-                this.datos = result.data || [];
-            } else {
-                const provincia = document.getElementById('filterProvincia').value;
-                const proveedor = document.getElementById('filterProveedor').value;
-                const tipo = document.getElementById('filterTipo').value;
-
-                if (provincia) filtros.provincia = provincia;
-                if (proveedor) filtros.proveedor = proveedor;
-                if (tipo) filtros.tipo = tipo;
-
-                console.log('Filtros Provincia:', filtros);
-                const response = await this.service.filtrarVivoProvincia(filtros);
-                this.datos = Array.isArray(response.data) ? response.data : [];
-            }
-
-            this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
-        } catch (error) {
-            console.error('Error completo:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
-            this.datos = [];
-            this.renderizarTabla();
-        } finally {
-            this.mostrarCargando(false);
-        }
+        this.renderizarTablaServerSide();
     }
 
     limpiarFiltros() {
@@ -227,22 +164,17 @@ class ComercializacionController {
         }
     }
 
-    renderizarTabla() {
+    renderizarTablaServerSide() {
         const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
         if (!thead) return;
 
-        // 🔄 Destruir DataTable anterior si existe
+        //  Destruir cualquier DataTable previo
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        if (!this.datos || this.datos.length === 0) {
-            table.find('tbody').html('<tr><td colspan="30" class="text-center py-4 text-gray-500">No hay registros para mostrar</td></tr>');
-            return;
-        }
-
-        // 📋 Definir columnas según tipo actual
+        // Definir columnas según tipo actual
         let columnas = [];
         if (this.tipoActual === 'vivo-aqp') {
             columnas = [
@@ -271,56 +203,84 @@ class ComercializacionController {
             ];
         }
 
-        // Agregar columna de opciones al final
-        const columnasConOpciones = [
-            ...columnas.map(c => ({ data: c, title: c.replace(/([A-Z])/g, ' $1') })),
-            {
-                data: null,
-                title: 'Opciones',
-                orderable: false,
-                render: (data, type, row, meta) => `
-                <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
-                    <i class="fas fa-trash"></i>
-                </button>
-            `
-            }
-        ];
+        // 🔹 Agregar columna de opciones
+        const columnasConOpciones = [...columnas, 'Opciones'];
 
-        // 🧱 Renderizar encabezado
+        // 🔹 Generar dinámicamente las cabeceras del thead
         thead.innerHTML = columnasConOpciones
-            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.title}</th>`)
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
             .join('');
 
-        // 🚀 Inicializar DataTable con deferRender
+        // 🚀 Inicializar DataTable con server-side processing
         const dt = table.DataTable({
-            data: this.datos,
-            columns: columnasConOpciones,
-            deferRender: true,           // ⚡ Renderiza solo lo visible
-            pageLength: 25,              // Muestra menos filas por página
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url:
+                    this.tipoActual === 'vivo-aqp'
+                        ? this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_AQP.FILTRO
+                        : this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_PROVINCIA.FILTRO,
+                type: 'GET',
+                data: function (d) {
+                    const filtros = {};
+                    const campos = [
+                        'FechaInicio', 'FechaFin', 'Provincia', 'Empresa',
+                        'Proveedor', 'Tipo', 'Linea', 'Condicion', 'Mercado',
+                    ];
+
+                    campos.forEach(campo => {
+                        const el = document.getElementById(`filter${campo}`);
+                        if (el && el.value.trim() !== '') {
+                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
+                            filtros[key] = el.value.trim();
+                        }
+                    });
+
+                    // Combinar parámetros DataTable + filtros personalizados
+                    return Object.assign(d, filtros);
+                },
+                dataSrc: json => json.data
+            },
+            columns: [
+                ...columnas.map(col => ({ data: col })),
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row, meta) => `
+                    <div class="text-center space-x-2">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `
+                }
+            ],
+            order: [[1, 'desc']],
             responsive: true,
-            order: [[0, 'desc']],
+            pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            },
-            destroy: true
+            }
         });
 
-        // 🎯 Delegar eventos (sin perderlos al paginar)
-        table.find('tbody').off('click').on('click', '.edit-btn', (e) => {
+        // 🟢 Delegar eventos para los botones de acción
+        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
             const rowData = dt.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             this.modificarSeleccionado();
         });
 
-        table.find('tbody').on('click', '.delete-btn', async (e) => {
+        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
             const rowData = dt.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             await this.eliminarSeleccionado();
         });
     }
+
 
     toggleDetalle(event, el) {
         // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
@@ -520,13 +480,10 @@ class ComercializacionController {
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                console.log('Actualizando registro ID:', data.id);
-                console.log('Datos a enviar:', data);
-
+            
                 const resultado = await this.service.actualizar(this.tablaActual, data);
                 console.log('Resultado actualización:', resultado);
-
-                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
@@ -534,14 +491,14 @@ class ComercializacionController {
                 const resultado = await this.service.crear(this.tablaActual, data);
                 console.log('Resultado creación:', resultado);
 
-                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
+                this.mostrarNotificacion(' Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos(this.tipoActual);
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -614,10 +571,6 @@ class ComercializacionController {
             this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.proveedor) {
-            this.mostrarNotificacion('El proveedor es obligatorio', 'warning');
-            return false;
-        }
         return true;
     }
 
@@ -634,14 +587,9 @@ class ComercializacionController {
             return;
         }
 
-        if (this.datos.length === 0) {
-            this.mostrarNotificacion('No hay datos para exportar', 'warning');
-            return;
-        }
-
         try {
             this.service.exportarCSV(this.tablaActual);
-            this.mostrarNotificacion('✅ Iniciando descarga de CSV...', 'success');
+            this.mostrarNotificacion(' Iniciando descarga de CSV...', 'success');
         } catch (error) {
             this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
         }

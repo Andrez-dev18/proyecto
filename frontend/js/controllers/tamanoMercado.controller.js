@@ -225,7 +225,7 @@ class TamanoMercadoController {
         try {
             this.mostrarCargando(true);
 
-            this.renderizarTablaInicial();
+            this.renderizarTablaFiltrada();
 
             this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
         } catch (error) {
@@ -243,91 +243,35 @@ class TamanoMercadoController {
         }
     }
 
-    renderizarTablaInicial() {
+
+    renderizarTablaFiltrada() {
         const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
         if (!thead) return;
 
-        // Destruir cualquier instancia anterior de DataTable
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().destroy();
-        }
-
-        // Definir columnas
-        const columnas = [
-            'id', 'fecha', 'tipo', 'linea', 'provincia', 'zona',
-            'empresa', 'proveedor',
-            'producto', 'cantidad', 'peso', 'prom',
-            'precio', 'info_mercado', 'nom_db'
-        ];
-
-        const columnasConOpciones = [...columnas, 'Opciones'];
-
-        //  Generar encabezado dinámico
-        thead.innerHTML = columnasConOpciones
-            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
-            .join('');
-
-        // Inicializar DataTable en modo Server-Side
-        this.tabla = table.DataTable({
-            processing: true,  // muestra spinner de carga
-            serverSide: true,  // DataTables consulta directamente al backend
-            ajax: {
-                url: this.service.baseURL + AppConfig.API.ENDPOINTS.TAMAMERDIA.ALL,
-                type: 'POST',
-                error: function (xhr, error, thrown) {
-                    console.error('Error al cargar datos:', error, thrown);
-                }
-            },
-            columns: [
-                ...columnas.map(col => ({ data: col })),
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: (data, type, row) => `
-                    <div class="text-center space-x-2">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-id="${row.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-id="${row.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `
-                }
-            ],
-            order: [[0, 'desc']],
-            responsive: true,
-            pageLength: 10,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            }
-        });
-        // 🟢 Delegar eventos para botones de acción (funcionan incluso con renderizado dinámico)
-        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
-            const rowData = this.tabla.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            this.modificarSeleccionado();
-        });
-
-        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
-            const rowData = this.tabla.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            await this.eliminarSeleccionado();
-        });
-    }
-
-    renderizarTablaFiltrada() {
-        const table = $('.min-w-full');
-
-        // Limpiar cualquier DataTable previo
+        // 🔹 Destruir cualquier DataTable previo
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        // Inicializar DataTable con AJAX y delegación de eventos
-        const dt = $('.min-w-full').DataTable({
+        // 🔹 Definir columnas base
+        const columnas = [
+            'id', 'fecha', 'tipo', 'linea', 'provincia', 'zona',
+            'empresa', 'proveedor', 'producto',
+            'cantidad', 'peso', 'prom', 'precio',
+            'info_mercado', 'nom_db'
+        ];
+
+        // 🔹 Agregar columna de opciones
+        const columnasConOpciones = [...columnas, 'Opciones'];
+
+        // 🔹 Generar dinámicamente las cabeceras del thead
+        thead.innerHTML = columnasConOpciones
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
+            .join('');
+
+        // 🔹 Inicializar DataTable con AJAX y filtros
+        const dt = table.DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -340,55 +284,47 @@ class TamanoMercadoController {
                         'Provincia', 'Zona', 'Empresa', 'Proveedor', 'Producto'
                     ];
 
+                    // Extraer filtros desde los inputs del formulario
                     campos.forEach(campo => {
                         const el = document.getElementById(`filter${campo}`);
-                        if (el && el.value) {
+                        if (el && el.value.trim() !== '') {
                             const key = campo.charAt(0).toLowerCase() + campo.slice(1);
                             filtros[key] = el.value.trim();
                         }
                     });
 
+                    // Combinar los parámetros de DataTables + filtros personalizados
                     return Object.assign(d, filtros);
                 },
                 dataSrc: json => json.data
             },
             columns: [
-                { data: 'id' },
-                { data: 'fecha' },
-                { data: 'tipo' },
-                { data: 'linea' },
-                { data: 'provincia' },
-                { data: 'zona' },
-                { data: 'empresa' },
-                { data: 'proveedor' },
-                { data: 'producto' },
-                { data: 'cantidad' },
-                { data: 'peso' },
-                { data: 'prom' },
-                { data: 'precio' },
-                { data: 'info_mercado' },
-                { data: 'nom_db' },
+                ...columnas.map(col => ({ data: col })),
                 {
                     data: null,
                     orderable: false,
+                    searchable: false,
                     render: (data, type, row, meta) => `
-                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="text-center space-x-2">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 `
                 }
             ],
             order: [[1, 'desc']],
             responsive: true,
+            pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
             }
         });
 
-        // 🟢 Delegar eventos para botones de acción (funcionan incluso con renderizado dinámico)
+        // 🟢 Delegar eventos para los botones de acción (seguros con renderizado dinámico)
         $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
             const rowData = dt.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;

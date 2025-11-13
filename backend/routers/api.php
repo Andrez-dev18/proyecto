@@ -620,7 +620,7 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
 }elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
-    $TamaMerDiaController->obtenerDatosFiltrados();
+    $TamaMerDiaController->obtenerTodosDatosFiltro();
     exit;
     // EXPORTAR A EXCEL
 }elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
