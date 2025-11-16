@@ -27,6 +27,12 @@ const AppConfig = {
                 BENEFICIADO_AREQUIPA: '/reporte/beneficiado/arequipa/excel',
                 BENEFICIADO_PROVINCIA: '/reporte/beneficiado/provincia/excel'
             },
+            VIVO_AQP: {
+                FILTRO: '/vivoArequipa/filtro'
+            },
+            VIVO_PROVINCIA: {
+                FILTRO: '/vivoProvincia/filtro'
+            },
             TAMAMERDIA: {
                 ALL: '/tamamerdia/all',
                 CREAR: '/tamamerdia/crear',

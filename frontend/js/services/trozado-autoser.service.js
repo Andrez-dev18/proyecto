@@ -102,12 +102,12 @@ class TrozadoAutoserService {
     async getCortes() {
         try {
             const url = `${this.baseURL}${this.config.CATALOGOS.CORTES}`;
-            console.log('📦 Intentando cargar cortes desde:', url);
+            console.log('Intentando cargar cortes desde:', url);
             
             const response = await fetch(url);
             
             if (!response.ok) {
-                console.warn('⚠️ Endpoint de cortes no disponible, usando valores por defecto');
+                console.warn('Endpoint de cortes no disponible, usando valores por defecto');
                 // SOLO LOS 6 CORTES QUE EXISTEN
                 return [
                     { id: 1, corte: 'PECHUGA ESPECIAL' },
@@ -120,14 +120,14 @@ class TrozadoAutoserService {
             }
             
             const data = await response.json();
-            console.log('✅ Cortes cargados desde backend:', data);
+            console.log('Cortes cargados desde backend:', data);
             
             return data.map(item => ({
                 id: item.codigo || item.id,
                 corte: item.nombre
             }));
         } catch (error) {
-            console.error('❌ Error al cargar cortes, usando valores por defecto:', error);
+            console.error('Error al cargar cortes, usando valores por defecto:', error);
             // SOLO LOS 6 CORTES QUE EXISTEN
             return [
                 { id: 1, corte: 'PECHUGA ESPECIAL' },

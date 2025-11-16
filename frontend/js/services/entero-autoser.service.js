@@ -7,14 +7,14 @@ class EnteroAutoserService {
     async getAll() {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
-            console.log('📡 Fetching:', url);
+            console.log('Fetching:', url);
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error en la petición');
             const data = await response.json();
-            console.log('✅ Datos recibidos:', data);
+            console.log('Datos recibidos:', data);
             return data;
         } catch (error) {
-            console.error('❌ Error en getAll:', error);
+            console.error('Error en getAll:', error);
             throw error;
         }
     }
@@ -22,7 +22,7 @@ class EnteroAutoserService {
     async create(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
-            console.log('📡 Creating:', url, data);
+            console.log('Creating:', url, data);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -31,7 +31,7 @@ class EnteroAutoserService {
             if (!response.ok) throw new Error('Error al crear');
             return await response.json();
         } catch (error) {
-            console.error('❌ Error en create:', error);
+            console.error('Error en create:', error);
             throw error;
         }
     }
@@ -39,7 +39,7 @@ class EnteroAutoserService {
     async update(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
-            console.log('📡 Updating:', url, data);
+            console.log('Updating:', url, data);
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -48,7 +48,7 @@ class EnteroAutoserService {
             if (!response.ok) throw new Error('Error al actualizar');
             return await response.json();
         } catch (error) {
-            console.error('❌ Error en update:', error);
+            console.error('Error en update:', error);
             throw error;
         }
     }
@@ -56,14 +56,14 @@ class EnteroAutoserService {
     async delete(id) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
-            console.log('📡 Deleting:', url);
+            console.log('Deleting:', url);
             const response = await fetch(url, {
                 method: 'DELETE'
             });
             if (!response.ok) throw new Error('Error al eliminar');
             return await response.json();
         } catch (error) {
-            console.error('❌ Error en delete:', error);
+            console.error('Error en delete:', error);
             throw error;
         }
     }
@@ -81,7 +81,7 @@ class EnteroAutoserService {
             if (!response.ok) throw new Error('Error en filtrado');
             return await response.json();
         } catch (error) {
-            console.error('❌ Error en getFiltered:', error);
+            console.error('Error en getFiltered:', error);
             throw error;
         }
     }
@@ -89,12 +89,12 @@ class EnteroAutoserService {
     async getProveedores() {
         try {
             const url = `${this.baseUrl}${this.config.CATALOGOS.PROVEEDORES}`;
-            console.log('📡 Fetching proveedores:', url);
+            console.log('Fetching proveedores:', url);
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error al cargar proveedores');
             return await response.json();
         } catch (error) {
-            console.error('❌ Error en getProveedores:', error);
+            console.error('Error en getProveedores:', error);
             return [];
         }
     }
@@ -109,7 +109,7 @@ class EnteroAutoserService {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
             window.open(url, '_blank');
         } catch (error) {
-            console.error('❌ Error al exportar:', error);
+            console.error('Error al exportar:', error);
             throw error;
         }
     }

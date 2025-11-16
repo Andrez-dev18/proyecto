@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ventas Vivo Arequipa</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .dropdown-columns {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .column-toggle {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .column-toggle:hover {
+            background-color: #f3f4f6;
+        }
+
+        .column-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .dropdown-header {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #btnToggleFiltros {
+            transition: transform 0.3s ease, background-color 0.2s ease;
+        }
+
+        #btnToggleFiltros:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+
+        #filterContent {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+        }
+
+        #filterContent.show {
+            max-height: 800px;
+            opacity: 1;
+            padding-top: 1rem;
+        }
+
+        .dataTables_wrapper {
+            width: 100% !important;
+            overflow-x: auto;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        table.dataTable tbody td {
+            padding: 8px 10px;
+        }
+
+        .modal-field-group {
+            margin-bottom: 1rem;
+        }
+
+        .modal-field-group label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-hover-scale {
+            transition: transform 0.2s;
+        }
+
+        .btn-hover-scale:hover {
+            transform: scale(1.05);
+        }
+
+        .slide-down {
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-6">
+
+        <!-- Acciones -->
+        <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-purple-600"></i>
+                Acciones
+            </h2>
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex flex-wrap gap-3">
+                    <button id="btnNuevo"
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nuevo Registro
+                    </button>
+                    <button id="btnExportar"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Exportar Excel
+                    </button>
+                </div>
+
+                <div class="dropdown-columns">
+                    <button id="btnToggleColumns" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale flex items-center gap-2">
+                        <i class="fas fa-columns"></i>
+                        Mostrar/Ocultar columnas
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    
+                    <div id="columnDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <span>Seleccionar Columnas</span>
+                            <button id="btnCloseDropdown" class="text-white hover:text-gray-200">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="p-2">
+                            <!-- Las columnas se generarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtros -->
+        <section id="filterSection" class="bg-white rounded-2xl card-shadow p-6 mb-6 slide-down">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-sliders-h text-purple-600"></i>
+                    Filtros
+                </h2>
+                <div class="flex gap-3">
+                    <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <button id="btnLimpiarFiltros" class="text-purple-600 hover:text-purple-700 font-semibold">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        Limpiar filtros
+                    </button>
+                </div>
+            </div>
+            <div id="filterContent" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar mr-1 text-purple-600"></i>
+                        Año
+                    </label>
+                    <input type="number" id="filterAno" min="2020" max="2030"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
+                        Mes
+                    </label>
+                    <select id="filterMes"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los meses</option>
+                        <option value="Enero">Enero</option>
+                        <option value="Febrero">Febrero</option>
+                        <option value="Marzo">Marzo</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Mayo">Mayo</option>
+                        <option value="Junio">Junio</option>
+                        <option value="Julio">Julio</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Septiembre">Septiembre</option>
+                        <option value="Octubre">Octubre</option>
+                        <option value="Noviembre">Noviembre</option>
+                        <option value="Diciembre">Diciembre</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map-marker-alt mr-1 text-purple-600"></i>
+                        Provincia
+                    </label>
+                    <select id="filterProvincia"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las provincias</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-map mr-1 text-purple-600"></i>
+                        Zona
+                    </label>
+                    <select id="filterZona"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todas las zonas</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        <i class="fas fa-users mr-1 text-purple-600"></i>
+                        Tipo Cliente
+                    </label>
+                    <select id="filterTipoCliente"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option value="">Todos los tipos</option>
+                    </select>
+                </div>
+                <div class="lg:col-span-5 flex items-end justify-center">
+                    <button id="btnAplicarFiltros"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg shadow btn-hover-scale">
+                        <i class="fa-solid fa-filter mr-2"></i>
+                        Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla -->
+        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Registros de Ventas Vivo Arequipa
+            </h2>
+            
+            <div class="overflow-x-auto overflow-y-visible" style="max-width: 100%;">
+                <div class="min-w-full inline-block align-middle">
+                    <div class="overflow-hidden border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200" id="dataTable">
+                            <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                <tr id="tableHeader">
+                                    <!-- Se generará dinámicamente -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="22" class="text-center py-8 text-gray-500">Cargando datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
+        style="display: none; overflow-y: auto;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full my-8">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
+                <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
+            </div>
+            <form id="modalForm" class="p-6">
+                <!-- Información básica -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                        <i class="fas fa-info-circle text-purple-600 mr-2"></i>
+                        Información Básica
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="modal-field-group">
+                            <label>Año *</label>
+                            <input type="number" id="modalAno" required min="2020" max="2030"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Mes *</label>
+                            <select id="modalMes" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Seleccionar...</option>
+                                <option value="Enero">Enero</option>
+                                <option value="Febrero">Febrero</option>
+                                <option value="Marzo">Marzo</option>
+                                <option value="Abril">Abril</option>
+                                <option value="Mayo">Mayo</option>
+                                <option value="Junio">Junio</option>
+                                <option value="Julio">Julio</option>
+                                <option value="Agosto">Agosto</option>
+                                <option value="Septiembre">Septiembre</option>
+                                <option value="Octubre">Octubre</option>
+                                <option value="Noviembre">Noviembre</option>
+                                <option value="Diciembre">Diciembre</option>
+                            </select>
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Provincia</label>
+                            <select id="modalProvincia"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Zona</label>
+                            <select id="modalZona"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Compra</label>
+                            <input type="text" id="modalCompra"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Tipo Cliente</label>
+                            <select id="modalTipoCliente"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="modal-field-group md:col-span-3">
+                            <label>Nombre</label>
+                            <input type="text" id="modalNombre"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Granjas -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                        <i class="fas fa-warehouse text-purple-600 mr-2"></i>
+                        Información de Granjas
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="modal-field-group">
+                            <label>GRS</label>
+                            <input type="number" id="modalGrs" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>RP</label>
+                            <input type="number" id="modalRp" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Renzo</label>
+                            <input type="number" id="modalRenzo" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Fafo</label>
+                            <input type="number" id="modalFafo" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Santa Angela</label>
+                            <input type="number" id="modalSantaAngela" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Rosario</label>
+                            <input type="number" id="modalRosario" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Pollo Lima</label>
+                            <input type="number" id="modalPolloLima" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Otras Granjas</label>
+                            <input type="number" id="modalOtrasGranjas" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Potenciales y Condiciones -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                        <i class="fas fa-chart-line text-purple-600 mr-2"></i>
+                        Potenciales y Condiciones
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="modal-field-group">
+                            <label>Potencial Mínimo</label>
+                            <input type="number" id="modalPotencialMinimo" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Potencial Máximo</label>
+                            <input type="number" id="modalPotencialMaximo" min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Condición PT Mín</label>
+                            <input type="text" id="modalCondicionPtmin"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div class="modal-field-group">
+                            <label>Condición PT Máx</label>
+                            <input type="text" id="modalCondicionPtmax"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">
+                        <i class="fas fa-comment text-purple-600 mr-2"></i>
+                        Observaciones
+                    </h4>
+                    <textarea id="modalObservaciones" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        placeholder="Ingrese observaciones adicionales..."></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="btnCancelar"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnGuardar"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+        style="display: none;">
+        <div class="bg-white p-6 rounded-xl shadow-2xl">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
+            <p class="text-gray-700">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+    <script src="js/services/pventas.vivo-arequipa.service.js"></script>
+    <script src="js/controllers/pventas-vivo-arequipa.controller.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Inicializando PVentasVivoArequipa controller...');
+            if (window.pventasVivoArequipaController) {
+                window.pventasVivoArequipaController.init();
+            } else {
+                console.error('❌ pventasVivoArequipaController no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>

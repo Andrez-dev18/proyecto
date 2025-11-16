@@ -30,18 +30,18 @@ class PrecioVivoService {
         if (filtros.empresa) params.append('empresa', filtros.empresa);
 
         const url = `${this.baseURL}${this.endpoints.FILTRO}?${params}`;
-        console.log('🔍 URL de filtrado:', url);
+        console.log('URL de filtrado:', url);
         
         const response = await fetch(url);
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('❌ Error response:', errorText);
+            console.error('Error response:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();
-        console.log('✅ Resultado del filtro:', result);
+        console.log('Resultado del filtro:', result);
         
         // Manejar diferentes formatos de respuesta
         if (Array.isArray(result)) {
@@ -53,7 +53,7 @@ class PrecioVivoService {
         
         return [];
     } catch (error) {
-        console.error('❌ Error en filtrar:', error);
+        console.error('Error en filtrar:', error);
         throw error;
     }
 }

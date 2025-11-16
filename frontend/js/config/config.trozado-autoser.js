@@ -1,6 +1,6 @@
 const TrozadoAutoserConfig = {
     API: {
-        BASE_URL: AppConfig.API.BASE_URL,
+        BASE_URL: 'http://localhost/proyecto/backend',
         ENDPOINTS: {
             ALL: '/trozadoAutoser/all',
             FILTRO: '/trozadoAutoser/filtro',

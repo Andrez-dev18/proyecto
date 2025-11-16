@@ -1,5 +1,3 @@
-// js/controllers/criador-emprendedor.controller.js
-
 class CriadorEmprendedorController {
     constructor() {
         this.service = new CriadorEmprendedorService();
@@ -7,18 +5,98 @@ class CriadorEmprendedorController {
         this.datos = [];
         this.catalogos = {};
         this.config = window.CriadorEmprendedorConfig;
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
         this.setupColumnToggle();
+        this.setupToggleFiltros();
         await this.cargarDatos();
+    }
+
+    // MÉTODO: Toggle de columnas
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        // Inicializar estado de columnas
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        // Toggle dropdown
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
+    }
+
+    // MÉTODO: Toggle de filtros
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
     }
 
     async cargarCatalogos() {
         try {
-            console.log('📦 Cargando catálogos...');
+            console.log('Cargando catálogos...');
+            
             const [provincias, proveedores, tipos] = await Promise.all([
                 this.service.getProvincias(),
                 this.service.getProveedores(),
@@ -26,10 +104,12 @@ class CriadorEmprendedorController {
             ]);
             
             this.catalogos = { provincias, proveedores, tipos };
-            console.log('✅ Catálogos cargados:', this.catalogos);
+            
+            console.log('Catálogos cargados:', this.catalogos);
+            
             this.poblarSelects();
         } catch (error) {
-            console.error('❌ Error al cargar catálogos:', error);
+            console.error('Error al cargar catálogos:', error);
         }
     }
 
@@ -37,7 +117,6 @@ class CriadorEmprendedorController {
         this.poblarSelect('filterProvincia', this.catalogos.provincias, 'codigo', 'nombre');
         this.poblarSelect('filterProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
         this.poblarSelect('filterTipo', this.catalogos.tipos, 'codigo', 'nombre');
-        
         this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
         this.poblarSelect('modalProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
         this.poblarSelect('modalTipo', this.catalogos.tipos, 'codigo', 'nombre');
@@ -64,20 +143,13 @@ class CriadorEmprendedorController {
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
-
-        document.getElementById('filterFechaInicio')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterFechaFin')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProvincia')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterProveedor')?.addEventListener('change', () => this.aplicarFiltros());
-        document.getElementById('filterTipo')?.addEventListener('change', () => this.aplicarFiltros());
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
     }
 
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('Cargando datos...');
             this.datos = await this.service.getAll();
-            console.log('Datos cargados:', this.datos.length);
             this.renderizarTabla();
             this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
@@ -98,26 +170,29 @@ class CriadorEmprendedorController {
             const filtros = {};
             const fechaInicio = document.getElementById('filterFechaInicio').value;
             const fechaFin = document.getElementById('filterFechaFin').value;
-            const provinciaId = document.getElementById('filterProvincia').value;
-            const proveedorId = document.getElementById('filterProveedor').value;
-            const tipoId = document.getElementById('filterTipo').value;
+            const provincia = document.getElementById('filterProvincia').value;
+            const proveedor = document.getElementById('filterProveedor').value;
+            const tipo = document.getElementById('filterTipo').value;
 
             if (fechaInicio) filtros.fechaInicio = fechaInicio;
             if (fechaFin) filtros.fechaFin = fechaFin;
-            if (provinciaId) filtros.provincia = parseInt(provinciaId);
-            if (proveedorId) filtros.proveedor = parseInt(proveedorId);
-            if (tipoId) filtros.tipo = parseInt(tipoId);
+            if (provincia) filtros.provincia = provincia;
+            if (proveedor) filtros.proveedor = proveedor;
+            if (tipo) filtros.tipo = tipo;
 
             console.log('Filtros a aplicar:', filtros);
             
-            if (!fechaInicio && !fechaFin && !provinciaId && !proveedorId && !tipoId) {
+            // Si no hay filtros, cargar todos los datos
+            if (!fechaInicio && !fechaFin && !provincia && !proveedor && !tipo) {
                 console.log('Sin filtros, cargando todos los datos');
                 await this.cargarDatos();
                 return;
             }
             
+            // Aplicar filtros
             const resultado = await this.service.getFiltered(filtros);
             
+            // Procesar resultado
             if (Array.isArray(resultado)) {
                 this.datos = resultado;
             } else if (resultado && Array.isArray(resultado.data)) {
@@ -128,7 +203,9 @@ class CriadorEmprendedorController {
             
             console.log(`Filtrado completado: ${this.datos.length} registros`);
             
+            // Renderizar la tabla
             this.renderizarTabla();
+            
             this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
             
         } catch (error) {
@@ -158,11 +235,13 @@ class CriadorEmprendedorController {
             return;
         }
 
-        const table = $('.min-w-full');
+        // Destruir DataTable si existe
+        const table = $('#dataTable');
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().destroy();
         }
 
+        // Limpiar tbody
         tbody.innerHTML = '';
         
         if (this.datos.length === 0) {
@@ -170,17 +249,18 @@ class CriadorEmprendedorController {
             return;
         }
 
+        // Crear filas mostrando el ID que viene del backend
         this.datos.forEach((registro, i) => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-orange-50 transition-colors';
+            tr.className = 'hover:bg-blue-50 transition-colors';
             tr.innerHTML = `
-                <td class="px-2 py-1 border-b text-sm text-center">${i + 1}</td>
+                <td class="px-2 py-1 border-b text-sm text-center font-semibold">${registro.id}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.fecha || '-'}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.provincia || '-'}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.proveedor || '-'}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.tipo || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.cantidad || '-'}</td>
-                <td class="px-2 py-1 border-b text-sm text-center">${registro.precio || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">${registro.cantidad || 0}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">S/. ${registro.precio || '0'}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.observaciones || '-'}</td>
                 <td class="px-2 py-1 border-b text-sm text-center space-x-2">
                     <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
@@ -192,6 +272,7 @@ class CriadorEmprendedorController {
                 </td>
             `;
             
+            // Agregar eventos directamente
             const editBtn = tr.querySelector('.edit-btn');
             const deleteBtn = tr.querySelector('.delete-btn');
             
@@ -210,17 +291,25 @@ class CriadorEmprendedorController {
             tbody.appendChild(tr);
         });
         
+        // Re-inicializar DataTable después
         setTimeout(() => {
             try {
-                $('.min-w-full').DataTable({
+                this.dataTable = $('#dataTable').DataTable({
                     pageLength: 10,
                     language: {
-                        url: this.config.UI.DATATABLES_LANGUAGE
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
                     },
                     responsive: true,
-                    order: [[1, 'desc']]
+                    order: [[1, 'desc']], // Ordenar por fecha
+                    scrollX: true,
+                    drawCallback: () => {
+                        // Aplicar visibilidad de columnas después de cada redibujado
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const column = this.dataTable.column(parseInt(columnIndex));
+                            column.visible(this.columnasVisibles[columnIndex]);
+                        });
+                    }
                 });
-                console.log('DataTable inicializado');
             } catch (error) {
                 console.error('Error al inicializar DataTable:', error);
             }
@@ -252,6 +341,7 @@ class CriadorEmprendedorController {
 
         try {
             this.mostrarCargando(true);
+            // Usar el ID que viene del backend
             await this.service.delete(this.registroSeleccionado.id);
             this.mostrarNotificacion('Registro eliminado', 'success');
             await this.cargarDatos();
@@ -269,6 +359,7 @@ class CriadorEmprendedorController {
         
         document.getElementById('modalFecha').value = r.fecha || '';
         
+        // Buscar los códigos por nombre si es necesario
         const provinciaObj = this.catalogos.provincias.find(p => p.nombre === r.provincia);
         const proveedorObj = this.catalogos.proveedores.find(p => p.nombre === r.proveedor);
         const tipoObj = this.catalogos.tipos.find(t => t.nombre === r.tipo);
@@ -276,7 +367,6 @@ class CriadorEmprendedorController {
         document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.codigo : '';
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.codigo : '';
         document.getElementById('modalTipo').value = tipoObj ? tipoObj.codigo : '';
-        
         document.getElementById('modalCantidad').value = r.cantidad || '';
         document.getElementById('modalPrecio').value = r.precio || '';
         document.getElementById('modalObservaciones').value = r.observaciones || '';
@@ -299,15 +389,14 @@ class CriadorEmprendedorController {
 
         try {
             this.mostrarCargando(true);
-            console.log('Guardando registro:', data);
 
             if (this.registroSeleccionado) {
+                // Para actualizar, incluir el ID existente
                 data.id = this.registroSeleccionado.id;
-                console.log('Actualizando registro ID:', data.id);
                 await this.service.update(data);
                 this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
-                console.log('➕ Creando nuevo registro');
+                // Para crear nuevo, NO enviar ID - el backend lo genera
                 await this.service.create(data);
                 this.mostrarNotificacion('Registro creado', 'success');
             }
@@ -315,8 +404,8 @@ class CriadorEmprendedorController {
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('Error al guardar:', error);
-            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al guardar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -327,17 +416,22 @@ class CriadorEmprendedorController {
         const proveedorId = document.getElementById('modalProveedor').value;
         const tipoId = document.getElementById('modalTipo').value;
         
-        return {
+        // NO incluir ID en los datos del formulario para nuevos registros
+        const datos = {
             fecha: document.getElementById('modalFecha').value,
-            provincia: parseInt(provinciaId) || null,
-            proveedor: parseInt(proveedorId) || null,
-            tipo: parseInt(tipoId) || null,
+            provincia: provinciaId || null,
+            proveedor: proveedorId || null,
+            tipo: tipoId || null,
             cantidad: parseInt(document.getElementById('modalCantidad').value) || 0,
             precio: parseFloat(document.getElementById('modalPrecio').value) || 0,
             observaciones: document.getElementById('modalObservaciones').value || '',
             usuarioRegistro: 'admin',
-            fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            usuarioTransferencia: 'sistema',
+            fechaHoraTransferencia: new Date().toISOString().slice(0, 19).replace('T', ' ')
         };
+        
+        return datos;
     }
 
     validarFormulario(data) {
@@ -347,10 +441,12 @@ class CriadorEmprendedorController {
             this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
+        
         if (!data.provincia) {
             this.mostrarNotificacion('La provincia es obligatoria', 'warning');
             return false;
         }
+        
         if (!data.tipo) {
             this.mostrarNotificacion('El tipo es obligatorio', 'warning');
             return false;
@@ -372,7 +468,7 @@ class CriadorEmprendedorController {
             this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseUrl}/reporte/criador/exportar`, '_blank');
+        window.open(`${this.service.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`, '_blank');
     }
 
     mostrarCargando(mostrar) {
@@ -416,44 +512,6 @@ class CriadorEmprendedorController {
 
         setTimeout(() => notif.remove(), 4000);
     }
-
-
-    setupColumnToggle() {
-    const btnToggle = document.getElementById('btnToggleColumns');
-    const dropdown = document.getElementById('columnDropdown');
-    const btnClose = document.getElementById('btnCloseDropdown');
-    const checkboxes = document.querySelectorAll('.column-checkbox');
-
-    // Abrir/cerrar dropdown
-    btnToggle?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('show');
-    });
-
-    // Cerrar con botón X
-    btnClose?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.remove('show');
-    });
-
-    // Cerrar al hacer clic fuera
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.dropdown-columns')) {
-            dropdown.classList.remove('show');
-        }
-    });
-
-    // Manejar cambios en checkboxes
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            const columnIndex = parseInt(e.target.dataset.column);
-            const table = $('#dataTable').DataTable();
-            const column = table.column(columnIndex);
-            column.visible(e.target.checked);
-        });
-    });
-}
-
 }
 
 window.criadorEmprendedorController = new CriadorEmprendedorController();
