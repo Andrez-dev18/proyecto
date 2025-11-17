@@ -19,7 +19,7 @@ class PrecioVivoController
     public function create()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-        if (!isset($data["id"]) || !empty(trim($data["id"]))) {
+        if (isset($data["id"]) && !empty($data["id"])) {
             http_response_code(400);
             echo json_encode(["error" => "El ID debe ser 0 o no enviado para crear un nuevo registro."]);
             return;
