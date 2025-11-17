@@ -1,13 +1,14 @@
-<?php 
-require_once __DIR__ . '/../services/ProvinciaService.php';
+<?php
+require_once __DIR__ . '/../services/VendedorService.php';
 
-class ProvinciaController
+class VendedorController
 {
+
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new ProvinciaService($db);
+        $this->service = new VendedorService($db);
     }
 
     public function getAll()
@@ -67,6 +68,25 @@ class ProvinciaController
         }
     }
 
-}
+    public function obtenerTodosDatosFiltro()
+    {
+        $params = [
+            'start'       => intval($_GET['start'] ?? 0),
+            'length'      => intval($_GET['length'] ?? 10),
+            'search'      => $_GET['search'] ?? ['value' => '']
+        ];
 
-?>
+        $datos = $this->service->obtenerDatosFiltrados($params);
+        $recordsTotal = $this->service->obtenerTotalRegistros();
+        $recordsFiltered = $this->service->obtenerTotalFiltrados($params);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success',
+            'params:' => $params,
+            'data' => $datos,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered
+        ]);
+    }
+}

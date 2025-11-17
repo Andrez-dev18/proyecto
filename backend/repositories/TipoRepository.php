@@ -20,4 +20,48 @@ class TipoRepository
         $query = "SELECT * FROM com_tipo ORDER BY codigo DESC";
         return $this->executeQuery($query);
     }
+
+    public function save($data)
+    {
+        // ----------------- UPDATE -----------------
+        if (!empty($data["codigo"])) {
+
+            $query = "
+            UPDATE com_tipo SET
+                nombre = :nombre,
+                linea  = :linea
+            WHERE codigo = :codigo
+        ";
+
+            $stmt = $this->conn->prepare($query);
+
+            return $stmt->execute([
+                ":codigo" => $data["codigo"],
+                ":nombre" => $data["nombre"] ?? '',
+                ":linea"  => $data["linea"] ?? ''
+            ]);
+        }
+
+        // ----------------- INSERT -----------------
+        $query = "
+        INSERT INTO com_tipo (nombre, linea)
+        VALUES (:nombre, :linea)
+    ";
+
+        $stmt = $this->conn->prepare($query);
+
+        return $stmt->execute([
+            ":nombre" => $data["nombre"] ?? '',
+            ":linea"  => $data["linea"] ?? ''
+        ]);
+    }
+
+    public function delete($id)
+    {
+        $query = "DELETE FROM com_tipo WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':id' => $id]);
+        return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
+    }
+
 }
