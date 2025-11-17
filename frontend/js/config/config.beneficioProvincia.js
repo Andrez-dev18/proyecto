@@ -33,28 +33,28 @@ const BeneficioProvinciaConfig = {
 
     MENSAJES: {
         EXITO: {
-            CARGA: '✅ Datos cargados exitosamente',
-            GUARDADO: '✅ Registro guardado exitosamente',
-            ACTUALIZADO: '✅ Registro actualizado exitosamente',
-            ELIMINADO: '✅ Registro eliminado exitosamente',
-            EXPORTADO: '✅ Iniciando descarga de Excel...'
+            CARGA: 'Datos cargados exitosamente',
+            GUARDADO: 'Registro guardado exitosamente',
+            ACTUALIZADO: 'Registro actualizado exitosamente',
+            ELIMINADO: 'Registro eliminado exitosamente',
+            EXPORTADO: 'Iniciando descarga de Excel...'
         },
         ERROR: {
-            CARGAR: '❌ Error al cargar los datos',
-            GUARDAR: '❌ Error al guardar el registro',
-            ACTUALIZAR: '❌ Error al actualizar el registro',
-            ELIMINAR: '❌ Error al eliminar el registro',
-            EXPORTAR: '❌ Error al exportar',
-            CATALOGOS: '❌ Error al cargar catálogos',
-            CONEXION: '❌ Error de conexión con el servidor',
-            FORMATO: '❌ Formato de respuesta inválido'
+            CARGAR: 'Error al cargar los datos',
+            GUARDAR: 'Error al guardar el registro',
+            ACTUALIZAR: 'Error al actualizar el registro',
+            ELIMINAR: 'Error al eliminar el registro',
+            EXPORTAR: 'Error al exportar',
+            CATALOGOS: 'Error al cargar catálogos',
+            CONEXION: 'Error de conexión con el servidor',
+            FORMATO: 'Formato de respuesta inválido'
         },
         ADVERTENCIA: {
-            SELECCIONAR: '⚠️ Selecciona un registro de la tabla',
-            SIN_DATOS: '⚠️ No hay datos para exportar',
-            FECHA_REQUERIDA: '⚠️ La fecha es obligatoria',
-            PROVINCIA_REQUERIDA: '⚠️ La provincia es obligatoria',
-            PROVEEDOR_REQUERIDO: '⚠️ El proveedor es obligatorio'
+            SELECCIONAR: 'Selecciona un registro de la tabla',
+            SIN_DATOS: 'No hay datos para exportar',
+            FECHA_REQUERIDA: 'La fecha es obligatoria',
+            PROVINCIA_REQUERIDA: 'La provincia es obligatoria',
+            PROVEEDOR_REQUERIDO: 'El proveedor es obligatorio'
         },
         CONFIRMACION: {
             ELIMINAR: '¿Estás seguro de eliminar este registro?\n\nEsta acción no se puede deshacer.'

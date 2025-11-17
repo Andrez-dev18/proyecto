@@ -31,6 +31,7 @@ require_once __DIR__ . '/../controllers/IngresosLimaController.php';
 require_once __DIR__ . '/../controllers/GallinaCDController.php';
 require_once __DIR__ . '/../controllers/ProductoSustitutoController.php';
 require_once __DIR__ . '/../controllers/ETL_Controller.php';
+require_once __DIR__ . '/../controllers/TipoGallinaController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -79,6 +80,7 @@ $ETLController = new ETL_Controller($db);
 $IngresosLimaController = new IngresosLimaController($db);
 $GallinaCDController = new GallinaCDController($db);
 $ProductoSustitutoController = new ProductoSustitutoController($db);
+$TipoGallinaController = new TipoGallinaController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -694,6 +696,9 @@ elseif (preg_match("/\/gallinacd\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/gallinacd/exportar") !== false && $request == "GET") {
     $reporteController->exportarGallinaCdExcel();
+    exit;
+}elseif (strpos($path, "/tipoGallina/all") !== false && $request == "GET") {
+    $TipoGallinaController->getAll();
     exit;
 }
 

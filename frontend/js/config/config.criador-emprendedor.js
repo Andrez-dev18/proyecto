@@ -23,3 +23,4 @@ const CriadorEmprendedorConfig = {
 };
 
 window.CriadorEmprendedorConfig = CriadorEmprendedorConfig;
+

@@ -5,27 +5,98 @@ class TiendaController {
         this.datos = [];
         this.catalogos = {};
         this.config = window.TiendaConfig;
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle();
+        this.setupToggleFiltros();
         await this.cargarDatos();
+    }
+
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
+    }
+
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
     }
 
     async cargarCatalogos() {
         try {
-            console.log('📦 Cargando catálogos...');
             const [empresas, tipos] = await Promise.all([
                 this.service.getEmpresas(),
                 this.service.getTipos()
             ]);
             
             this.catalogos = { empresas, tipos };
-            console.log('✅ Catálogos cargados:', this.catalogos);
             this.poblarSelects();
         } catch (error) {
-            console.error('❌ Error al cargar catálogos:', error);
+            console.error('Error al cargar catálogos:', error);
         }
     }
 
@@ -68,14 +139,12 @@ class TiendaController {
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('📊 Cargando datos...');
             this.datos = await this.service.getAll();
-            console.log('✅ Datos cargados:', this.datos.length);
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('❌ Error:', error);
-            this.mostrarNotificacion('❌ Error al cargar datos', 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
             this.renderizarTabla();
         } finally {
@@ -86,7 +155,6 @@ class TiendaController {
     async aplicarFiltros() {
         try {
             this.mostrarCargando(true);
-            console.log('🔍 === INICIANDO FILTRADO ===');
 
             const filtros = {};
             const fechaInicio = document.getElementById('filterFechaInicio').value;
@@ -98,11 +166,8 @@ class TiendaController {
             if (fechaFin) filtros.fechaFin = fechaFin;
             if (empresaId) filtros.empresa = parseInt(empresaId);
             if (tipoId) filtros.tipo = parseInt(tipoId);
-
-            console.log('📤 Filtros a aplicar:', filtros);
             
             if (!fechaInicio && !fechaFin && !empresaId && !tipoId) {
-                console.log('📊 Sin filtros, cargando todos los datos');
                 await this.cargarDatos();
                 return;
             }
@@ -117,14 +182,12 @@ class TiendaController {
                 this.datos = [];
             }
             
-            console.log(`✅ Filtrado completado: ${this.datos.length} registros`);
-            
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
+            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
             
         } catch (error) {
-            console.error('❌ Error al filtrar:', error);
-            this.mostrarNotificacion('❌ Error al filtrar: ' + error.message, 'error');
+            console.error('Error al filtrar:', error);
+            this.mostrarNotificacion('Error al filtrar: ' + error.message, 'error');
             await this.cargarDatos();
         } finally {
             this.mostrarCargando(false);
@@ -140,13 +203,8 @@ class TiendaController {
     }
 
     renderizarTabla() {
-        console.log('🔄 Renderizando tabla con', this.datos.length, 'registros');
-        
         const tbody = document.getElementById('tableBody');
-        if (!tbody) {
-            console.error('❌ No se encontró tbody');
-            return;
-        }
+        if (!tbody) return;
 
         const table = $('.min-w-full');
         if ($.fn.DataTable.isDataTable(table)) {
@@ -162,7 +220,7 @@ class TiendaController {
 
         this.datos.forEach((registro, i) => {
             const tr = document.createElement('tr');
-            tr.className = 'hover:bg-teal-50 transition-colors';
+            tr.className = 'hover:bg-blue-50 transition-colors';
             tr.innerHTML = `
                 <td class="px-2 py-1 border-b text-sm text-center">${i + 1}</td>
                 <td class="px-2 py-1 border-b text-sm">${registro.fecha || '-'}</td>
@@ -185,13 +243,11 @@ class TiendaController {
             
             editBtn.onclick = () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('📝 Editando:', this.registroSeleccionado);
                 this.modificarSeleccionado();
             };
             
             deleteBtn.onclick = async () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('🗑️ Eliminando:', this.registroSeleccionado);
                 await this.eliminarSeleccionado();
             };
             
@@ -200,15 +256,21 @@ class TiendaController {
         
         setTimeout(() => {
             try {
-                $('.min-w-full').DataTable({
+                this.dataTable = $('.min-w-full').DataTable({
                     pageLength: 10,
                     language: {
-                        url: this.config.UI.DATATABLES_LANGUAGE
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
                     },
                     responsive: true,
-                    order: [[1, 'desc']]
+                    order: [[1, 'desc']],
+                    scrollX: true,
+                    drawCallback: () => {
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const column = this.dataTable.column(parseInt(columnIndex));
+                            column.visible(this.columnasVisibles[columnIndex]);
+                        });
+                    }
                 });
-                console.log('✅ DataTable inicializado');
             } catch (error) {
                 console.error('Error al inicializar DataTable:', error);
             }
@@ -241,11 +303,11 @@ class TiendaController {
         try {
             this.mostrarCargando(true);
             await this.service.delete(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado', 'success');
+            this.mostrarNotificacion('Registro eliminado', 'success');
             await this.cargarDatos();
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al eliminar', 'error');
+            this.mostrarNotificacion('Error al eliminar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -253,7 +315,6 @@ class TiendaController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        console.log('📝 Cargando en formulario:', r);
         
         document.getElementById('modalFecha').value = r.fecha || '';
         
@@ -283,24 +344,21 @@ class TiendaController {
 
         try {
             this.mostrarCargando(true);
-            console.log('💾 Guardando registro:', data);
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                console.log('📝 Actualizando registro ID:', data.id);
                 await this.service.update(data);
-                this.mostrarNotificacion('✅ Registro actualizado', 'success');
+                this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
-                console.log('➕ Creando nuevo registro');
                 await this.service.create(data);
-                this.mostrarNotificacion('✅ Registro creado', 'success');
+                this.mostrarNotificacion('Registro creado', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('❌ Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            console.error('Error al guardar:', error);
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -322,26 +380,22 @@ class TiendaController {
     }
 
     validarFormulario(data) {
-        console.log('🔍 Validando formulario:', data);
-        
         if (!data.fecha) {
-            this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
+            this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
         if (!data.empresa) {
-            this.mostrarNotificacion('⚠️ La empresa es obligatoria', 'warning');
+            this.mostrarNotificacion('La empresa es obligatoria', 'warning');
             return false;
         }
         if (!data.tipo) {
-            this.mostrarNotificacion('⚠️ El tipo es obligatorio', 'warning');
+            this.mostrarNotificacion('El tipo es obligatorio', 'warning');
             return false;
         }
         if (!data.precio || data.precio <= 0) {
-            this.mostrarNotificacion('⚠️ El precio es obligatorio y debe ser mayor a 0', 'warning');
+            this.mostrarNotificacion('El precio es obligatorio y debe ser mayor a 0', 'warning');
             return false;
         }
-        
-        console.log('✅ Validación exitosa');
         return true;
     }
 
@@ -354,7 +408,7 @@ class TiendaController {
 
     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
         
@@ -376,8 +430,6 @@ class TiendaController {
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo}] ${mensaje}`);
-
         let container = document.getElementById('notificaciones-container');
         if (!container) {
             container = document.createElement('div');

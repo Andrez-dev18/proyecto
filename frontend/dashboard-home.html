@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Inicio</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js para gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--color-start) 0%, var(--color-end) 100%);
+        }
+
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ✅ SOLUCIÓN: Contenedores de gráficas con altura fija */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .chart-container-large {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        /* Scroll suave para el contenedor principal */
+        body {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        /* Personalizar scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-12 animate-fade-in-up">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mb-6 shadow-2xl">
+                <i class="fas fa-chart-line text-white text-5xl"></i>
+            </div>
+            <h1 class="text-5xl font-bold gradient-text mb-4">Sistema de Gestión Avícola</h1>
+            <p class="text-xl text-gray-600">Granja Rinconada Del Sur S.A.</p>
+            <p class="text-sm text-gray-500 mt-2">
+                <i class="fas fa-calendar-alt mr-2"></i>
+                <span id="currentDate"></span>
+                <span class="mx-2">|</span>
+                <i class="fas fa-clock mr-2"></i>
+                <span id="currentTime"></span>
+            </p>
+        </div>
+
+        <!-- Tarjetas de Estadísticas Principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Ventas del Mes -->
+            <div class="stat-card rounded-2xl shadow-lg p-6 text-white card-hover animate-fade-in-up" 
+                 style="--color-start: #667eea; --color-end: #764ba2; animation-delay: 0.1s;">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Ventas del Mes</p>
+                        <h3 class="text-3xl font-bold mt-2">S/ <span id="ventasMes">0</span></h3>
+                    </div>
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-dollar-sign text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <span class="flex items-center">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span id="ventasPorcentaje">12.5</span>%
+                    </span>
+                    <span class="ml-2 text-white/70">vs mes anterior</span>
+                </div>
+            </div>
+
+            <!-- Total Criadores -->
+            <div class="stat-card rounded-2xl shadow-lg p-6 text-white card-hover animate-fade-in-up" 
+                 style="--color-start: #f093fb; --color-end: #f5576c; animation-delay: 0.2s;">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Criadores Activos</p>
+                        <h3 class="text-3xl font-bold mt-2"><span id="totalCriadores">0</span></h3>
+                    </div>
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-seedling text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <span class="flex items-center">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        <span id="criadoresPorcentaje">8.2</span>%
+                    </span>
+                    <span class="ml-2 text-white/70">nuevos este mes</span>
+                </div>
+            </div>
+
+            <!-- Producción Diaria -->
+            <div class="stat-card rounded-2xl shadow-lg p-6 text-white card-hover animate-fade-in-up" 
+                 style="--color-start: #4facfe; --color-end: #00f2fe; animation-delay: 0.3s;">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Producción Diaria</p>
+                        <h3 class="text-3xl font-bold mt-2"><span id="produccionDiaria">0</span> <span class="text-xl">unid</span></h3>
+                    </div>
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-egg text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <span class="flex items-center">
+                        <span class="pulse-dot inline-block w-2 h-2 bg-white rounded-full mr-2"></span>
+                        En tiempo real
+                    </span>
+                </div>
+            </div>
+
+            <!-- Precio Promedio -->
+            <div class="stat-card rounded-2xl shadow-lg p-6 text-white card-hover animate-fade-in-up" 
+                 style="--color-start: #43e97b; --color-end: #38f9d7; animation-delay: 0.4s;">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-white/80 text-sm font-medium">Precio Promedio</p>
+                        <h3 class="text-3xl font-bold mt-2">S/ <span id="precioPromedio">0.00</span></h3>
+                    </div>
+                    <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-line text-3xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center text-sm">
+                    <span class="flex items-center">
+                        <i class="fas fa-minus mr-1"></i>
+                        <span id="precioPorcentaje">2.1</span>%
+                    </span>
+                    <span class="ml-2 text-white/70">vs semana anterior</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficas y Tablas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Gráfica de Ventas Mensuales -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover animate-fade-in-up" style="animation-delay: 0.5s;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-bar text-blue-600 mr-3"></i>
+                        Ventas Mensuales
+                    </h3>
+                    <select class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                        <option>2025</option>
+                        <option>2024</option>
+                    </select>
+                </div>
+                <!-- ✅ Contenedor con altura fija -->
+                <div class="chart-container">
+                    <canvas id="chartVentasMensuales"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfica de Producción por Tipo -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover animate-fade-in-up" style="animation-delay: 0.6s;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-pie text-purple-600 mr-3"></i>
+                        Producción por Tipo
+                    </h3>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold">
+                        Este mes
+                    </span>
+                </div>
+                <!-- ✅ Contenedor con altura fija -->
+                <div class="chart-container">
+                    <canvas id="chartProduccionTipo"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica de Línea - Tendencia de Precios -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 card-hover animate-fade-in-up" style="animation-delay: 0.7s;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-area text-green-600 mr-3"></i>
+                    Tendencia de Precios - Últimos 30 Días
+                </h3>
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+                        7 días
+                    </button>
+                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors">
+                        30 días
+                    </button>
+                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-300 transition-colors">
+                        90 días
+                    </button>
+                </div>
+            </div>
+            <!-- ✅ Contenedor con altura fija más grande -->
+            <div class="chart-container-large">
+                <canvas id="chartTendenciaPrecios"></canvas>
+            </div>
+        </div>
+
+        <!-- Sección de Accesos Rápidos -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-fade-in-up" style="animation-delay: 0.8s;">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-bolt text-yellow-500 mr-3"></i>
+                Accesos Rápidos
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Card 1 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-shopping-cart text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Mercado</span>
+                </a>
+
+                <!-- Card 2 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard-criadores-emprendedores.html','criador')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-seedling text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Criadores</span>
+                </a>
+
+                <!-- Card 3 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard-huevo.html','huevo')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-egg text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Huevos</span>
+                </a>
+
+                <!-- Card 4 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard_tamanoMercado.html','tamanoMercado')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-pie text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Tamaño</span>
+                </a>
+
+                <!-- Card 5 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard-capturas.html','vivo-arequipa')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-camera text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Capturas</span>
+                </a>
+
+                <!-- Card 6 -->
+                <a href="#" onclick="parent.loadDashboardAndData('dashboard-gallina.html','gallina')" 
+                   class="flex flex-col items-center p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:shadow-lg transition-all group">
+                    <div class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-drumstick-bite text-white text-xl"></i>
+                    </div>
+                    <span class="text-sm font-semibold text-gray-700 text-center">Gallinas</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Últimas Actividades -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Últimos Registros -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-fade-in-up" style="animation-delay: 0.9s;">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-clock text-indigo-600 mr-3"></i>
+                    Últimos Registros
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-plus text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">Nuevo registro de huevos</p>
+                            <p class="text-xs text-gray-500">Hace 5 minutos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user-plus text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">Criador registrado</p>
+                            <p class="text-xs text-gray-500">Hace 1 hora</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-chart-line text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-800">Actualización de precios</p>
+                            <p class="text-xs text-gray-500">Hace 3 horas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas y Notificaciones -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 animate-fade-in-up" style="animation-delay: 1s;">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-bell text-red-600 mr-3"></i>
+                    Alertas
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-start p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mt-1 mr-3"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Stock bajo en Arequipa</p>
+                            <p class="text-xs text-gray-600 mt-1">Revisar inventario de huevos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+                        <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Actualización disponible</p>
+                            <p class="text-xs text-gray-600 mt-1">Nueva versión del sistema</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start p-3 bg-green-50 border-l-4 border-green-500 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600 mt-1 mr-3"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Backup completado</p>
+                            <p class="text-xs text-gray-600 mt-1">Respaldo automático exitoso</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 pb-8 text-gray-500">
+            <p>© 2025 | Granja Rinconada Del Sur S.A. | Todos los derechos reservados</p>
+        </div>
+    </div>
+
+    <script>
+        // Actualizar fecha y hora
+        function updateDateTime() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-ES', options);
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-ES');
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+
+        // Función para animar números
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                obj.textContent = current.toLocaleString('es-PE');
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Simular carga de datos
+        window.addEventListener('DOMContentLoaded', () => {
+            // Animar estadísticas
+            animateValue('ventasMes', 0, 125450, 1500);
+            animateValue('totalCriadores', 0, 47, 1000);
+            animateValue('produccionDiaria', 0, 8500, 1500);
+            
+            setTimeout(() => {
+                document.getElementById('precioPromedio').textContent = '12.50';
+            }, 500);
+
+            // Gráfica de Ventas Mensuales
+            const ctxVentas = document.getElementById('chartVentasMensuales').getContext('2d');
+            new Chart(ctxVentas, {
+                type: 'bar',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                    datasets: [{
+                        label: 'Ventas (S/)',
+                        data: [85000, 92000, 78000, 105000, 98000, 112000, 125000, 118000, 130000, 122000, 135000, 125450],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfica de Producción por Tipo
+            const ctxProduccion = document.getElementById('chartProduccionTipo').getContext('2d');
+            new Chart(ctxProduccion, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Huevos Blancos', 'Huevos Rojos', 'Pollos Vivos', 'Gallinas', 'Otros'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: [
+                            'rgba(102, 126, 234, 0.8)',
+                            'rgba(245, 87, 108, 0.8)',
+                            'rgba(67, 233, 123, 0.8)',
+                            'rgba(252, 211, 77, 0.8)',
+                            'rgba(156, 163, 175, 0.8)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Gráfica de Tendencia de Precios
+            const ctxTendencia = document.getElementById('chartTendenciaPrecios').getContext('2d');
+            new Chart(ctxTendencia, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, (_, i) => i + 1),
+                    datasets: [
+                        {
+                            label: 'Precio Mayorista',
+                            data: [12.2, 12.3, 12.1, 12.4, 12.5, 12.3, 12.6, 12.4, 12.7, 12.5, 12.8, 12.6, 12.9, 12.7, 13.0, 12.8, 12.9, 13.1, 12.9, 13.0, 13.2, 13.0, 13.1, 13.3, 13.1, 13.2, 13.4, 13.2, 13.3, 13.5],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Precio Público',
+                            data: [14.5, 14.6, 14.4, 14.7, 14.8, 14.6, 14.9, 14.7, 15.0, 14.8, 15.1, 14.9, 15.2, 15.0, 15.3, 15.1, 15.2, 15.4, 15.2, 15.3, 15.5, 15.3, 15.4, 15.6, 15.4, 15.5, 15.7, 15.5, 15.6, 15.8],
+                            borderColor: 'rgba(67, 233, 123, 1)',
+                            backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'S/ ' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -6,11 +6,64 @@ class TamanoMercadoController {
         this.registroSeleccionado = null;
         this.datos = [];
         this.catalogos = {};
+        this.dataTable = null; 
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle();
+    }
+
+
+    // MÉTODO: Setup de toggle de columnas
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        // Inicializar estado de columnas
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        // Toggle dropdown
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
     }
 
 
@@ -52,10 +105,10 @@ class TamanoMercadoController {
             };
 
             this.poblarSelects();
-            console.log('✅ Catálogos poblados correctamente');
+            console.log('Catálogos poblados correctamente');
         } catch (error) {
             console.error('Error al cargar catálogos:', error);
-            this.mostrarNotificacion('❌ Error al cargar catálogos: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al cargar catálogos: ' + error.message, 'error');
         }
     }
 
@@ -249,12 +302,12 @@ class TamanoMercadoController {
         const thead = document.querySelector('thead tr');
         if (!thead) return;
 
-        // 🔹 Destruir cualquier DataTable previo
+        // Destruir cualquier DataTable previo
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        // 🔹 Definir columnas base
+        // Definir columnas base
         const columnas = [
             'id', 'fecha', 'tipo', 'linea', 'provincia', 'zona',
             'empresa', 'proveedor', 'producto',
@@ -262,16 +315,16 @@ class TamanoMercadoController {
             'info_mercado', 'nom_db'
         ];
 
-        // 🔹 Agregar columna de opciones
+        // Agregar columna de opciones
         const columnasConOpciones = [...columnas, 'Opciones'];
 
-        // 🔹 Generar dinámicamente las cabeceras del thead
+        // Generar dinámicamente las cabeceras del thead
         thead.innerHTML = columnasConOpciones
             .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
             .join('');
 
-        // 🔹 Inicializar DataTable con AJAX y filtros
-        const dt = table.DataTable({
+        // Inicializar DataTable con AJAX y filtros
+        this.dataTable = table.DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -321,18 +374,35 @@ class TamanoMercadoController {
             pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            },
+            drawCallback: () => {
+                // Aplicar visibilidad de columnas después de cada redibujado
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    if (column) {
+                        column.visible(this.columnasVisibles[columnIndex]);
+                    }
+                });
             }
         });
 
-        // 🟢 Delegar eventos para los botones de acción (seguros con renderizado dinámico)
+        // Aplicar visibilidad inicial
+        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+            const column = this.dataTable.column(parseInt(columnIndex));
+            if (column) {
+                column.visible(this.columnasVisibles[columnIndex]);
+            }
+        });
+
+        // Delegar eventos para los botones de acción
         $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
-            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             this.modificarSeleccionado();
         });
 
         $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
-            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             await this.eliminarSeleccionado();
         });
@@ -568,7 +638,7 @@ class TamanoMercadoController {
 
         // Contenido del mensaje
         modal.innerHTML = `
-    <h3 style="color: #2e7d32; margin-bottom: 10px;">✅ ETL completado exitosamente</h3>
+    <h3 style="color: #2e7d32; margin-bottom: 10px;">ETL completado exitosamente</h3>
     <p style="margin-bottom: 20px; font-size: 15px; color: #333;">
       Se procesaron un total de <strong>${total}</strong> registros.<br><br>
       Todo se ejecutó correctamente.

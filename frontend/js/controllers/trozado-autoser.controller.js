@@ -5,33 +5,125 @@ class TrozadoAutoserController {
         this.datos = [];
         this.catalogos = {};
         this.config = window.TrozadoAutoserConfig;
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle(); 
+        this.setupToggleFiltros();
         await this.cargarDatos();
+    }
+
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        console.log('🔧 Configurando toggle de columnas...');
+
+        // Inicializar estado de columnas
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        // Abrir/cerrar dropdown
+        if (btnToggle) {
+            btnToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const isVisible = dropdown.classList.contains('show');
+                
+                if (isVisible) {
+                    dropdown.classList.remove('show');
+                } else {
+                    dropdown.classList.add('show');
+                }
+            });
+        }
+
+        // Cerrar con botón X
+        if (btnClose) {
+            btnClose.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.remove('show');
+            });
+        }
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
+    }
+
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        // Estado inicial: cerrado
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
     }
 
     async cargarCatalogos() {
         try {
-            console.log('📦 Cargando catálogos...');
+            console.log('Cargando catálogos...');
             
-            // Cargar cortes desde el backend o usar valores por defecto
             const cortes = await this.service.getCortes();
             
             this.catalogos = { cortes };
             
-            console.log('✅ Cortes configurados:', cortes);
+            console.log('Cortes cargados:', cortes);
             
             this.poblarSelects();
         } catch (error) {
-            console.error('❌ Error al cargar catálogos:', error);
+            console.error('Error al cargar catálogos:', error);
+            this.mostrarNotificacion('Error al cargar catálogos', 'error');
         }
     }
 
     poblarSelects() {
-        // Poblar select del modal y filtro con los cortes
         this.poblarSelect('filterCorte', this.catalogos.cortes, 'id', 'corte');
         this.poblarSelect('modalCorte', this.catalogos.cortes, 'id', 'corte');
     }
@@ -66,12 +158,17 @@ class TrozadoAutoserController {
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
+            console.log('Cargando todos los datos...');
+            
             this.datos = await this.service.getAll();
+            
+            console.log('Datos cargados:', this.datos.length, 'registros');
+            
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al cargar datos', 'error');
+            this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
             this.renderizarTabla();
         } finally {
@@ -82,7 +179,7 @@ class TrozadoAutoserController {
     async aplicarFiltros() {
         try {
             this.mostrarCargando(true);
-            console.log('🔍 === INICIANDO FILTRADO ===');
+            console.log('=== INICIANDO FILTRADO ===');
 
             const filtros = {};
             const fechaInicio = document.getElementById('filterFechaInicio').value;
@@ -93,10 +190,11 @@ class TrozadoAutoserController {
             if (fechaFin) filtros.fechaFin = fechaFin;
             if (corteId) filtros.corte = parseInt(corteId);
 
-            console.log('📤 Filtros a aplicar:', filtros);
+            console.log('Filtros a aplicar:', filtros);
             
+            // Si no hay filtros, cargar todos
             if (!fechaInicio && !fechaFin && !corteId) {
-                console.log('📊 Sin filtros, cargando todos los datos');
+                console.log('Sin filtros, cargando todos los datos');
                 await this.cargarDatos();
                 return;
             }
@@ -111,14 +209,14 @@ class TrozadoAutoserController {
                 this.datos = [];
             }
             
-            console.log(`✅ Filtrado completado: ${this.datos.length} registros`);
+            console.log(`Filtrado completado: ${this.datos.length} registros`);
             
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
+            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
             
         } catch (error) {
-            console.error('❌ Error al filtrar:', error);
-            this.mostrarNotificacion('❌ Error al filtrar: ' + error.message, 'error');
+            console.error('Error al filtrar:', error);
+            this.mostrarNotificacion('Error al filtrar: ' + error.message, 'error');
             await this.cargarDatos();
         } finally {
             this.mostrarCargando(false);
@@ -132,32 +230,36 @@ class TrozadoAutoserController {
         this.cargarDatos();
     }
 
+    // MÉTODO CORREGIDO - Se eliminó el typo "Copy"
     renderizarTabla() {
-        console.log('🔄 Renderizando tabla con', this.datos.length, 'registros');
+        console.log('Renderizando tabla con', this.datos.length, 'registros');
         
         const tbody = document.getElementById('tableBody');
         if (!tbody) {
-            console.error('❌ No se encontró tbody');
+            console.error('No se encontró tbody');
             return;
         }
 
         const table = $('.min-w-full');
+        
+        // Destruir DataTable anterior si existe
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().destroy();
         }
 
         tbody.innerHTML = '';
         
+        // Si no hay datos
         if (this.datos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="11" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
             return;
         }
 
+        // Llenar la tabla con datos
         this.datos.forEach((registro, i) => {
-            // Obtener el nombre del corte correctamente
+            // Obtener nombre del corte
             let nombreCorte = registro.corte;
             
-            // Si registro.corte es un número, buscar el nombre
             if (!isNaN(registro.corte)) {
                 const corteObj = this.catalogos.cortes.find(c => c.id == registro.corte);
                 nombreCorte = corteObj ? corteObj.corte : registro.corte;
@@ -189,32 +291,46 @@ class TrozadoAutoserController {
             const editBtn = tr.querySelector('.edit-btn');
             const deleteBtn = tr.querySelector('.delete-btn');
             
-            editBtn.onclick = () => {
+            editBtn.addEventListener('click', () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('📝 Editando:', this.registroSeleccionado);
+                console.log('Editando:', this.registroSeleccionado);
                 this.modificarSeleccionado();
-            };
+            });
             
-            deleteBtn.onclick = async () => {
+            deleteBtn.addEventListener('click', async () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('🗑️ Eliminando:', this.registroSeleccionado);
+                console.log('Eliminando:', this.registroSeleccionado);
                 await this.eliminarSeleccionado();
-            };
+            });
             
             tbody.appendChild(tr);
         });
         
+        // Inicializar DataTable después de llenar la tabla
         setTimeout(() => {
             try {
-                $('.min-w-full').DataTable({
+                this.dataTable = $('.min-w-full').DataTable({
                     pageLength: 10,
                     language: {
-                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+                        url: this.config.UI.DATATABLES_LANGUAGE
                     },
                     responsive: true,
                     order: [[1, 'desc']],
-                    scrollX: true
+                    scrollX: true,
+                    drawCallback: () => {
+                        // Restaurar visibilidad de columnas después de cada redibujado
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            try {
+                                const column = this.dataTable.column(parseInt(columnIndex));
+                                column.visible(this.columnasVisibles[columnIndex]);
+                            } catch(err) {
+                                console.log('Error al restaurar columna:', columnIndex);
+                            }
+                        });
+                    }
                 });
+                
+                console.log('✅ DataTable inicializado correctamente');
             } catch (error) {
                 console.error('Error al inicializar DataTable:', error);
             }
@@ -231,7 +347,10 @@ class TrozadoAutoserController {
     }
 
     modificarSeleccionado() {
-        if (!this.registroSeleccionado) return;
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro', 'warning');
+            return;
+        }
 
         document.getElementById('modalTitle').textContent = 'Modificar Registro';
         this.cargarDatosEnFormulario();
@@ -241,17 +360,21 @@ class TrozadoAutoserController {
     }
 
     async eliminarSeleccionado() {
-        if (!this.registroSeleccionado) return;
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro', 'warning');
+            return;
+        }
+        
         if (!confirm('¿Estás seguro de eliminar este registro?')) return;
 
         try {
             this.mostrarCargando(true);
             await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado', 'success');
+            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             await this.cargarDatos();
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al eliminar', 'error');
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -259,17 +382,15 @@ class TrozadoAutoserController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        console.log('📝 Cargando en formulario:', r);
+        console.log('Cargando en formulario:', r);
         
         document.getElementById('modalFecha').value = r.fecha || '';
         
-        // Para el corte, manejar ambos casos (nombre o ID)
+        // Buscar el ID del corte
         let corteId = '';
         if (!isNaN(r.corte)) {
-            // Si es un número, usarlo directamente
             corteId = r.corte;
         } else {
-            // Si es texto, buscar el ID
             const corteObj = this.catalogos.cortes.find(c => c.corte === r.corte);
             corteId = corteObj ? corteObj.id : '';
         }
@@ -282,8 +403,6 @@ class TrozadoAutoserController {
         document.getElementById('modalPrecioTiendaPalomar').value = r.precioTiendaPalomar || '';
         document.getElementById('modalPrecioTiendaRicoPollo').value = r.precioTiendaRicoPollo || '';
         document.getElementById('modalPrecioAvelino').value = r.precioAvelino || '';
-        
-        console.log('✅ Corte ID cargado:', document.getElementById('modalCorte').value);
     }
 
     limpiarFormulario() {
@@ -307,28 +426,24 @@ class TrozadoAutoserController {
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
                 await this.service.actualizar(data);
-                this.mostrarNotificacion('✅ Registro actualizado', 'success');
+                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
                 await this.service.crear(data);
-                this.mostrarNotificacion('✅ Registro creado', 'success');
+                this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al guardar', 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     obtenerDatosFormulario() {
-        // Obtener directamente el ID del corte
         const corteId = document.getElementById('modalCorte').value;
-        
-        console.log('📤 Datos del formulario:');
-        console.log('  - Corte ID:', corteId, 'Tipo:', typeof corteId);
         
         return {
             fecha: document.getElementById('modalFecha').value,
@@ -349,11 +464,11 @@ class TrozadoAutoserController {
 
     validarFormulario(data) {
         if (!data.fecha) {
-            this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
+            this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
         if (!data.corte) {
-            this.mostrarNotificacion('⚠️ El corte es obligatorio', 'warning');
+            this.mostrarNotificacion('El corte es obligatorio', 'warning');
             return false;
         }
         return true;
@@ -368,10 +483,10 @@ class TrozadoAutoserController {
 
     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/trozadoAutoser/exportar`, '_blank');
+        window.open(`${this.service.baseURL}${this.config.API.ENDPOINTS.EXCEL}`, '_blank');
     }
 
     mostrarCargando(mostrar) {
@@ -407,6 +522,7 @@ class TrozadoAutoserController {
         };
 
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
+        notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
             <span style="font-size: 20px;">${iconos[tipo]}</span>
             <span>${mensaje}</span>
@@ -414,19 +530,6 @@ class TrozadoAutoserController {
         container.appendChild(notif);
 
         setTimeout(() => notif.remove(), 4000);
-    }
-
-    obtenerNombreCorte(corteId) {
-        if (!corteId) return '-';
-        
-        // Si ya es un nombre (string), devolverlo
-        if (isNaN(corteId)) {
-            return corteId;
-        }
-        
-        // Si es un ID, buscar el nombre
-        const corte = this.catalogos.cortes.find(c => c.id == corteId);
-        return corte ? corte.corte : '-';
     }
 }
 
