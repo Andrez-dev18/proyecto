@@ -27,6 +27,9 @@ require_once __DIR__ . '/../controllers/TamaMerDiaController.php';
 require_once __DIR__ . '/../controllers/TipoPolloController.php';
 require_once __DIR__ . '/../controllers/TipoPolloVivoController.php';
 require_once __DIR__ . '/../controllers/CorteController.php';
+require_once __DIR__ . '/../controllers/IngresosLimaController.php';
+require_once __DIR__ . '/../controllers/GallinaCDController.php';
+require_once __DIR__ . '/../controllers/ProductoSustitutoController.php';
 require_once __DIR__ . '/../controllers/ETL_Controller.php';
 
 /*header("Access-Control-Allow-Origin: *");
@@ -73,6 +76,9 @@ $CriadorEmprendedorController = new CriadorEmprendedorController($db);
 $TamaMerDiaController = new TamaMerDiaController($db);
 $CorteController = new CorteController($db);
 $ETLController = new ETL_Controller($db);
+$IngresosLimaController = new IngresosLimaController($db);
+$GallinaCDController = new GallinaCDController($db);
+$ProductoSustitutoController = new ProductoSustitutoController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -629,6 +635,95 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     ################# FUNCION PARA EJECUTAR ETL DE TABLA TAMAÑO MERCADO  ##########################
 }elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
     $ETLController->run();
+    exit;
+}
+
+
+######### RUTAS COM_DB_INGRESO_LIMA #########
+// obtener todos
+elseif (strpos($path, "/ingresoLima/all") !== false && $request == "GET") {
+    $IngresosLimaController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/ingresoLima/crear") !== false && $request == "POST") {
+    $IngresosLimaController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/ingresoLima/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $IngresosLimaController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/ingresoLima\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $IngresosLimaController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&empresa=1
+}elseif (strpos($path, "/ingresoLima/filtro") !== false && $request == "GET") {
+    $IngresosLimaController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/ingresoLima/exportar") !== false && $request == "GET") {
+    $reporteController->exportarIngreEmpLimaExcel();
+    exit;
+}
+
+######### RUTAS COM_DB_GALLINA_CD #########
+// obtener todos
+elseif (strpos($path, "/gallinacd/all") !== false && $request == "GET") {
+    $GallinaCDController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/gallinacd/crear") !== false && $request == "POST") {
+    $GallinaCDController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/gallinacd/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $GallinaCDController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/gallinacd\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $GallinaCDController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
+}elseif (strpos($path, "/gallinacd/filtro") !== false && $request == "GET") {
+    $GallinaCDController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/gallinacd/exportar") !== false && $request == "GET") {
+    $reporteController->exportarGallinaCdExcel();
+    exit;
+}
+
+
+######### RUTAS COM_DB_PRODUCTO_SUSTITUTO #########
+// obtener todos
+elseif (strpos($path, "/productoSusti/all") !== false && $request == "GET") {
+    $ProductoSustitutoController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/productoSusti/crear") !== false && $request == "POST") {
+    $ProductoSustitutoController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/productoSusti/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $ProductoSustitutoController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/productoSusti\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $ProductoSustitutoController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
+}elseif (strpos($path, "/productoSusti/filtro") !== false && $request == "GET") {
+    $ProductoSustitutoController->obtenerDatosFiltrados();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/productoSusti/exportar") !== false && $request == "GET") {
+    $reporteController->exportarProdSustitutoExcel();
     exit;
 }
 
