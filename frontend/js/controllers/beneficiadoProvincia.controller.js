@@ -4,12 +4,90 @@ class BeneficioProvinciaController {
         this.registroSeleccionado = null;
         this.datos = [];
         this.catalogos = {};
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle();
+        this.setupToggleFiltros();
         await this.cargarDatos();
+    }
+
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        // Inicializar estado de columnas
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        // Toggle dropdown
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
+    }
+
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
     }
 
     async cargarCatalogos() {
@@ -32,10 +110,10 @@ class BeneficioProvinciaController {
             };
 
             this.poblarSelects();
-            console.log('✅ Catálogos poblados correctamente');
+            console.log('Catálogos poblados correctamente');
         } catch (error) {
             console.error('Error al cargar catálogos:', error);
-            this.mostrarNotificacion('❌ Error al cargar catálogos: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al cargar catálogos: ' + error.message, 'error');
         }
     }
 
@@ -91,10 +169,10 @@ class BeneficioProvinciaController {
             }
 
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
             console.error('Error detallado:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
+            this.mostrarNotificacion(error.message, 'error');
             this.datos = [];
             this.renderizarTabla();
         } finally {
@@ -123,10 +201,10 @@ class BeneficioProvinciaController {
             this.datos = result.data || [];
 
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
+            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
         } catch (error) {
             console.error('Error completo:', error);
-            this.mostrarNotificacion('❌ ' + error.message, 'error');
+            this.mostrarNotificacion(error.message, 'error');
             this.datos = [];
             this.renderizarTabla();
         } finally {
@@ -202,17 +280,29 @@ class BeneficioProvinciaController {
             });
         });
 
-        if ($.fn.DataTable.isDataTable('.min-w-full')) {
-            $('.min-w-full').DataTable().destroy();
-        }
-        $('.min-w-full').DataTable({
-            pageLength: 10,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            },
-            responsive: true,
-            order: [[1, 'desc']],
-        });
+        // Re-inicializar DataTable con configuración de columnas visibles
+        setTimeout(() => {
+            try {
+                this.dataTable = $('.min-w-full').DataTable({
+                    pageLength: 10,
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+                    },
+                    responsive: true,
+                    order: [[1, 'desc']],
+                    scrollX: true,
+                    drawCallback: () => {
+                        // Aplicar visibilidad de columnas después de cada redibujado
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const column = this.dataTable.column(parseInt(columnIndex));
+                            column.visible(this.columnasVisibles[columnIndex]);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error al inicializar DataTable:', error);
+            }
+        }, 100);
     }
 
     mostrarModalNuevo() {
@@ -242,7 +332,7 @@ class BeneficioProvinciaController {
         console.log('Registro seleccionado:', this.registroSeleccionado);
 
         if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('⚠️ Selecciona un registro de la tabla', 'warning');
+            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
             return;
         }
 
@@ -253,12 +343,12 @@ class BeneficioProvinciaController {
             console.log('Eliminando ID:', this.registroSeleccionado.id);
 
             await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado exitosamente', 'success');
+            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             this.registroSeleccionado = null;
             await this.cargarDatos();
         } catch (error) {
             console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('❌ Error al eliminar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -316,7 +406,7 @@ class BeneficioProvinciaController {
                 const resultado = await this.service.actualizar(data);
                 console.log('Resultado actualización:', resultado);
 
-                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
@@ -324,14 +414,14 @@ class BeneficioProvinciaController {
                 const resultado = await this.service.crear(data);
                 console.log('Resultado creación:', resultado);
 
-                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
+                this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -390,9 +480,9 @@ class BeneficioProvinciaController {
         this.registroSeleccionado = null;
     }
 
-     exportarExcel() {
+    exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
         window.open(`${this.service.baseURL}/reporte/beneficioProvincia/exportar`, '_blank');

@@ -102,26 +102,26 @@ class PrecioTrozadoService {
     async getEmpresas() {
     try {
         const url = `${this.baseURL}${this.config.CATALOGOS.EMPRESAS}`;
-        console.log('📦 Cargando empresas desde:', url);
+        console.log('Cargando empresas desde:', url);
         
         const response = await fetch(url);
         if (!response.ok) {
-            console.error('❌ Error al cargar empresas');
+            console.error('Error al cargar empresas');
             return [];
         }
         
         const data = await response.json();
-        console.log('✅ Empresas recibidas:', data);
+        console.log('Empresas recibidas:', data);
         
         const empresas = data.map(item => ({
             id: item.codigo || item.id,
             empresa: item.nombre
         }));
         
-        console.log('✅ Empresas mapeadas:', empresas);
+        console.log('Empresas mapeadas:', empresas);
         return empresas;
     } catch (error) {
-        console.error('❌ Error al cargar empresas:', error);
+        console.error('Error al cargar empresas:', error);
         return [];
     }
 }
@@ -130,12 +130,12 @@ class PrecioTrozadoService {
  async getCortes() {
     try {
         const url = `${this.baseURL}${this.config.CATALOGOS.CORTES}`;
-        console.log('📦 Intentando cargar cortes desde:', url);
+        console.log('Intentando cargar cortes desde:', url);
         
         const response = await fetch(url);
         
         if (!response.ok) {
-            console.warn('⚠️ Endpoint de cortes no disponible, usando valores por defecto');
+            console.warn('Endpoint de cortes no disponible, usando valores por defecto');
             // SOLO LOS 6 CORTES QUE EXISTEN
             return [
                 { id: 1, corte: 'PECHUGA ESPECIAL' },
@@ -148,14 +148,14 @@ class PrecioTrozadoService {
         }
         
         const data = await response.json();
-        console.log('✅ Cortes cargados desde backend:', data);
+        console.log('Cortes cargados desde backend:', data);
         
         return data.map(item => ({
             id: item.codigo || item.id,
             corte: item.nombre
         }));
     } catch (error) {
-        console.error('❌ Error al cargar cortes, usando valores por defecto:', error);
+        console.error('Error al cargar cortes, usando valores por defecto:', error);
         // SOLO LOS 6 CORTES QUE EXISTEN
         return [
             { id: 1, corte: 'PECHUGA ESPECIAL' },

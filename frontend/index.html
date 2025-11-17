@@ -177,19 +177,25 @@
                 </button>
 
                 <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
+                    
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp', 'Gestion Vivo Arequipa')"
                         class="menu-link block text-gray-400 hover:text-white">Vivo Arequipa</a>
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia', 'Gestion Vivo Provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
-
-                    <!-- Reemplaza la línea de Beneficiado Provincias en el menú -->
+<!----
+                    
                     <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vivo-arequipa.html','vivo-aqp')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Arequipa</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vivo-provincia.html','vivo-provincia')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
+                -->
+                        <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Beneficiado Provincias</a>
-
-
                     <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('precio-vivo.html','precio-vivo')"
                         class="menu-link block text-gray-400 hover:text-white">Precio Vivo</a>
                     <a href="#"
@@ -202,7 +208,6 @@
                         class="menu-link block text-gray-400 hover:text-white">Huevo</a>
                     <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-gallina.html','gallina')"
                         class="menu-link block text-gray-400 hover:text-white">Gallina</a>
-
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-entero-autoser.html','pollo-entero')"
                         class="menu-link block text-gray-400 hover:text-white">Pollo entero auto servicio</a>
@@ -215,12 +220,33 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-criador')">
+                    onclick="activateAndLoad(this, 'dashboard-criadores-emprendedores.html', 'criador-emprendedor', 'Gestión Criadores Emprendedores')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-seedling w-5"></i>
                         <span class="font-medium">2.- Criaderos Emprendedores</span>
                     </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+            </div>
+
+
+            <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="activateAndLoad(this, 'dashboard-ingreso-lima.html', 'ingreso-lima', 'Gestión Ingresos Lima')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-database w-5"></i>
+                        <span class="font-medium">3.- Ingresos Lima</span>
+                    </span>
+                </button>
+            </div>
+
+
+            <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="activateAndLoad(this, 'dashboard-gallina-cd.html', 'gallina-cd', 'Gestión GallinaCD')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-database w-5"></i>
+                        <span class="font-medium">4.- Gallina CD</span>
+                    </span>
                 </button>
 
                 <div id="submenu-criador" class="submenu hidden pl-10 mt-2 space-y-2">
@@ -232,34 +258,11 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="activateAndLoad(this, 'dashboard-producto-sustituto.html', 'producto-sustituto','Gestión Productos Sustituto')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">3.- DataBase</span>
+                        <i class="fas fa-database w-5"></i>
+                        <span class="font-medium">5.- Producto Sustituto</span>
                     </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
-                </button>
-            </div>
-
-            <div class="menu-group">
-                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
-                    <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">4.- DataBase</span>
-                    </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
-                </button>
-            </div>
-
-            <div class="menu-group">
-                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
-                    <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">5.- DataBase</span>
-                    </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
                 </button>
             </div>
 
@@ -297,7 +300,7 @@
                 </button>
 
                 <div id="submenu-capturas" class="submenu hidden pl-10 mt-2 space-y-2">
-                    <!-- VIVO -->
+                   <!-- VIVO -->
                     <div>
                         <button class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
                             onclick="toggleSubmenu('submenu-capturas-vivo')">
@@ -333,7 +336,38 @@
                 </div>
             </div>
 
+
+
+            <!-- POTENCIAL DE VENTA 
             <div class="menu-group">
+                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                    onclick="toggleSubmenu('submenu-potencial')">
+                    <span class="flex items-center gap-3">
+                        <i class="fas fa-chart-line w-5"></i>
+                        <span class="font-medium">8.- Potencial de Venta</span>
+                    </span>
+                    <i class="fas fa-chevron-down text-sm"></i>
+                </button>
+
+                <div id="submenu-potencial" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('pventas-vivo-arequipa.html','vivo-arequipa', 'Potencial Vivo Arequipa')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Arequipa</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('pventas-vivo-provincias.html','vivo-provincia', 'Potencial Vivo Provincias')"
+                        class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('pventas-beneficiado-arequipa.html','beneficiado-arequipa', 'Potencial Beneficiado Arequipa')"
+                        class="menu-link block text-gray-400 hover:text-white">Beneficiado Arequipa</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('pventas-beneficiado-provincias.html','beneficiado-provincia', 'Potencial Beneficiado Provincias')"
+                        class="menu-link block text-gray-400 hover:text-white">Beneficiado Provincias</a>
+                </div>
+            </div>-->
+
+
+
+            <!--<div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="toggleSubmenu('submenu-2')">
                     <span class="flex items-center gap-3">
@@ -343,6 +377,7 @@
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
             </div>
+            -->
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
@@ -515,8 +550,11 @@
             const titulo = document.getElementById('dashboardTitle');
             //se adiciona el dashboard al array de titulos para cargar el titulo
             const titles = {
-                'dashboard-capturas.html': 'Gestion ' + title,
+                //'dashboard-capturas.html': 'Gestion ' + title,
                 'dashboard-comercializacion.html': title,
+                //'dashboard-vivo-arequipa.html': 'Gestion Provincia',
+                //'dashboard-vivo-provincia.html': 'Gestion Arequipa',
+
                 'dashboard_tamanoMercado.html': 'Gestion Tamaño de Mercado',
                 'dashboard-beneficiado-provincia.html': 'Gestion Beneficio provincia',
                 'precio-vivo.html': 'Gestion Precio vivo',
@@ -527,6 +565,14 @@
                 'dashboard-entero-autoser.html': 'Gestion Pollo Entero Autoser',
                 'dashboard-trozado-autoser.html': 'Gestion Pollo Trozado Autoser',
                 'dashboard-criadores-emprendedores.html': title,
+                'dashboard-ingreso-lima.html': title,
+                'dashboard-gallina-cd.html': title,
+                'dashboard-producto-sustituto.html': title,
+
+                'pventas-vivo-arequipa.html': title || 'Potencial Vivo Arequipa',
+                'pventas-vivo-provincias.html': title || 'Potencial Vivo Provincias',
+                'pventas-beneficiado-arequipa.html': title || 'Potencial Beneficiado Arequipa',
+                'pventas-beneficiado-provincias.html': title || 'Potencial Beneficiado Provincias'
 
             };
 
@@ -645,7 +691,7 @@
             loadDashboardAndData(dashboardUrl, tipo, title);
         }
 
-         window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', () => {
             // MODIFICAR DASHBOARD POR DEFECTO
 
             // loadDashboardAndData('dashboard-comercializacion.html', 'vivo-aqp');
@@ -674,8 +720,8 @@
     </script>
 
     <script src="js/config/config.js"></script>
-    <script src="js/services/comercializacion.service.js"></script>
-    <script src="js/controllers/comercializacion.controller.js"></script>
+    <!-- <script src="js/services/comercializacion.service.js"></script>
+    <script src="js/controllers/comercializacion.controller.js"></script>-->
 
     <script src="js/services/auth.service.js"></script>
     <script src="js/controllers/session.controller.js"></script>

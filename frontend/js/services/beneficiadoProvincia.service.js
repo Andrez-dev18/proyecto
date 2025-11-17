@@ -9,7 +9,7 @@ class BeneficioProvinciaService {
     async getAll() {
         try {
             const url = `${this.baseURL}${this.endpoints.ALL}`;
-            console.log('🌐 Fetch URL:', url);
+            console.log('Fetch URL:', url);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -19,8 +19,8 @@ class BeneficioProvinciaService {
                 }
             });
             
-            console.log('📡 Response status:', response.status);
-            console.log('📡 Response ok:', response.ok);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,13 +28,13 @@ class BeneficioProvinciaService {
             
             // Obtener texto primero para ver qué llega
             const text = await response.text();
-            console.log('📄 Response text (first 500 chars):', text.substring(0, 500));
+            console.log('Response text (first 500 chars):', text.substring(0, 500));
             
             // Intentar parsear como JSON
             const data = JSON.parse(text);
-            console.log('✅ Data parsed successfully');
-            console.log('📊 Data type:', Array.isArray(data) ? 'Array' : typeof data);
-            console.log('📊 Data length:', Array.isArray(data) ? data.length : 'N/A');
+            console.log('Data parsed successfully');
+            console.log('Data type:', Array.isArray(data) ? 'Array' : typeof data);
+            console.log('Data length:', Array.isArray(data) ? data.length : 'N/A');
             
             // Tu API devuelve un array directo
             if (Array.isArray(data)) {
@@ -53,7 +53,7 @@ class BeneficioProvinciaService {
             
             return [];
         } catch (error) {
-            console.error('❌ Fetch error:', error);
+            console.error('Fetch error:', error);
             throw new Error(`Error al cargar datos: ${error.message}`);
         }
     }
@@ -68,7 +68,7 @@ class BeneficioProvinciaService {
             if (filtros.proveedor) params.append('proveedor', filtros.proveedor);
 
             const url = `${this.baseURL}${this.endpoints.FILTRO}?${params}`;
-            console.log('🔍 Filtrar URL:', url);
+            console.log('Filtrar URL:', url);
             
             const response = await fetch(url);
 
@@ -90,14 +90,14 @@ class BeneficioProvinciaService {
             
             return { status: 'success', data: [] };
         } catch (error) {
-            console.error('❌ Error en filtrar:', error);
+            console.error('Error en filtrar:', error);
             throw error;
         }
     }
 
     async crear(data) {
         try {
-            console.log('➕ Creando registro:', data);
+            console.log('Creando registro:', data);
             
             const response = await fetch(`${this.baseURL}${this.endpoints.CREAR}`, {
                 method: 'POST',
@@ -112,14 +112,14 @@ class BeneficioProvinciaService {
             const text = await response.text();
             return text ? JSON.parse(text) : { success: true };
         } catch (error) {
-            console.error('❌ Error en crear:', error);
+            console.error('Error en crear:', error);
             throw error;
         }
     }
 
     async actualizar(data) {
         try {
-            console.log('📝 Actualizando registro:', data);
+            console.log('Actualizando registro:', data);
             
             const response = await fetch(`${this.baseURL}${this.endpoints.ACTUALIZAR}`, {
                 method: 'PUT',
@@ -134,14 +134,14 @@ class BeneficioProvinciaService {
             const text = await response.text();
             return text ? JSON.parse(text) : { success: true };
         } catch (error) {
-            console.error('❌ Error en actualizar:', error);
+            console.error('Error en actualizar:', error);
             throw error;
         }
     }
 
     async eliminar(id) {
         try {
-            console.log('🗑️ Eliminando ID:', id);
+            console.log('Eliminando ID:', id);
             
             const url = `${this.baseURL}${this.endpoints.ELIMINAR}/${id}`;
             const response = await fetch(url, { method: 'DELETE' });
@@ -153,7 +153,7 @@ class BeneficioProvinciaService {
             const text = await response.text();
             return text ? JSON.parse(text) : { success: true };
         } catch (error) {
-            console.error('❌ Error en eliminar:', error);
+            console.error('Error en eliminar:', error);
             throw error;
         }
     }
@@ -162,7 +162,7 @@ class BeneficioProvinciaService {
         try {
             window.open(`${this.baseURL}${this.endpoints.EXCEL}`, '_blank');
         } catch (error) {
-            console.error('❌ Error en exportar:', error);
+            console.error('Error en exportar:', error);
             throw error;
         }
     }
@@ -170,12 +170,12 @@ class BeneficioProvinciaService {
     async getProveedores() {
         try {
             const url = `${this.baseURL}${this.config.CATALOGOS.PROVEEDORES}`;
-            console.log('📦 Cargando proveedores:', url);
+            console.log('Cargando proveedores:', url);
             
             const response = await fetch(url);
             
             if (!response.ok) {
-                console.warn('⚠️ No se pudieron cargar proveedores');
+                console.warn('No se pudieron cargar proveedores');
                 return [];
             }
             
@@ -200,7 +200,7 @@ class BeneficioProvinciaService {
             
             return [];
         } catch (error) {
-            console.error('❌ Error al cargar proveedores:', error);
+            console.error('Error al cargar proveedores:', error);
             return [];
         }
     }
@@ -208,12 +208,12 @@ class BeneficioProvinciaService {
     async getProvincias() {
         try {
             const url = `${this.baseURL}${this.config.CATALOGOS.PROVINCIAS}`;
-            console.log('📦 Cargando provincias:', url);
+            console.log('Cargando provincias:', url);
             
             const response = await fetch(url);
             
             if (!response.ok) {
-                console.warn('⚠️ No se pudieron cargar provincias');
+                console.warn('No se pudieron cargar provincias');
                 return [];
             }
             
@@ -238,7 +238,7 @@ class BeneficioProvinciaService {
             
             return [];
         } catch (error) {
-            console.error('❌ Error al cargar provincias:', error);
+            console.error('Error al cargar provincias:', error);
             return [];
         }
     }

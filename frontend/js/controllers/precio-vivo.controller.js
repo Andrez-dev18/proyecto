@@ -5,23 +5,101 @@ class PrecioVivoController {
         this.datos = [];
         this.catalogos = {};
         this.config = window.PrecioVivoConfig;
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle();
+        this.setupToggleFiltros();
         await this.cargarDatos();
+    }
+
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+        const checkboxes = document.querySelectorAll('.column-checkbox');
+
+        // Inicializar estado de columnas
+        checkboxes.forEach(checkbox => {
+            const columnIndex = parseInt(checkbox.dataset.column);
+            this.columnasVisibles[columnIndex] = checkbox.checked;
+        });
+
+        // Toggle dropdown
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+        });
+    }
+
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
     }
 
     async cargarCatalogos() {
         try {
-            console.log('📦 Cargando catálogos...');
+            console.log('Cargando catálogos...');
             const empresas = await this.service.getEmpresas();
             this.catalogos = { empresas };
-            console.log('✅ Empresas cargadas:', empresas);
+            console.log('Empresas cargadas:', empresas);
             this.poblarSelects();
         } catch (error) {
-            console.error('❌ Error al cargar catálogos:', error);
+            console.error('Error al cargar catálogos:', error);
         }
     }
 
@@ -61,14 +139,14 @@ class PrecioVivoController {
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('📊 Cargando datos...');
+            console.log('Cargando datos...');
             this.datos = await this.service.getAll();
-            console.log('✅ Datos cargados:', this.datos.length);
+            console.log('Datos cargados:', this.datos.length);
             this.renderizarTabla();
-            this.mostrarNotificacion(`✅ ${this.datos.length} registros cargados`, 'success');
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('❌ Error:', error);
-            this.mostrarNotificacion('❌ Error al cargar datos', 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
             this.renderizarTabla();
         } finally {
@@ -79,7 +157,7 @@ class PrecioVivoController {
     async aplicarFiltros() {
         try {
             this.mostrarCargando(true);
-            console.log('🔍 === INICIANDO FILTRADO ===');
+            console.log('=== INICIANDO FILTRADO ===');
 
             const filtros = {};
             const fechaInicio = document.getElementById('filterFechaInicio').value;
@@ -90,11 +168,11 @@ class PrecioVivoController {
             if (fechaFin) filtros.fechaFin = fechaFin;
             if (empresaId) filtros.empresa = parseInt(empresaId); // Convertir a número
 
-            console.log('📤 Filtros a aplicar:', filtros);
+            console.log('Filtros a aplicar:', filtros);
             
             // Si no hay filtros, cargar todos los datos
             if (!fechaInicio && !fechaFin && !empresaId) {
-                console.log('📊 Sin filtros, cargando todos los datos');
+                console.log('Sin filtros, cargando todos los datos');
                 await this.cargarDatos();
                 return;
             }
@@ -111,16 +189,16 @@ class PrecioVivoController {
                 this.datos = [];
             }
             
-            console.log(`✅ Filtrado completado: ${this.datos.length} registros`);
+            console.log(`Filtrado completado: ${this.datos.length} registros`);
             
             // Renderizar la tabla
             this.renderizarTabla();
             
-            this.mostrarNotificacion(`✅ Filtrados: ${this.datos.length} registros`, 'success');
+            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
             
         } catch (error) {
-            console.error('❌ Error al filtrar:', error);
-            this.mostrarNotificacion('❌ Error al filtrar: ' + error.message, 'error');
+            console.error('Error al filtrar:', error);
+            this.mostrarNotificacion('Error al filtrar: ' + error.message, 'error');
             await this.cargarDatos();
         } finally {
             this.mostrarCargando(false);
@@ -135,11 +213,11 @@ class PrecioVivoController {
     }
 
     renderizarTabla() {
-        console.log('🔄 Renderizando tabla con', this.datos.length, 'registros');
+        console.log('Renderizando tabla con', this.datos.length, 'registros');
         
         const tbody = document.getElementById('tableBody');
         if (!tbody) {
-            console.error('❌ No se encontró tbody');
+            console.error('No se encontró tbody');
             return;
         }
 
@@ -187,13 +265,13 @@ class PrecioVivoController {
             
             editBtn.onclick = () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('📝 Editando:', this.registroSeleccionado);
+                console.log('Editando:', this.registroSeleccionado);
                 this.modificarSeleccionado();
             };
             
             deleteBtn.onclick = async () => {
                 this.registroSeleccionado = this.datos[i];
-                console.log('🗑️ Eliminando:', this.registroSeleccionado);
+                console.log('Eliminando:', this.registroSeleccionado);
                 await this.eliminarSeleccionado();
             };
             
@@ -203,15 +281,23 @@ class PrecioVivoController {
         // Re-inicializar DataTable después
         setTimeout(() => {
             try {
-                $('.min-w-full').DataTable({
+                this.dataTable = $('.min-w-full').DataTable({
                     pageLength: 10,
                     language: {
                         url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
                     },
                     responsive: true,
-                    order: [[1, 'desc']]
+                    order: [[1, 'desc']],
+                    scrollX: true,
+                    drawCallback: () => {
+                        // Aplicar visibilidad de columnas después de cada redibujado
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const column = this.dataTable.column(parseInt(columnIndex));
+                            column.visible(this.columnasVisibles[columnIndex]);
+                        });
+                    }
                 });
-                console.log('✅ DataTable inicializado');
+                console.log('DataTable inicializado');
             } catch (error) {
                 console.error('Error al inicializar DataTable:', error);
             }
@@ -244,11 +330,11 @@ class PrecioVivoController {
         try {
             this.mostrarCargando(true);
             await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('✅ Registro eliminado', 'success');
+            this.mostrarNotificacion('Registro eliminado', 'success');
             await this.cargarDatos();
         } catch (error) {
             console.error('Error:', error);
-            this.mostrarNotificacion('❌ Error al eliminar', 'error');
+            this.mostrarNotificacion('Error al eliminar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -256,7 +342,7 @@ class PrecioVivoController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        console.log('📝 Cargando en formulario:', r);
+        console.log('Cargando en formulario:', r);
         
         document.getElementById('modalFecha').value = r.fecha || '';
         
@@ -271,7 +357,7 @@ class PrecioVivoController {
         document.getElementById('modalPrecioPubMin').value = r.precioPubMin || '';
         document.getElementById('modalPrecioPubMax').value = r.precioPubMax || '';
         
-        console.log('✅ Empresa ID cargado:', document.getElementById('modalEmpresa').value);
+        console.log('Empresa ID cargado:', document.getElementById('modalEmpresa').value);
     }
 
     limpiarFormulario() {
@@ -291,24 +377,24 @@ class PrecioVivoController {
 
         try {
             this.mostrarCargando(true);
-            console.log('💾 Guardando registro:', data);
+            console.log('Guardando registro:', data);
 
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                console.log('📝 Actualizando registro ID:', data.id);
+                console.log('Actualizando registro ID:', data.id);
                 await this.service.actualizar(data);
-                this.mostrarNotificacion('✅ Registro actualizado', 'success');
+                this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
                 console.log('➕ Creando nuevo registro');
                 await this.service.crear(data);
-                this.mostrarNotificacion('✅ Registro creado', 'success');
+                this.mostrarNotificacion('Registro creado', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('❌ Error al guardar:', error);
-            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
+            console.error('Error al guardar:', error);
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -318,7 +404,7 @@ class PrecioVivoController {
         // Obtener directamente el ID del select
         const empresaId = document.getElementById('modalEmpresa').value;
         
-        console.log('📤 Datos del formulario:');
+        console.log('Datos del formulario:');
         console.log('  - Empresa ID:', empresaId, 'Tipo:', typeof empresaId);
         
         return {
@@ -338,18 +424,18 @@ class PrecioVivoController {
     }
 
     validarFormulario(data) {
-        console.log('🔍 Validando formulario:', data);
+        console.log('Validando formulario:', data);
         
         if (!data.fecha) {
-            this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
+            this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
         if (!data.empresa) {
-            this.mostrarNotificacion('⚠️ La empresa es obligatoria', 'warning');
+            this.mostrarNotificacion('La empresa es obligatoria', 'warning');
             return false;
         }
         
-        console.log('✅ Validación exitosa');
+        console.log('Validación exitosa');
         return true;
     }
 
@@ -362,7 +448,7 @@ class PrecioVivoController {
 
     exportarExcel() {
         if (this.datos.length === 0) {
-            this.mostrarNotificacion('⚠️ No hay datos para exportar', 'warning');
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
         window.open(`${this.service.baseURL}/reporte/precioVivo/exportar`, '_blank');
@@ -409,7 +495,6 @@ class PrecioVivoController {
 
         setTimeout(() => notif.remove(), 4000);
     }
-    
 }
 
 window.precioVivoController = new PrecioVivoController();
