@@ -6,11 +6,16 @@ class ComercializacionController {
         this.registroSeleccionado = null;
         this.datos = [];
         this.catalogos = {};
+        this.dataTable = null;
+        this.columnasVisibles = {};
+        this.columnasDefinicion = {};
     }
 
     async init() {
         await this.cargarCatalogos();
         this.setupEventListeners();
+        this.setupColumnToggle();
+        this.setupToggleFiltros();
     }
 
     async cargarCatalogos() {
@@ -85,14 +90,8 @@ class ComercializacionController {
     }
 
     setupEventListeners() {
-        // Botones tipo
-        document.getElementById('btnVivoAqp')?.addEventListener('click', () => this.cargarDatos('vivo-aqp'));
-        document.getElementById('btnVivoProvincia')?.addEventListener('click', () => this.cargarDatos('vivo-provincia'));
-
         // Botones acción
         document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnModificar')?.addEventListener('click', () => this.modificarSeleccionado());
-        document.getElementById('btnEliminar')?.addEventListener('click', () => this.eliminarSeleccionado());
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
@@ -104,28 +103,146 @@ class ComercializacionController {
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
     }
 
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+
+        // Toggle dropdown
+        btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.remove('show');
+        });
+
+        // Cerrar al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    }
+
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.add('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
+    }
+
+    generarCheckboxesColumnas(columnas) {
+    const container = document.getElementById('columnCheckboxContainer');
+    
+    console.log('🔍 DEBUG generarCheckboxesColumnas:');
+    console.log('- Container encontrado:', !!container);
+    console.log('- Columnas a generar:', columnas.length);
+    
+    if (!container) {
+        console.error('❌ Container "columnCheckboxContainer" NO encontrado en el DOM');
+        console.log('Elementos con ID en el documento:', 
+            Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+        );
+        return;
+    }
+
+    container.innerHTML = '';
+    this.columnasVisibles = {};
+    
+    columnas.forEach((col, index) => {
+        const label = document.createElement('label');
+        label.className = 'column-toggle';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'column-checkbox';
+        checkbox.dataset.column = index;
+        checkbox.checked = true;
+        
+        if (index === columnas.length - 1) {
+            checkbox.disabled = true;
+        }
+        
+        this.columnasVisibles[index] = true;
+        
+        checkbox.addEventListener('change', (e) => {
+            e.stopPropagation();
+            const columnIndex = parseInt(e.target.dataset.column);
+            this.columnasVisibles[columnIndex] = e.target.checked;
+            
+            if (this.dataTable) {
+                const column = this.dataTable.column(columnIndex);
+                column.visible(e.target.checked);
+            }
+        });
+        
+        const span = document.createElement('span');
+        span.textContent = col;
+        
+        label.appendChild(checkbox);
+        label.appendChild(span);
+        container.appendChild(label);
+    });
+
+    console.log('✅ Checkboxes generados:', container.children.length);
+    console.log('✅ HTML del container:', container.innerHTML.substring(0, 200) + '...');
+}
+
+
+    formatearNombreColumna(nombre) {
+        return nombre
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+    }
+
     async cargarDatos(tipo) {
         try {
             this.tipoActual = tipo;
             this.tablaActual = tipo === 'vivo-aqp' ? 'com_db_vivo_aqp' : 'com_db_vivo_provincia';
 
             this.mostrarCargando(true);
+            console.log(`🔄 Cargando vista de tipo: ${tipo}`);
 
-            console.log(`Cargando vista de tipo: ${tipo}`);
-
-            // 🔹 Mostrar los filtros correspondientes según el tipo
+            // Mostrar filtros correspondientes
             if (tipo === 'vivo-aqp') {
                 this.mostrarFiltrosAqp();
             } else {
                 this.mostrarFiltrosProvincia();
             }
 
+            // Renderizar tabla
             this.renderizarTablaServerSide();
 
-            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
+            this.mostrarNotificacion(`✅ Datos cargados correctamente`, 'success');
 
         } catch (error) {
-            console.error('Error al inicializar tabla:', error);
+            console.error('❌ Error al inicializar tabla:', error);
             this.mostrarNotificacion('❌ ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
@@ -133,21 +250,31 @@ class ComercializacionController {
     }
 
     mostrarFiltrosAqp() {
-        document.getElementById('filterMercado').parentElement.style.display = 'block';
-        document.getElementById('filterProvincia').parentElement.style.display = 'none';
-        document.getElementById('filterCondicion').parentElement.style.display = 'block';
-        document.getElementById('filterTipo').parentElement.style.display = 'none';
+        const filterElements = document.querySelectorAll('.filter-arequipa, .filter-provincia');
+        filterElements.forEach(el => {
+            if (el.classList.contains('filter-arequipa')) {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        });
     }
 
     mostrarFiltrosProvincia() {
-        document.getElementById('filterMercado').parentElement.style.display = 'none';
-        document.getElementById('filterProvincia').parentElement.style.display = 'block';
-        document.getElementById('filterCondicion').parentElement.style.display = 'none';
-        document.getElementById('filterTipo').parentElement.style.display = 'block';
+        const filterElements = document.querySelectorAll('.filter-arequipa, .filter-provincia');
+        filterElements.forEach(el => {
+            if (el.classList.contains('filter-provincia')) {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        });
     }
 
     async aplicarFiltros() {
-        this.renderizarTablaServerSide();
+        if (this.dataTable) {
+            this.dataTable.ajax.reload();
+        }
     }
 
     limpiarFiltros() {
@@ -159,25 +286,43 @@ class ComercializacionController {
         document.getElementById('filterCondicion').value = '';
         document.getElementById('filterTipo').value = '';
 
-        if (this.tipoActual) {
-            this.cargarDatos(this.tipoActual);
+        if (this.tipoActual && this.dataTable) {
+            this.dataTable.ajax.reload();
         }
     }
 
     renderizarTablaServerSide() {
         const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
-        if (!thead) return;
+        if (!thead) {
+            console.error('❌ Thead no encontrado');
+            return;
+        }
 
-        //  Destruir cualquier DataTable previo
+        // Destruir DataTable previo
         if ($.fn.DataTable.isDataTable(table)) {
+            console.log('🗑️ Destruyendo DataTable anterior');
             table.DataTable().clear().destroy();
         }
 
         // Definir columnas según tipo actual
         let columnas = [];
+        let columnasData = [];
+
         if (this.tipoActual === 'vivo-aqp') {
             columnas = [
+                'ID', 'Fecha', 'Mercado', 'Empresa', 'RUC Empresa', 'Condición',
+                'Proveedor', 'RUC Proveedor',
+                'P.May Mín', 'P.May Máx', 'P.Púb Mín', 'P.Púb Máx',
+                'Peso Macho Mín', 'Peso Macho Máx', 'Peso Hemb Mín', 'Peso Hemb Máx',
+                'Color Mín', 'Color Máx',
+                'Peso Macho Prom Mín', 'Peso Macho Prom Máx',
+                'Peso Hembra Prom Mín', 'Peso Hembra Prom Máx',
+                'Cantidad', 'Usuario Registro', 'Fecha Registro',
+                'Usuario Transferencia', 'Fecha Transferencia'
+            ];
+
+            columnasData = [
                 'id', 'fecha', 'mercado', 'empresa', 'ruc_empresa', 'condicion',
                 'proveedor', 'ruc_proveedor',
                 'precioMayMin', 'precioMayMax', 'precioPubMin', 'precioPubMax',
@@ -190,6 +335,19 @@ class ComercializacionController {
             ];
         } else if (this.tipoActual === 'vivo-provincia') {
             columnas = [
+                'ID', 'Fecha', 'Provincia', 'Proveedor', 'RUC Proveedor',
+                'Tipo', 'Línea',
+                'P.May Car Mín', 'P.May Car Máx', 'P.May Bra Mín', 'P.May Bra Máx',
+                'P.Púb Mín', 'P.Púb Máx',
+                'Peso Macho Prom Mín', 'Peso Macho Prom Máx',
+                'Peso Hembra Prom Mín', 'Peso Hembra Prom Máx',
+                'Peso Brasa Prom Mín', 'Peso Brasa Prom Máx',
+                'Color Mín', 'Color Máx', 'Cantidad',
+                'Usuario Registro', 'Fecha Registro',
+                'Usuario Transferencia', 'Fecha Transferencia'
+            ];
+
+            columnasData = [
                 'id', 'fecha', 'provincia', 'proveedor', 'ruc_proveedor',
                 'tipo', 'linea',
                 'precioMayCarMin', 'precioMayCarMax', 'precioMayBraMin', 'precioMayBraMax',
@@ -203,25 +361,29 @@ class ComercializacionController {
             ];
         }
 
-        // 🔹 Agregar columna de opciones
-        const columnasConOpciones = [...columnas, 'Opciones'];
+        // Agregar columna de opciones
+        columnas.push('Opciones');
 
-        // 🔹 Generar dinámicamente las cabeceras del thead
-        thead.innerHTML = columnasConOpciones
-            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/([A-Z])/g, ' $1')}</th>`)
+        // Generar checkboxes ANTES de inicializar DataTable
+        this.generarCheckboxesColumnas(columnas);
+
+        // Generar cabeceras
+        thead.innerHTML = columnas
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c}</th>`)
             .join('');
 
-        // 🚀 Inicializar DataTable con server-side processing
-        const dt = table.DataTable({
+        console.log('📊 Inicializando DataTable con', columnas.length, 'columnas');
+
+        // Inicializar DataTable
+        this.dataTable = table.DataTable({
             processing: true,
             serverSide: true,
             ajax: {
-                url:
-                    this.tipoActual === 'vivo-aqp'
-                        ? this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_AQP.FILTRO
-                        : this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_PROVINCIA.FILTRO,
+                url: this.tipoActual === 'vivo-aqp'
+                    ? this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_AQP.FILTRO
+                    : this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_PROVINCIA.FILTRO,
                 type: 'GET',
-                data: function (d) {
+                data: (d) => {
                     const filtros = {};
                     const campos = [
                         'FechaInicio', 'FechaFin', 'Provincia', 'Empresa',
@@ -236,27 +398,29 @@ class ComercializacionController {
                         }
                     });
 
-                    // Combinar parámetros DataTable + filtros personalizados
                     return Object.assign(d, filtros);
                 },
-                dataSrc: json => json.data
+                dataSrc: json => {
+                    console.log('📥 Datos recibidos:', json.data?.length || 0, 'registros');
+                    return json.data || [];
+                }
             },
             columns: [
-                ...columnas.map(col => ({ data: col })),
+                ...columnasData.map(col => ({ data: col })),
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
                     render: (data, type, row, meta) => `
-                    <div class="text-center space-x-2">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `
+                        <div class="text-center space-x-2">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `
                 }
             ],
             order: [[1, 'desc']],
@@ -264,71 +428,39 @@ class ComercializacionController {
             pageLength: 10,
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            },
+            initComplete: () => {
+                console.log('✅ DataTable inicializado correctamente');
+                
+                // Aplicar visibilidad inicial de columnas
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    column.visible(this.columnasVisibles[columnIndex]);
+                });
+            },
+            drawCallback: () => {
+                // Aplicar visibilidad de columnas en cada redibujado
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    column.visible(this.columnasVisibles[columnIndex]);
+                });
             }
         });
 
-        // 🟢 Delegar eventos para los botones de acción
+        // Eventos para botones de acción
         $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
-            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             this.modificarSeleccionado();
         });
 
         $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
-            const rowData = dt.row($(e.currentTarget).closest('tr')).data();
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             await this.eliminarSeleccionado();
         });
-    }
 
-
-    toggleDetalle(event, el) {
-        // el puede ser el botón dentro de la fila; buscamos la fila principal y alternamos la siguiente fila de detalles
-        const btn = el instanceof Element ? el : (event && event.currentTarget);
-        const tr = btn.closest('tr');
-        if (!tr) return;
-        const next = tr.nextElementSibling;
-        if (!next || !next.classList.contains('detail-row')) return;
-        next.style.display = next.style.display === 'none' ? 'table-row' : 'none';
-        // alternar icono
-        const icon = tr.querySelector('i.fas');
-        if (icon) icon.classList.toggle('fa-chevron-up');
-    }
-
-    obtenerNombreCatalogo(catalogo, id) {
-        if (!id) return '-';
-        const item = this.catalogos[catalogo]?.find(c => c.id == id);
-        return item ? Object.values(item)[1] : id;
-    }
-
-    seleccionarRegistro(event, id) {
-        // Permitir llamada sin evento (compatibilidad)
-        if (typeof event !== 'object' || !event) {
-            id = event;
-            event = null;
-        }
-
-        this.registroSeleccionado = this.datos.find(d => d.id == id);
-        console.log('Registro seleccionado:', this.registroSeleccionado);
-
-        // Remover resaltado en todas las filas principales y detalle
-        document.querySelectorAll('#tableBody tr').forEach(tr => {
-            tr.classList.remove('bg-blue-100');
-        });
-
-        // Resaltar la fila principal y la de detalle asociada (si existe)
-        if (event) {
-            const tr = event.currentTarget || event.target.closest('tr');
-            if (tr) {
-                tr.classList.add('bg-blue-100');
-                const det = tr.nextElementSibling;
-                if (det && det.classList.contains('detail-row')) det.classList.add('bg-blue-100');
-            }
-        } else {
-            // Si no hay evento, buscar por índice del registro
-            const row = Array.from(document.querySelectorAll('#tableBody tr')).find(r => r.textContent.includes(String(id)));
-            if (row) row.classList.add('bg-blue-100');
-        }
+        console.log('✅ Tabla renderizada completamente');
     }
 
     mostrarModalNuevo() {
@@ -379,7 +511,11 @@ class ComercializacionController {
             await this.service.eliminar(this.tablaActual, this.registroSeleccionado.id);
             this.mostrarNotificacion('✅ Registro eliminado exitosamente', 'success');
             this.registroSeleccionado = null;
-            await this.cargarDatos(this.tipoActual);
+            
+            // Recargar datos en DataTable
+            if (this.dataTable) {
+                this.dataTable.ajax.reload();
+            }
         } catch (error) {
             console.error('Error al eliminar:', error);
             this.mostrarNotificacion('❌ Error al eliminar: ' + error.message, 'error');
@@ -395,7 +531,6 @@ class ComercializacionController {
         document.getElementById('campoEmpresa').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoMercado').style.display = esAqp ? 'block' : 'none';
         document.getElementById('campoCondicion').style.display = esAqp ? 'block' : 'none';
-        //document.getElementById('campoRucEmpr').style.display = esAqp ? 'block' : 'none';
 
         // Campos de Provincia
         document.getElementById('campoProvincia').style.display = esAqp ? 'none' : 'block';
@@ -418,8 +553,6 @@ class ComercializacionController {
             const mercadoObj = this.catalogos.mercados.find(m => m.mercado === r.mercado);
             document.getElementById('modalMercado').value = mercadoObj ? mercadoObj.id : '';
 
-            //document.getElementById('modalRucEmpr').value = r.ruc_empr || '';
-
             // Buscar ID de condicion por nombre
             const condicionObj = this.catalogos.condiciones.find(c => c.condicion === r.condicion);
             document.getElementById('modalCondicion').value = condicionObj ? condicionObj.id : '';
@@ -436,8 +569,6 @@ class ComercializacionController {
         // Buscar ID de proveedor por nombre
         const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
         document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
-
-        // document.getElementById('modalRucProv').value = r.ruc_prov || '';
 
         document.getElementById('modalPrecioMayMin').value = r.precioMayMin || '';
         document.getElementById('modalPrecioMayMax').value = r.precioMayMax || '';
@@ -483,7 +614,7 @@ class ComercializacionController {
             
                 const resultado = await this.service.actualizar(this.tablaActual, data);
                 console.log('Resultado actualización:', resultado);
-                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('✅ Registro actualizado exitosamente', 'success');
             } else {
                 console.log('Creando nuevo registro');
                 console.log('Datos a enviar:', data);
@@ -491,31 +622,32 @@ class ComercializacionController {
                 const resultado = await this.service.crear(this.tablaActual, data);
                 console.log('Resultado creación:', resultado);
 
-                this.mostrarNotificacion(' Registro creado exitosamente', 'success');
+                this.mostrarNotificacion('✅ Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
-            await this.cargarDatos(this.tipoActual);
+            
+            // Recargar datos en DataTable
+            if (this.dataTable) {
+                this.dataTable.ajax.reload();
+            }
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            this.mostrarNotificacion('❌ Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     obtenerDatosFormulario() {
-        const usuario = 'admin'; // Obtener del sistema de login
+        const usuario = 'admin';
         const ahora = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-        // Obtener ID del proveedor (enviamos códigos/IDs al backend)
         const proveedorId = parseInt(document.getElementById('modalProveedor').value) || null;
 
         const data = {
             fecha: document.getElementById('modalFecha').value,
-            // Enviar códigos (IDs) para relaciones en lugar de nombres
             proveedor: proveedorId,
-            //ruc_prov: document.getElementById('modalRucProv').value || '',
             precioMayMin: parseFloat(document.getElementById('modalPrecioMayMin').value) || 0,
             precioMayMax: parseFloat(document.getElementById('modalPrecioMayMax').value) || 0,
             precioPubMin: parseFloat(document.getElementById('modalPrecioPubMin').value) || 0,
@@ -538,17 +670,14 @@ class ComercializacionController {
         };
 
         if (this.tipoActual === 'vivo-aqp') {
-            // Enviar IDs para mercado/empresa/condicion
             const mercadoId = parseInt(document.getElementById('modalMercado').value) || null;
             const empresaId = parseInt(document.getElementById('modalEmpresa').value) || null;
             const condicionId = parseInt(document.getElementById('modalCondicion').value) || null;
 
             data.mercado = mercadoId;
             data.empresa = empresaId;
-            // data.ruc_empr = document.getElementById('modalRucEmpr').value || '';
             data.condicion = condicionId;
         } else {
-            // Enviar IDs para provincia/tipo
             const provinciaId = parseInt(document.getElementById('modalProvincia').value) || null;
             const tipoId = parseInt(document.getElementById('modalTipo').value) || null;
 
@@ -568,7 +697,7 @@ class ComercializacionController {
 
     validarFormulario(data) {
         if (!data.fecha) {
-            this.mostrarNotificacion('La fecha es obligatoria', 'warning');
+            this.mostrarNotificacion('⚠️ La fecha es obligatoria', 'warning');
             return false;
         }
         return true;
@@ -583,15 +712,15 @@ class ComercializacionController {
 
     exportarExcel() {
         if (!this.tipoActual) {
-            this.mostrarNotificacion('Primero selecciona un tipo de datos', 'warning');
+            this.mostrarNotificacion('⚠️ Primero selecciona un tipo de datos', 'warning');
             return;
         }
 
         try {
             this.service.exportarCSV(this.tablaActual);
-            this.mostrarNotificacion(' Iniciando descarga de CSV...', 'success');
+            this.mostrarNotificacion('✅ Iniciando descarga de Excel...', 'success');
         } catch (error) {
-            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+            this.mostrarNotificacion('❌ Error al exportar: ' + error.message, 'error');
         }
     }
 
@@ -605,7 +734,6 @@ class ComercializacionController {
     mostrarNotificacion(mensaje, tipo = 'info') {
         console.log(`[${tipo}] ${mensaje}`);
 
-        // Crear contenedor si no existe
         let container = document.getElementById('notificaciones-container');
         if (!container) {
             container = document.createElement('div');
@@ -614,7 +742,6 @@ class ComercializacionController {
             document.body.appendChild(container);
         }
 
-        // Crear notificación
         const notif = document.createElement('div');
         const colores = {
             success: 'bg-green-500',
@@ -638,7 +765,6 @@ class ComercializacionController {
 
         container.appendChild(notif);
 
-        // Auto-eliminar después de 4 segundos
         setTimeout(() => {
             notif.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notif.remove(), 300);
@@ -646,5 +772,4 @@ class ComercializacionController {
     }
 }
 
-// Instancia global
 window.comercializacionController = new ComercializacionController();
