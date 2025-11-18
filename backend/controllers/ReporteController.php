@@ -46,6 +46,7 @@ class ReporteController
     private $Vendedor;
     private $Producto;
     private $ClienteProcesado;
+    private $TrozadoDiario;
 
     public function __construct($db)
     {
@@ -71,6 +72,7 @@ class ReporteController
         $this->Vendedor = new VendedorService($db);
         $this->Producto = new ProductoService($db);
         $this->ClienteProcesado = new ClienteProcesadoService($db);
+        $this->TrozadoDiario = new TrozadoDiarioService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1376,6 +1378,58 @@ class ReporteController
         // Exportar como CSV
         $this->outputCSV(
             'Com_Productos_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarTrozadoDiarioExcel()
+    {
+        // Obtener los datos
+        $datos = $this->TrozadoDiario->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'ZONA',
+            'LINEA',
+            'CODIGO',
+            'PRODUCTO',
+            'CANTIDAD',
+            'PRECIO',
+            'PESO',
+            'IMPORTE',
+            'PROMEDIO',
+            'BD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO'
+        ];
+
+        // Mapear cada fila
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['zona'] ?? ''),
+                strtoupper($d['linea'] ?? ''),
+                $d['codigo'] ?? '',
+                strtoupper($d['producto'] ?? ''),
+                $d['cantidad'] ?? '',
+                $d['precio'] ?? '',
+                $d['peso'] ?? '',
+                $d['importe'] ?? '',
+                $d['pprom'] ?? '',
+                strtoupper($d['nom_db'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? ''
+            ];
+        };
+
+        // Exportar CSV
+        $this->outputCSV(
+            'Trozado_Diario_' . date('Y-m-d') . '.csv',
             $headers,
             $datos,
             $mapper

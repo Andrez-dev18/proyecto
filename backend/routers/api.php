@@ -39,6 +39,7 @@ require_once __DIR__ . '/../controllers/TipoTiendaController.php';
 require_once __DIR__ . '/../controllers/TipoHuevoController.php';
 require_once __DIR__ . '/../controllers/TipoAlternoController.php';
 require_once __DIR__ . '/../controllers/TipoEmprendedorController.php';
+require_once __DIR__ . '/../controllers/TrozadoDiarioController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -95,6 +96,7 @@ $tipoTiendaController = new TipoTiendaController($db);
 $TipoHuevoController = new TipoHuevoController($db);
 $TipoAlternoController = new TipoAlternoController($db);
 $TipoEmprendedorController = new TipoEmprendedorController($db);
+$TrozadoDiarioController = new TrozadoDiarioController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -1084,6 +1086,41 @@ elseif (preg_match("/\/producto\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &&
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/producto/exportar") !== false && $request == "GET") {
     $reporteController->exportarComProductoExcel();
+    exit;
+}
+
+
+
+######### RUTAS COM_TROZADO_DIARIO #########
+// obtener todos
+elseif (strpos($path, "/trozadoDiario/all") !== false && $request == "GET") {
+    $TrozadoDiarioController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/trozadoDiario/crear") !== false && $request == "POST") {
+    $TrozadoDiarioController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/trozadoDiario/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $TrozadoDiarioController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/trozadoDiario\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $TrozadoDiarioController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/trozadoDiario/filtro") !== false && $request == "GET") {
+    $TrozadoDiarioController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/trozadoDiario/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoDiarioExcel();
+    exit;
+} ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
+elseif (strpos($path, "/trozadoDiario/etl") !== false && $request == "POST") {
+    $TrozadoDiarioController->runETL();
     exit;
 }
 
