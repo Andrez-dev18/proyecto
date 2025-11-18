@@ -17,6 +17,10 @@ require_once __DIR__ . '/../services/CriadorEmprendedorService.php';
 require_once __DIR__ . '/../services/GallinaCDService.php';
 require_once __DIR__ . '/../services/IngresosLimaService.php';
 require_once __DIR__ . '/../services/ProductoSustitutoService.php';
+require_once __DIR__ . '/../services/MercadoService.php';
+require_once __DIR__ . '/../services/ClienteProcesadoService.php';
+require_once __DIR__ . '/../services/VendedorService.php';
+require_once __DIR__ . '/../services/ProductoService.php';
 
 class ReporteController
 {
@@ -38,6 +42,10 @@ class ReporteController
     private $ProdSustituto;
     private $Ingresolima;
     private $GallinaCD;
+    private $Mercado;
+    private $Vendedor;
+    private $Producto;
+    private $ClienteProcesado;
 
     public function __construct($db)
     {
@@ -59,6 +67,10 @@ class ReporteController
         $this->ProdSustituto = new ProductoSustitutoService($db);
         $this->Ingresolima = new IngresosLimaService($db);
         $this->GallinaCD = new GallinaCDService($db);
+        $this->Mercado = new MercadoService($db);
+        $this->Vendedor = new VendedorService($db);
+        $this->Producto = new ProductoService($db);
+        $this->ClienteProcesado = new ClienteProcesadoService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1208,6 +1220,162 @@ class ReporteController
         // Exportar como CSV (o Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Ingre_Emp_Lima_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarMercadoExcel()
+    {
+        // Obtener los datos desde la BD
+        $datos = $this->Mercado->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'CÓDIGO',
+            'NOMBRE'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['codigo'] ?? '',
+                strtoupper($d['nombre'] ?? '')
+            ];
+        };
+
+        // Exportar como CSV
+        $this->outputCSV(
+            'Mercados_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarClienteProcesadosExcel()
+    {
+        // Obtener los datos desde la BD
+        $datos = $this->ClienteProcesado->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'DISTRITO',
+            'ZONA',
+            'CANAL',
+            'CÓDIGO',
+            'LÍNEA',
+            'SUBLÍNEA',
+            'VENDEDOR',
+            'CLIENTE',
+            'DESCRIPCIÓN',
+            'RUTA',
+            'NOM RUTA',
+            'UNIDAD',
+            'PESO',
+            'IMPORTE',
+            'NOM_DB',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO'
+        ];
+
+        // Mapeo de datos
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['distrito'] ?? ''),
+                strtoupper($d['zona'] ?? ''),
+                strtoupper($d['canal'] ?? ''),
+                $d['codigo'] ?? '',
+                strtoupper($d['linea'] ?? ''),
+                strtoupper($d['sublinea'] ?? ''),
+                strtoupper($d['vendedor'] ?? ''),
+                strtoupper($d['cliente'] ?? ''),
+                strtoupper($d['descripcion'] ?? ''),
+                $d['ruta'] ?? '',
+                strtoupper($d['nomruta'] ?? ''),
+                $d['unidad'] ?? '',
+                $d['peso'] ?? '',
+                $d['importe'] ?? '',
+                strtoupper($d['nom_db'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? ''
+            ];
+        };
+
+        // Exportar CSV
+        $this->outputCSV(
+            'Cliente_Procesados_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarVendedoresExcel()
+    {
+        // Obtener los datos desde la BD
+        $datos = $this->Vendedor->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'VENDEDOR',
+            'CANAL',
+            'ZONA'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                strtoupper($d['vendedor'] ?? ''),
+                strtoupper($d['canal'] ?? ''),
+                strtoupper($d['zona'] ?? '')
+            ];
+        };
+
+        // Exportar como CSV
+        $this->outputCSV(
+            'Vendedores_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarComProductoExcel()
+    {
+        // Obtener los datos desde la BD
+        $datos = $this->Producto->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'DESCRIPCIÓN',
+            'LÍNEA',
+            'SUBLÍNEA',
+            'CÓDIGO'
+        ];
+
+        // Mapear los datos obtenidos del query
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                strtoupper($d['descripcion'] ?? ''),
+                strtoupper($d['linea'] ?? ''),
+                strtoupper($d['sublinea'] ?? ''),
+                $d['codigo'] ?? ''
+            ];
+        };
+
+        // Exportar como CSV
+        $this->outputCSV(
+            'Com_Productos_' . date('Y-m-d') . '.csv',
             $headers,
             $datos,
             $mapper

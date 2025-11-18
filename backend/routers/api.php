@@ -339,7 +339,7 @@ elseif (preg_match("/\/mercado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/mercado/exportar") !== false && $request == "GET") {
-    //$reporteController->exportarProdSustitutoExcel();
+    $reporteController->exportarMercadoExcel();
     exit;
 
 
@@ -1020,7 +1020,7 @@ elseif (preg_match("/\/clienteProce\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/clienteProce/exportar") !== false && $request == "GET") {
-    //$reporteController->exportarProdSustitutoExcel();
+    $reporteController->exportarClienteProcesadosExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL  ##########################
 elseif (strpos($path, "/clienteProce/etl") !== false && $request == "POST") {
@@ -1053,7 +1053,7 @@ elseif (preg_match("/\/vendedor\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &&
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/vendedor/exportar") !== false && $request == "GET") {
-    //$reporteController->exportarProdSustitutoExcel();
+    $reporteController->exportarVendedoresExcel();
     exit;
 }
 
@@ -1083,7 +1083,7 @@ elseif (preg_match("/\/producto\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &&
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/producto/exportar") !== false && $request == "GET") {
-    //$reporteController->exportarProdSustitutoExcel();
+    $reporteController->exportarComProductoExcel();
     exit;
 }
 
