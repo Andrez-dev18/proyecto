@@ -40,6 +40,7 @@ require_once __DIR__ . '/../controllers/TipoHuevoController.php';
 require_once __DIR__ . '/../controllers/TipoAlternoController.php';
 require_once __DIR__ . '/../controllers/TipoEmprendedorController.php';
 require_once __DIR__ . '/../controllers/TrozadoDiarioController.php';
+require_once __DIR__ . '/../controllers/TipoProdSustitutoController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -97,6 +98,7 @@ $TipoHuevoController = new TipoHuevoController($db);
 $TipoAlternoController = new TipoAlternoController($db);
 $TipoEmprendedorController = new TipoEmprendedorController($db);
 $TrozadoDiarioController = new TrozadoDiarioController($db);
+$TipoProSutitutoController = new TipoProdSustitutoController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -574,6 +576,12 @@ elseif (preg_match("/\/tipoGallina\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches)
     ############## RUTA CORTES###################
 }elseif (strpos($path, "/corte/all") !== false && $request == "GET") {
     $CorteController->getAll();
+    exit;
+}
+
+    ############## RUTA TIPO PRODUCTO SUSTITUTO ###################
+elseif (strpos($path, "/tipoProductoSusti/all") !== false && $request == "GET") {
+    $TipoProSutitutoController->getAll();
     exit;
 }
 
