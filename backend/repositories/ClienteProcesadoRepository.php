@@ -301,4 +301,126 @@ class ClienteProcesadoRepository
         $result = $this->executeQuery($query);
         return $result[0]['total'] ?? 0;
     }
+
+    //funcion para ETL
+    public function ejecutarEtlClientesProcesados($fechaInicio, $fechaFin)
+    {
+        try {
+            $this->conn->beginTransaction();
+
+            $resultado = [
+                'success' => true,
+                'mensaje' => 'ETL ejecutado correctamente',
+                'detalle' => [],
+                'fecha_inicio' => $fechaInicio,
+                'fecha_fin' => $fechaFin
+            ];
+
+            // ========== PASO 1: DELETE ==========
+            $deleteSQL = "
+            DELETE FROM com_db_cliente_procesados
+            WHERE fecha >= '$fechaInicio'
+            AND fecha <= '$fechaFin'
+            AND nom_db = 'grs'
+        ";
+
+            $stmt = $this->conn->query($deleteSQL);
+            $registrosEliminados = $stmt->rowCount();
+            $resultado['detalle'][] = "Eliminados $registrosEliminados registros de com_db_cliente_procesados";
+
+
+            // ========== PASO 2: INSERT ==========
+            $insertSQL = "
+        INSERT INTO com_db_cliente_procesados(
+            fecha,distrito,zona,canal,codigo,linea,sublinea,vendedor,
+            cliente,descripcion,ruta,nomruta,unidad,peso,importe,nom_db
+        )
+        SELECT tab.tfectra fecha,
+               tab.distrito,
+               vr.zona,
+               vr.canal,
+               tab.tcodigo codigo,
+               IF(pr.linea IS NULL, lp.linnom, pr.linea) linea,
+               IF(pr.sublinea IS NULL, l.descri, pr.sublinea) sublinea,
+               v.nombre vendedor,
+               c.nombre cliente,
+               tab.descri,
+               tab.ruta,
+               cr.descri nomruta,
+               tab.unidad,
+               tab.peso,
+               tab.importe,
+               'grs'
+        FROM (
+            SELECT a.tfectra,
+                   b.distrito,
+                   b.canal,
+                   a.tcodigo,
+                   m.lin,
+                   IF(
+                        IF(b.provincia<>'AREQUIPA','OPPP',a.tcodven) IS NULL,
+                        IF(LEFT(m.lin,1)='6',
+                            IF(b.codven2 IS NULL OR b.codven2='','OP',b.codven2),
+                            IF(b.codven IS NULL OR b.codven='','OP',b.codven)
+                        ),
+                        IF(b.provincia<>'AREQUIPA','OPPP',a.tcodven)
+                   ) AS tcodven,
+                   a.tprocli,
+                   m.descri,
+                   b.ruta,
+                   SUM(a.tcantid) unidad,
+                   ROUND(SUM(a.tespeci),2) peso,
+                   ROUND(SUM(a.timport),2) importe
+            FROM sale AS a
+            LEFT JOIN ccte AS b ON a.tprocli = b.codigo
+            LEFT JOIN mitm AS m ON a.tcodigo = m.codigo
+            WHERE a.tfectra >= '$fechaInicio'
+              AND a.tfectra <= '$fechaFin'
+              AND m.lin NOT IN ('601','602')
+              AND LEFT(m.lin,1) NOT IN ('8','9','7','0')
+              AND a.tcodigo <> '.'
+            GROUP BY a.treg, a.tcodigo
+        ) AS tab
+        LEFT JOIN ccte AS c ON tab.tprocli = c.codigo
+        LEFT JOIN ccte AS v ON tab.tcodven = v.codigo
+        LEFT JOIN com_vendedor AS vr ON v.nombre = vr.vendedor
+        LEFT JOIN com_producto AS pr ON tab.descri = pr.descripcion
+        LEFT JOIN linea AS l ON tab.lin = l.linea
+        LEFT JOIN (
+            SELECT l.linea, lp.linea AS linnom 
+            FROM linea AS l
+            INNER JOIN com_producto AS lp ON l.descri = lp.sublinea
+            GROUP BY lp.linea
+        ) AS lp ON lp.linea = l.linea
+        LEFT JOIN cctex AS cr 
+               ON CONCAT(cr.cod2, cr.cod1) = tab.ruta
+              AND cr.cod2 = '01'
+        ORDER BY tab.tfectra;
+        ";
+
+            $stmt = $this->conn->query($insertSQL);
+            $registrosInsertados = $stmt->rowCount();
+            $resultado['detalle'][] = "Insertados $registrosInsertados registros en com_db_cliente_procesados";
+
+
+            // RESUMEN
+            $resultado['resumen'] = [
+                'eliminados' => $registrosEliminados,
+                'insertados' => $registrosInsertados,
+                'total' => $registrosEliminados + $registrosInsertados
+            ];
+
+            $this->conn->commit();
+            return $resultado;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return [
+                'success' => false,
+                'mensaje' => 'Error al ejecutar el ETL',
+                'error' => $e->getMessage(),
+                'linea' => $e->getLine(),
+                'archivo' => $e->getFile()
+            ];
+        }
+    }
 }

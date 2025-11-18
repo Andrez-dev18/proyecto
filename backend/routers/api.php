@@ -1022,6 +1022,10 @@ elseif (preg_match("/\/clienteProce\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches
 }elseif (strpos($path, "/clienteProce/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
+} ################# FUNCION PARA EJECUTAR ETL  ##########################
+elseif (strpos($path, "/clienteProce/etl") !== false && $request == "POST") {
+    $ClienteProcesadoController->runETL();
+    exit;
 }
 
 ######### RUTAS COM_VENDEDOR #########

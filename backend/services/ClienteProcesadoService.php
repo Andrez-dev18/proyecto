@@ -40,4 +40,10 @@ class ClienteProcesadoService
     {
         return $this->repo->countFiltered($params);
     }
+
+    public function runEtl($fechaInicio, $fechaFin)
+    {
+        return $this->repo->ejecutarEtlClientesProcesados($fechaInicio, $fechaFin);
+    }
+
 }

@@ -81,4 +81,21 @@ class ClienteProcesadoController
             'recordsFiltered' => $recordsFiltered
         ]);
     }
+
+    public function runETL()
+    {
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        $fechaInicio = $input['fechaInicio'] ?? null;
+        $fechaFin = $input['fechaFin'] ?? null;
+
+        if (!$fechaInicio || !$fechaFin) {
+            echo json_encode(['success' => false, 'error' => 'Debe enviar fechaInicio y fechaFin']);
+            return;
+        }
+
+        $result = $this->service->runEtl($fechaInicio, $fechaFin);
+        echo json_encode($result);
+    }
+
 }
