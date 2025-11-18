@@ -1,13 +1,13 @@
 <?php 
-require_once __DIR__ . '/../repositories/TipoGallinaRepository.php';
+require_once __DIR__ . '/../repositories/TipoAlternoRepository.php';
 
-class TipoGallinaService
+class TipoAlternoService
 {
     private $repo;
 
     public function __construct($db)
     {
-        $this->repo = new TipoGallinaRepository($db);
+        $this->repo = new TipoAlternoRepository($db);
     }
 
     public function getAll()

@@ -1,6 +1,6 @@
 <?php
 
-class TipoGallinaRepository
+class tipoHuevoRepository
 {
     private $conn;
 
@@ -8,16 +8,22 @@ class TipoGallinaRepository
     {
         $this->conn = $db;
     }
+
     public function findAll()
     {
-        $query = "SELECT * FROM com_tipo_gallina;";
-
+        $query = "SELECT * FROM com_tipo_huevo ORDER BY codigo DESC";
         return $this->executeQuery($query);
+    }
+
+    private function executeQuery($query)
+    {
+        $stmt = $this->conn->query($query);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function existsNombre($nombre, $codigo = null)
     {
-        $sql = "SELECT codigo FROM com_tipo_gallina WHERE nombre = :nombre";
+        $sql = "SELECT codigo FROM com_tipo_huevo WHERE nombre = :nombre";
 
         if ($codigo !== null) {
             $sql .= " AND codigo != :codigo";
@@ -40,14 +46,14 @@ class TipoGallinaRepository
         $nombre = $data["nombre"] ?? null;
 
         if ($this->existsNombre($nombre, $data["codigo"] ?? null)) {
-            throw new Exception("El tipo de gallina '{$nombre}' ya existe.");
+            throw new Exception("El tipo de huevo '{$nombre}' ya existe.");
         }
 
         // UPDATE
         if (!empty($data["codigo"])) {
 
             $query = "
-                UPDATE com_tipo_gallina
+                UPDATE com_tipo_huevo
                 SET nombre = :nombre
                 WHERE codigo = :codigo
             ";
@@ -62,7 +68,7 @@ class TipoGallinaRepository
 
         // INSERT
         $query = "
-            INSERT INTO com_tipo_gallina (nombre)
+            INSERT INTO com_tipo_huevo (nombre)
             VALUES (:nombre)
         ";
 
@@ -73,18 +79,11 @@ class TipoGallinaRepository
         ]);
     }
 
-    private function executeQuery($query)
-    {
-        $stmt = $this->conn->query($query);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     public function delete($id)
     {
-        $query = "DELETE FROM com_tipo_gallina WHERE id = :id";
+        $query = "DELETE FROM com_tipo_huevo WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $id]);
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
     }
-
 }

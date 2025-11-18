@@ -1,13 +1,13 @@
 <?php 
-require_once __DIR__ . '/../services/ProveedorService.php';
+require_once __DIR__ . '/../services/TipoEmprendedorService.php';
 
-class ProveedorController
+class TipoEmprendedorController
 {
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new ProveedorService($db);
+        $this->service = new TipoEmprendedorService($db);
     }
 
     public function getAll()
@@ -25,7 +25,7 @@ class ProveedorController
                 return;
             }
             $this->service->save($data);
-            echo json_encode(["message" => "Registro creado correctamente"]);
+            echo json_encode(["message" => "Registro creado tipo emprendedor correctamente"]);
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode(["error" => $e->getMessage()]);
