@@ -20,7 +20,7 @@ class TipoController
     {
         try {
             $data = json_decode(file_get_contents("php://input"), true);
-            if (isset($data["id"]) && !empty(trim($data["id"]))) {
+            if (isset($data["codigo"]) && !empty(trim($data["codigo"]))) {
                 http_response_code(400);
                 echo json_encode(["error" => "El ID no debe ser enviado para crear nuevo registro."]);
                 return;
@@ -37,7 +37,7 @@ class TipoController
     {
         try {
             $data = json_decode(file_get_contents("php://input"), true);
-            if (!isset($data["id"]) || empty(trim($data["id"]))) {
+            if (!isset($data["codigo"]) || empty(trim($data["codigo"]))) {
                 http_response_code(400);
                 echo json_encode(["error" => "ID inválido para actualizar el registro."]);
                 return;

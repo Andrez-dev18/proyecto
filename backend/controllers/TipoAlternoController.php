@@ -1,13 +1,13 @@
 <?php 
-require_once __DIR__ . '/../services/ProveedorService.php';
+require_once __DIR__ . '/../services/TipoAlternoService.php';
 
-class ProveedorController
+class TipoAlternoController
 {
     private $service;
 
     public function __construct($db)
     {
-        $this->service = new ProveedorService($db);
+        $this->service = new TipoAlternoService($db);
     }
 
     public function getAll()
