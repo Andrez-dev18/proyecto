@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			try {
 				if (loading) loading.style.display = 'flex';
-
-				const data = await AuthService.login("SYSTEM", "12345678");
+				//NO TOCAR 
+				const data = await AuthService.login(usuario, password);
 
 				if (data && data.success) {
 					sessionStorage.setItem('usuario', JSON.stringify(data.data));

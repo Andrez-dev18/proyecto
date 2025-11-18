@@ -104,7 +104,7 @@ class TableView {
                 responsive: true,
                 order: [[0, 'desc']],
                 language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                    url: 'assets/i18n/es-ES.json'
                 },
                 columnDefs: [
                     { orderable: false, targets: -1 } // Desactivar orden en la columna de "Opciones"
