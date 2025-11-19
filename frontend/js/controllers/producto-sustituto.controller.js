@@ -12,8 +12,8 @@ class ProductoSustitutoController {
 
     async init() {
         console.log('🚀 Inicializando ProductoSustituto Controller...');
+        await this.cargarCatalogos();  // Cargar catálogos primero
         await this.cargarDatos();
-        await this.cargarCatalogos();
         this.setupEventListeners();
         this.setupColumnToggle();
         this.setupToggleFiltros();
@@ -106,21 +106,22 @@ class ProductoSustitutoController {
 
     async cargarCatalogos() {
         try {
-            console.log('Extrayendo catálogos de los datos...');
+            console.log('Cargando tipos de productos desde API...');
             
-            // Extraer productos únicos de los datos
-            const productosUnicos = [...new Set(this.datos.map(d => d.producto))].filter(p => p);
+            // Cargar tipos de productos desde el endpoint
+            const tiposProducto = await this.service.getTiposProducto();
             
-            this.catalogos.productos = productosUnicos.map(producto => ({
-                codigo: producto,
-                nombre: producto
+            this.catalogos.productos = tiposProducto.map(tipo => ({
+                codigo: tipo.codigo,
+                nombre: tipo.nombre
             }));
             
-            console.log('Productos extraídos:', this.catalogos.productos);
+            console.log('Tipos de productos cargados:', this.catalogos.productos);
             this.poblarSelects();
             
         } catch (error) {
             console.error('❌ Error al cargar catálogos:', error);
+            this.mostrarNotificacion('Error al cargar tipos de productos', 'error');
         }
     }
 
@@ -131,14 +132,18 @@ class ProductoSustitutoController {
         if (selectFilterProducto) {
             selectFilterProducto.innerHTML = '<option value="">Todos los productos</option>';
             this.catalogos.productos.forEach(producto => {
-                selectFilterProducto.innerHTML += `<option value="${producto.codigo}">${producto.nombre}</option>`;
+                selectFilterProducto.innerHTML += `
+                    <option value="${producto.codigo}">${producto.nombre}</option>
+                `;
             });
         }
         
         if (selectModalProducto) {
             selectModalProducto.innerHTML = '<option value="">Seleccionar...</option>';
             this.catalogos.productos.forEach(producto => {
-                selectModalProducto.innerHTML += `<option value="${producto.codigo}">${producto.nombre}</option>`;
+                selectModalProducto.innerHTML += `
+                    <option value="${producto.codigo}">${producto.nombre}</option>
+                `;
             });
         }
     }
@@ -157,7 +162,7 @@ class ProductoSustitutoController {
         
         const fechaInicio = document.getElementById('filterFechaInicio')?.value;
         const fechaFin = document.getElementById('filterFechaFin')?.value;
-        const producto = document.getElementById('filterProducto')?.value;
+        const productoSeleccionado = document.getElementById('filterProducto')?.value;
 
         this.datosFiltrados = this.datos.filter(registro => {
             let cumple = true;
@@ -170,8 +175,12 @@ class ProductoSustitutoController {
                 cumple = cumple && registro.fecha <= fechaFin;
             }
             
-            if (producto && registro.producto) {
-                cumple = cumple && registro.producto === producto;
+            if (productoSeleccionado) {
+                // Buscar el nombre del producto basado en el código
+                const productoInfo = this.catalogos.productos.find(p => p.codigo == productoSeleccionado);
+                if (productoInfo) {
+                    cumple = cumple && registro.producto === productoInfo.nombre;
+                }
             }
             
             return cumple;
@@ -370,7 +379,6 @@ class ProductoSustitutoController {
             this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             
             await this.cargarDatos();
-            await this.cargarCatalogos();
             
             const fechaInicio = document.getElementById('filterFechaInicio')?.value;
             const fechaFin = document.getElementById('filterFechaFin')?.value;
@@ -402,21 +410,13 @@ class ProductoSustitutoController {
         document.getElementById('modalFecha').value = r.fecha || '';
         
         const selectProducto = document.getElementById('modalProducto');
-        if (selectProducto) {
-            let found = false;
-            for (let option of selectProducto.options) {
-                if (option.value === r.producto) {
-                    selectProducto.value = r.producto;
-                    found = true;
-                    break;
-                }
-            }
-            
-            if (!found && r.producto) {
-                const newOption = document.createElement('option');
-                newOption.value = r.producto;
-                newOption.text = r.producto;
-                selectProducto.add(newOption);
+        if (selectProducto && r.producto) {
+            // Buscar el código del producto basado en el nombre
+            const productoInfo = this.catalogos.productos.find(p => p.nombre === r.producto);
+            if (productoInfo) {
+                selectProducto.value = productoInfo.codigo;
+            } else {
+                // Si no se encuentra, intentar con el valor directo
                 selectProducto.value = r.producto;
             }
         }
@@ -456,7 +456,6 @@ class ProductoSustitutoController {
             this.cerrarModal();
             
             await this.cargarDatos();
-            await this.cargarCatalogos();
             
             const fechaInicio = document.getElementById('filterFechaInicio')?.value;
             const fechaFin = document.getElementById('filterFechaFin')?.value;

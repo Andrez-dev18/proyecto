@@ -4,6 +4,19 @@ class ProductoSustitutoService {
         this.baseUrl = this.config.API.BASE_URL;
     }
 
+    async getTiposProducto() {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.TIPOS_PRODUCTO}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al obtener tipos de producto');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error en getTiposProducto:', error);
+            throw error;
+        }
+    }
+
     async getAll() {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;

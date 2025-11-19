@@ -312,7 +312,7 @@ class TrozadoAutoserController {
                 this.dataTable = $('.min-w-full').DataTable({
                     pageLength: 10,
                     language: {
-                        url: 'assets/i18n/es-ES.json'
+                        url: this.config.UI.DATATABLES_LANGUAGE
                     },
                     responsive: true,
                     order: [[1, 'desc']],
