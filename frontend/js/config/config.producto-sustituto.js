@@ -7,7 +7,8 @@ const ProductoSustitutoConfig = {
             CREAR: '/productoSusti/crear',
             ACTUALIZAR: '/productoSusti/actualizar',
             ELIMINAR: '/productoSusti/borrar',
-            EXCEL: '/productoSusti/exportar'
+            EXCEL: '/productoSusti/exportar',
+            TIPOS_PRODUCTO: '/tipoProductoSusti/all'
         }
     },
 

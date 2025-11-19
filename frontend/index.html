@@ -7,7 +7,7 @@
     <meta name="description" content="Sistema de Gestión de Pollo - Múltiples Dashboards">
     <title>Sistema de Gestión - Dashboard</title>
 
-    <!-- Tailwind CSS -->
+     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
 
     <!-- Font Awesome para iconos -->
@@ -177,14 +177,14 @@
                 </button>
 
                 <div id="submenu-mercado" class="submenu hidden pl-10 mt-2 space-y-2">
-                    
+
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-aqp', 'Gestion Vivo Arequipa')"
                         class="menu-link block text-gray-400 hover:text-white">Vivo Arequipa</a>
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-comercializacion.html','vivo-provincia', 'Gestion Vivo Provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
-<!----
+                    <!----
                     
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vivo-arequipa.html','vivo-aqp')"
@@ -193,7 +193,7 @@
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vivo-provincia.html','vivo-provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Vivo Provincias</a>
                 -->
-                        <a href="#"
+                    <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-beneficiado-provincia.html','beneficiado-provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Beneficiado Provincias</a>
                     <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('precio-vivo.html','precio-vivo')"
@@ -252,7 +252,7 @@
                 <div id="submenu-criador" class="submenu hidden pl-10 mt-2 space-y-2">
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-criadores-emprendedores.html','criador-emprendedor', 'Gestion Criador Emprendedor')"
-                        class="menu-link block text-gray-400 hover:text-white">Criador Emprendedores</a>                  
+                        class="menu-link block text-gray-400 hover:text-white">Criador Emprendedores</a>
                 </div>
             </div>
 
@@ -300,9 +300,10 @@
                 </button>
 
                 <div id="submenu-capturas" class="submenu hidden pl-10 mt-2 space-y-2">
-                   <!-- VIVO -->
+                    <!-- VIVO -->
                     <div>
-                        <button class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
+                        <button
+                            class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
                             onclick="toggleSubmenu('submenu-capturas-vivo')">
                             <span>Vivo</span>
                             <i class="fas fa-chevron-right text-xs"></i>
@@ -319,7 +320,8 @@
 
                     <!-- BENEFICIADO -->
                     <div>
-                        <button class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
+                        <button
+                            class="submenu-toggle flex items-center justify-between w-full text-gray-300 hover:text-white"
                             onclick="toggleSubmenu('submenu-capturas-beneficiado', this)">
                             <span>Beneficiado</span>
                             <i class="fas fa-chevron-right text-xs"></i>
@@ -367,17 +369,28 @@
 
 
 
-            <!--<div class="menu-group">
+            <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="toggleSubmenu('submenu-2')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">9.- DataBase</span>
+                        <span class="font-medium">9.- Clientes Procesados</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
+
+                <div id="submenu-2" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-clientes-procesados.html','clientes-procesados')"
+                        class="menu-link block text-gray-400 hover:text-white">Data</a>
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vendedor.html','vendedor')"
+                        class="menu-link block text-gray-400 hover:text-white">Vendedores</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-producto.html','Productos')"
+                        class="menu-link block text-gray-400 hover:text-white">Productos</a>
+                </div>
             </div>
-            -->
+
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
@@ -572,7 +585,11 @@
                 'pventas-vivo-arequipa.html': title || 'Potencial Vivo Arequipa',
                 'pventas-vivo-provincias.html': title || 'Potencial Vivo Provincias',
                 'pventas-beneficiado-arequipa.html': title || 'Potencial Beneficiado Arequipa',
-                'pventas-beneficiado-provincias.html': title || 'Potencial Beneficiado Provincias'
+                'pventas-beneficiado-provincias.html': title || 'Potencial Beneficiado Provincias',
+                'dashboard-clientes-procesados.html': title || 'Clientes Procesados',
+                'dashboard-vendedor.html': title || 'Vendedores',
+                'dashboard-producto.html': title || 'Productos'
+
 
             };
 
@@ -722,6 +739,7 @@
     <script src="js/config/config.js"></script>
     <!-- <script src="js/services/comercializacion.service.js"></script>
     <script src="js/controllers/comercializacion.controller.js"></script>-->
+
     <script src="js/services/auth.service.js"></script>
     <script src="js/controllers/session.controller.js"></script>
 

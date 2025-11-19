@@ -373,7 +373,7 @@ class TamanoMercadoController {
             responsive: true,
             pageLength: 10,
             language: {
-                url: 'assets/i18n/es-ES.json'
+                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
             },
             drawCallback: () => {
                 // Aplicar visibilidad de columnas después de cada redibujado
