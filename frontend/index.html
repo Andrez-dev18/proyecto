@@ -427,12 +427,11 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="activateAndLoad(this, 'dashdoard-trozado-diario.html', 'trozado-diario','Gestión Trozado Diario')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">13.- DataBase</span>
+                        <i class="fas fa-database w-5"></i>
+                        <span class="font-medium">13.- Precio Trozado Diario</span>
                     </span>
-                    <i class="fas fa-chevron-down text-sm"></i>
                 </button>
             </div>
         </nav>
@@ -588,7 +587,8 @@
                 'pventas-beneficiado-provincias.html': title || 'Potencial Beneficiado Provincias',
                 'dashboard-clientes-procesados.html': title || 'Clientes Procesados',
                 'dashboard-vendedor.html': title || 'Vendedores',
-                'dashboard-producto.html': title || 'Productos'
+                'dashboard-producto.html': title || 'Productos',
+                'dashdoard-trozado-diario.html': title || 'Precio Trozado Diario'
 
 
             };
