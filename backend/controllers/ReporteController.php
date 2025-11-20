@@ -21,6 +21,8 @@ require_once __DIR__ . '/../services/MercadoService.php';
 require_once __DIR__ . '/../services/ClienteProcesadoService.php';
 require_once __DIR__ . '/../services/VendedorService.php';
 require_once __DIR__ . '/../services/ProductoService.php';
+require_once __DIR__ . '/../services/ClientePvService.php';
+require_once __DIR__ . '/../services/InfoGRSService.php';
 
 class ReporteController
 {
@@ -47,6 +49,8 @@ class ReporteController
     private $Producto;
     private $ClienteProcesado;
     private $TrozadoDiario;
+    private $InfoGrs;
+    private $CtrlClientePV;
 
     public function __construct($db)
     {
@@ -73,6 +77,8 @@ class ReporteController
         $this->Producto = new ProductoService($db);
         $this->ClienteProcesado = new ClienteProcesadoService($db);
         $this->TrozadoDiario = new TrozadoDiarioService($db);
+        $this->InfoGrs = new InfoGRSService($db);
+        $this->CtrlClientePV = new ClientePvService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1430,6 +1436,126 @@ class ReporteController
         // Exportar CSV
         $this->outputCSV(
             'Trozado_Diario_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarCtrlClientePVExcel()
+    {
+        // Obtener los datos
+        $datos = $this->CtrlClientePV->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'ZONA',
+            'SUBZONA',
+            'CLIENTE',
+            'COORPORATIVO',
+            'CARNE UNIDADES',
+            'CARNE KILOS',
+            'CARNE SOLES',
+            'BRASA UNIDADES',
+            'BRASA KILOS',
+            'BRASA SOLES',
+            'TOTAL UNIDADES',
+            'TOTAL KILOS',
+            'TOTAL SOLES',
+            'BD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO'
+        ];
+
+        // Mapear cada fila (convertir algunos a mayúsculas)
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['zona'] ?? ''),
+                strtoupper($d['subzona'] ?? ''),
+                strtoupper($d['cliente'] ?? ''),
+                strtoupper($d['coorporativo'] ?? ''),
+                $d['carne_unidad'] ?? '',
+                $d['carne_kilos'] ?? '',
+                $d['carne_soles'] ?? '',
+                $d['brasa_unidad'] ?? '',
+                $d['brasa_kilos'] ?? '',
+                $d['brasa_soles'] ?? '',
+                $d['total_unidad'] ?? '',
+                $d['total_kilos'] ?? '',
+                $d['total_soles'] ?? '',
+                strtoupper($d['nom_db'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? ''
+            ];
+        };
+
+        // Exportar CSV
+        $this->outputCSV(
+            'Ctrl_Cliente_PV_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
+
+    public function exportarInfoGrsExcel()
+    {
+        // Obtener los datos
+        $datos = $this->InfoGrs->getAll();
+
+        // Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'PROVINCIA',
+            'ZONA',
+            'TIPO',
+            'CATEGORIA',
+            'LINEA',
+            'CODIGO',
+            'DESCRIPCION',
+            'CANTIDAD',
+            'PRECIO',
+            'PESO',
+            'IMPORTE',
+            'PROM. PESO',
+            'MERCADO',
+            'BD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO'
+        ];
+
+        // Mapear cada fila
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['zona'] ?? ''),
+                strtoupper($d['tipo'] ?? ''),
+                strtoupper($d['categoria'] ?? ''),
+                strtoupper($d['linea'] ?? ''),
+                $d['codigo'] ?? '',
+                strtoupper($d['descripcion'] ?? ''),
+                $d['cantidad'] ?? '',
+                $d['precio'] ?? '',
+                $d['peso'] ?? '',
+                $d['importe'] ?? '',
+                $d['peso_prom'] ?? '',
+                strtoupper($d['mercado'] ?? ''),
+                strtoupper($d['nom_db'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? ''
+            ];
+        };
+
+        // Exportar CSV
+        $this->outputCSV(
+            'Info_GRS_' . date('Y-m-d') . '.csv',
             $headers,
             $datos,
             $mapper

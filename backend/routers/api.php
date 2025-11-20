@@ -41,6 +41,9 @@ require_once __DIR__ . '/../controllers/TipoAlternoController.php';
 require_once __DIR__ . '/../controllers/TipoEmprendedorController.php';
 require_once __DIR__ . '/../controllers/TrozadoDiarioController.php';
 require_once __DIR__ . '/../controllers/TipoProdSustitutoController.php';
+require_once __DIR__ . '/../controllers/ClientePvController.php';
+require_once __DIR__ . '/../controllers/InfoGRSController.php';
+require_once __DIR__ . '/../controllers/OficialGRSController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -99,6 +102,9 @@ $TipoAlternoController = new TipoAlternoController($db);
 $TipoEmprendedorController = new TipoEmprendedorController($db);
 $TrozadoDiarioController = new TrozadoDiarioController($db);
 $TipoProSutitutoController = new TipoProdSustitutoController($db);
+$ClientePvController = new ClientePvController($db);
+$InfoGRSController = new InfoGRSController($db);
+$OficialGRSController = new OficialGRSController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -1129,6 +1135,113 @@ elseif (preg_match("/\/trozadoDiario\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
 elseif (strpos($path, "/trozadoDiario/etl") !== false && $request == "POST") {
     $TrozadoDiarioController->runETL();
+    exit;
+}
+
+
+
+######### RUTAS COM_INFO_GRS #########
+// obtener todos
+elseif (strpos($path, "/infoGRS/all") !== false && $request == "GET") {
+    $InfoGRSController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/infoGRS/crear") !== false && $request == "POST") {
+    $InfoGRSController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/infoGRS/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $InfoGRSController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/infoGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $InfoGRSController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/infoGRS/filtro") !== false && $request == "GET") {
+    $InfoGRSController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/infoGRS/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoDiarioExcel();
+    exit;
+} ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
+elseif (strpos($path, "/infoGRS/etl") !== false && $request == "POST") {
+    $TrozadoDiarioController->runETL();
+    exit;
+}
+
+
+
+######### RUTAS COM_CTRL_CLIENTE_PV #########
+// obtener todos
+elseif (strpos($path, "/clientePv/all") !== false && $request == "GET") {
+    $ClientePvController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/clientePv/crear") !== false && $request == "POST") {
+    $ClientePvController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/clientePv/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $ClientePvController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/clientePv\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $ClientePvController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/clientePv/filtro") !== false && $request == "GET") {
+    $ClientePvController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/clientePv/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoDiarioExcel();
+    exit;
+} ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
+elseif (strpos($path, "/clientePv/etl") !== false && $request == "POST") {
+    $TrozadoDiarioController->runETL();
+    exit;
+}
+
+
+######### RUTAS COM_OFICIAL_GRS #########
+// obtener todos
+elseif (strpos($path, "/oficialGRS/all") !== false && $request == "GET") {
+    $OficialGRSController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/oficialGRS/crear") !== false && $request == "POST") {
+    $OficialGRSController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/oficialGRS/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $OficialGRSController->update();
+    exit;
+}
+//borrar con regex para ids con caracteres
+elseif (preg_match("/\/oficialGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $OficialGRSController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/oficialGRS/filtro") !== false && $request == "GET") {
+    $OficialGRSController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/oficialGRS/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoDiarioExcel();
+    exit;
+} ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
+elseif (strpos($path, "/oficialGRS/etl") !== false && $request == "POST") {
+    //$OficialGRSController->runETL();
+    exit;
+}elseif (strpos($path, "/oficialGRS/autocomplete") !== false && $request == "GET") {
+    $OficialGRSController->autocomplete();
     exit;
 }
 
