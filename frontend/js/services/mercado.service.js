@@ -1,20 +1,7 @@
-class ProductoSustitutoService {
+class MercadoService {
     constructor() {
-        this.config = window.ProductoSustitutoConfig;
+        this.config = window.MercadoConfig;
         this.baseUrl = this.config.API.BASE_URL;
-    }
-
-    async getTiposProducto() {
-        try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.TIPOS_PRODUCTO}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error al obtener tipos de producto');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error en getTiposProducto:', error);
-            throw error;
-        }
     }
 
     async getAll() {
@@ -38,7 +25,10 @@ class ProductoSustitutoService {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            if (!response.ok) throw new Error('Error al crear');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear');
+            }
             return await response.json();
         } catch (error) {
             console.error('Error en create:', error);
@@ -54,7 +44,10 @@ class ProductoSustitutoService {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            if (!response.ok) throw new Error('Error al actualizar');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al actualizar');
+            }
             return await response.json();
         } catch (error) {
             console.error('Error en update:', error);
@@ -68,7 +61,10 @@ class ProductoSustitutoService {
             const response = await fetch(url, {
                 method: 'DELETE'
             });
-            if (!response.ok) throw new Error('Error al eliminar');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al eliminar');
+            }
             return await response.json();
         } catch (error) {
             console.error('Error en delete:', error);
@@ -76,31 +72,9 @@ class ProductoSustitutoService {
         }
     }
 
-    async getFiltered(filters) {
+    async exportToExcel() {
         try {
-            const params = new URLSearchParams();
-            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
-            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-            if (filters.producto) params.append('producto', filters.producto);
-
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error en filtrado');
-            return await response.json();
-        } catch (error) {
-            console.error('Error en getFiltered:', error);
-            throw error;
-        }
-    }
-
-    async exportToExcel(filters = {}) {
-        try {
-            const params = new URLSearchParams();
-            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
-            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-            if (filters.producto) params.append('producto', filters.producto);
-
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`;
             window.open(url, '_blank');
         } catch (error) {
             console.error('Error al exportar:', error);
@@ -109,5 +83,4 @@ class ProductoSustitutoService {
     }
 }
 
-window.ProductoSustitutoService = ProductoSustitutoService;
-
+window.MercadoService = MercadoService;
