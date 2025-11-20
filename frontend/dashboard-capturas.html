@@ -7,11 +7,10 @@
     <meta name="description" content="Sistema de Gestión de Pollo - Dashboard administrativo">
     <title>Dashboard - Gestión</title>
 
-    <!-- Tailwind CSS -->
-     <!--CSS ESTILOS TAILWIND -->
+      <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
-    <link rel="stylesheet" href="assets/css/datatables.min.css">
-    <!-- FONT AWESOME -->
+
+    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
     <!-- Estilos personalizados -->
     <style>
@@ -207,48 +206,196 @@
         .toast-close:hover {
             color: #4b5563;
         }
+
+        /* Estilos para el dropdown de columnas */
+        .dropdown-columns {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 320px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .column-toggle {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .column-toggle:last-child {
+            border-bottom: none;
+        }
+
+        .column-toggle:hover {
+            background-color: #f9fafb;
+        }
+
+        .column-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #8b5cf6;
+            border-radius: 4px;
+        }
+
+        .column-toggle input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .column-toggle span {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Scrollbar personalizado para el dropdown */
+        .dropdown-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 10px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb:hover {
+            background: #7c3aed;
+        }
+
+        #btnToggleFiltros {
+            transition: transform 0.3s ease, background-color 0.2s ease;
+        }
+
+        #btnToggleFiltros:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+
+        #filterContent {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+        }
+
+        #filterContent.show {
+            max-height: 600px;
+            opacity: 1;
+            padding-top: 1rem;
+        }
     </style>
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
     <div class="container mx-auto px-4 py-8">
 
-
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto">
-            <!-- Selector de tipo de datos -->
-
-<!-- Botones de acción -->
+            <!-- Botones de acción -->
             <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="actionButtons" style="display: none;">
-                <div class="flex flex-wrap gap-3 justify-left items-center">
-                    <div class="flex items-center gap-2 text-gray-700 font-semibold mr-4">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                            </path>
-                        </svg>
-                        <span>Acciones:</span>
+                <div class="flex flex-wrap gap-3 justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 text-gray-700 font-semibold">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            <span>Acciones:</span>
+                        </div>
+                        <button onclick="mostrarModalNuevo()"
+                            class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            Nuevo
+                        </button>
+                        <button id="btnReporte" onclick="generarReporteSeleccionado()"
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Reporte
+                        </button>
                     </div>
-                    <button onclick="mostrarModalNuevo()"
-                        class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
-                        Nuevo
-                    </button>
-                    <button id="btnReporte" onclick="generarReporteSeleccionado()"
-                        class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                            </path>
-                        </svg>
-                        Reporte
-                    </button>
 
+                    <!-- Dropdown para columnas -->
+                    <div class="dropdown-columns">
+                        <button id="btnToggleColumns" 
+                            class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0a2 2 0 012 2v8a2 2 0 01-2 2m-6 0h6"></path>
+                            </svg>
+                            Mostrar/Ocultar columnas
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div id="columnDropdown" class="dropdown-content">
+                            <div class="dropdown-header">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    Seleccionar Columnas
+                                </span>
+                                <button id="btnCloseDropdown" class="text-white hover:text-gray-200 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="columnCheckboxContainer" class="p-2">
+                                <!-- Los checkboxes se generarán dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
+
             <!-- Filtros -->
             <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="filterSection" style="display: none;">
                 <div class="flex items-center justify-between mb-4">
@@ -260,10 +407,9 @@
                         </svg>
                         Filtros
                     </h2>
-                    <!-- Botón para ocultar/mostrar filtros -->
-                <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
-                    <i class="fas fa-chevron-up"></i>
-                </button>
+                    <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
                     <button onclick="limpiarFiltros()"
                         class="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 text-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,8 +476,6 @@
                     <span id="filterInfo">Mostrando todos los registros</span>
                 </div>
             </section>
-
-            
 
             <!-- Tabla de datos -->
             <section class="bg-white rounded-2xl shadow-lg overflow-hidden">
@@ -407,52 +551,62 @@
 
     <!-- Toast Container -->
     <div id="toastContainer" class="toast-container"></div>
+
     <script>
         window.cargarDatos = async function (tipo) {
             if (window.capturasController && typeof window.capturasController.cargarDatos === 'function') {
-                // Llama al método real dentro del controlador de capturas
                 await window.capturasController.cargarDatos(tipo);
             } else {
                 console.error("capturasController.cargarDatos no está definido");
             }
         };
-         // Obtiene el año actual del navegador
-            document.getElementById('year').textContent = new Date().getFullYear();
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Toggle filtros
+        const toggleBtn = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+        
+        if (toggleBtn && filterContent) {
+            filterContent.classList.add('show');
+            
+            toggleBtn.addEventListener('click', () => {
+                const isOpen = filterContent.classList.contains('show');
+                const icon = toggleBtn.querySelector('i');
+                
+                if (isOpen) {
+                    filterContent.classList.remove('show');
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    filterContent.classList.add('show');
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            });
+        }
     </script>
 
-
     <!-- jQuery -->
-    <!-- jQuery (requerido por DataTables) -->
-    <script src="assets/js/jquery-3.7.1.min.js"></script>
-    <!-- DataTables CSS y JS -->
-    <script src="assets/js/datatables.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 
-    <!-- Scripts - ORDEN IMPORTANTÍSIMO (Arquitectura por capas) -->
-    <!-- 1. Configuración -->
+    <!-- Scripts -->
     <script src="js/config/config.js"></script>
     <script src="js/config/constants.js"></script>
-
-    <!-- 2. Servicios -->
     <script src="js/services/api.service.js"></script>
-
-    <!-- 3. Vistas -->
     <script src="js/views/table.view.js"></script>
     <script src="js/views/form.view.js"></script>
-
-    <!-- 4. Controladores -->
     <script src="js/controllers/data.controller.js"></script>
     <script src="js/controllers/ui.controller.js"></script>
     <script src="js/controllers/form.controller.js"></script>
     <script src="js/controllers/view.controller.js"></script>
     <script src="js/controllers/filter.controller.js"></script>
-
-    <!-- 5. Utilidades -->
     <script src="js/utils/notifications.js"></script>
     <script src="js/utils/helpers.js"></script>
-
-    <!-- 6. Aplicación principal -->
     <script src="app.js"></script>
     <script src="js/utils/funcionesVarias.js"></script>
 </body>
 
 </html>
+

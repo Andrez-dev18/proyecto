@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Condiciones</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/output.css">
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/dashboard-style.css">
+    
+    <style>
+        .dataTables_wrapper {
+            width: 100% !important;
+            overflow-x: auto;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-6">
+
+        <!-- Tabla (Solo lectura - sin acciones) -->
+        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Listado de Condiciones
+            </h2>
+            
+            <div class="overflow-x-auto overflow-y-visible" style="max-width: 100%;">
+                <div class="min-w-full inline-block align-middle">
+                    <div class="overflow-hidden border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200" id="dataTable">
+                            <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                <tr>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">CÓDIGO</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NOMBRE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="2" class="text-center py-8 text-gray-500">Cargando datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+        style="display: none;">
+        <div class="bg-white p-6 rounded-xl shadow-2xl">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
+            <p class="text-gray-700">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+    <script src="js/config/config.js"></script>
+    <script src="js/config/config.condicion.js"></script>
+    <script src="js/services/condicion.service.js"></script>
+    <script src="js/controllers/condicion.controller.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Inicializando Condicion controller...');
+            if (window.condicionController) {
+                window.condicionController.init();
+            } else {
+                console.error('❌ condicionController no está disponible');
+            }
+        });
+    </script>
+</body>
+</html>

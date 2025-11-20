@@ -50,6 +50,7 @@ const AppConfig = {
                 FILTRO: '/preciovivo/filtro?',
                 EXPORTA: '/preciovivo/exportar',
             },
+            
         }
     },
 
