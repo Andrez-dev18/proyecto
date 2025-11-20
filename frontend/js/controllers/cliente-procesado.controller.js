@@ -1,157 +1,17 @@
 class ClienteProcesadoController {
     constructor() {
         this.service = new ClienteProcesadoService();
-        this.dataTable = null;
         this.registroSeleccionado = null;
+        this.datos = [];
+        this.dataTable = null;
         this.columnasVisibles = {};
     }
 
     async init() {
-        console.log('Inicializando ClienteProcesadoController...');
+        console.log('🚀 Inicializando Cliente Procesado Controller (clienteProce)...');
         this.setupEventListeners();
         this.setupColumnToggle();
-        await this.cargarDatosInicial();
-    }
-
-    async cargarDatosInicial() {
-        try {
-            this.mostrarCargando(true);
-            
-            // Primero intentar cargar datos directos
-            const datos = await this.service.getAll();
-            console.log('Datos iniciales cargados:', datos.length, 'registros');
-            
-            // Luego inicializar DataTable con servidor
-            this.inicializarDataTable();
-            
-        } catch (error) {
-            console.error('Error al cargar datos iniciales:', error);
-            this.mostrarNotificacion('Error al cargar datos: ' + error.message, 'error');
-        } finally {
-            this.mostrarCargando(false);
-        }
-    }
-
-    inicializarDataTable() {
-        const table = $('#tablaClientes');
-        
-        // Si ya existe, destruir
-        if (this.dataTable) {
-            this.dataTable.destroy();
-        }
-
-        // Configurar DataTable
-        this.dataTable = table.DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: `${this.service.baseURL}${this.service.endpoints.FILTRO}`,
-                type: 'GET',
-                data: (d) => {
-                    // Agregar filtros personalizados
-                    const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-                    const fechaFin = document.getElementById('filterFechaFin')?.value;
-                    
-                    if (fechaInicio) d.fechaInicio = fechaInicio;
-                    if (fechaFin) d.fechaFin = fechaFin;
-                    
-                    console.log('Parámetros enviados:', d);
-                    return d;
-                },
-                dataSrc: function(json) {
-                    console.log('Respuesta del servidor:', json);
-                    return json.data || [];
-                },
-                error: function(xhr, error, thrown) {
-                    console.error('Error en DataTables:', error, thrown);
-                    console.error('Response:', xhr.responseText);
-                }
-            },
-            columns: [
-                { data: 'id', title: 'ID' },
-                { data: 'fecha', title: 'Fecha' },
-                { data: 'distrito', title: 'Distrito' },
-                { data: 'zona', title: 'Zona' },
-                { data: 'canal', title: 'Canal' },
-                { data: 'codigo', title: 'Código' },
-                { data: 'linea', title: 'Línea' },
-                { data: 'sublinea', title: 'Sublínea' },
-                { data: 'vendedor', title: 'Vendedor' },
-                { data: 'cliente', title: 'Cliente' },
-                { data: 'descripcion', title: 'Descripción' },
-                { data: 'ruta', title: 'Ruta' },
-                { data: 'nomruta', title: 'Nom. Ruta' },
-                { 
-                    data: 'unidad', 
-                    title: 'Unidad',
-                    render: function(data) {
-                        return parseFloat(data).toFixed(2);
-                    }
-                },
-                { 
-                    data: 'peso', 
-                    title: 'Peso',
-                    render: function(data) {
-                        return parseFloat(data).toFixed(2);
-                    }
-                },
-                { 
-                    data: 'importe', 
-                    title: 'Importe',
-                    render: function(data) {
-                        return parseFloat(data).toFixed(2);
-                    }
-                },
-                { data: 'nom_db', title: 'BD' },
-                {
-                    data: null,
-                    title: 'Acciones',
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, row) {
-                        return `
-                            <div class="flex gap-2 justify-center">
-                                <button onclick="clienteProcesadoController.editarRegistro(${row.id})" 
-                                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="clienteProcesadoController.eliminarRegistro(${row.id})" 
-                                        class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            ],
-            order: [[1, 'desc']],
-            pageLength: 10,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            },
-            drawCallback: () => {
-                this.aplicarVisibilidadColumnas();
-            }
-        });
-    }
-
-    setupEventListeners() {
-        // Botones principales
-        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportar());
-        document.getElementById('btnETL')?.addEventListener('click', () => this.abrirModalETL());
-        
-        // Filtros
-        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
-        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
-        
-        // Modal
-        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
-        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
-        
-        // ETL
-        document.getElementById('cancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
-        document.getElementById('confirmarETL')?.addEventListener('click', () => this.ejecutarETL());
+        this.renderizarTablaFiltrada();
     }
 
     setupColumnToggle() {
@@ -160,159 +20,318 @@ class ClienteProcesadoController {
         const btnClose = document.getElementById('btnCloseDropdown');
         const checkboxes = document.querySelectorAll('.column-checkbox');
 
-        // Inicializar visibilidad
+        // Inicializar estado de columnas
         checkboxes.forEach(checkbox => {
             const columnIndex = parseInt(checkbox.dataset.column);
             this.columnasVisibles[columnIndex] = checkbox.checked;
-            
-            checkbox.addEventListener('change', (e) => {
-                const index = parseInt(e.target.dataset.column);
-                this.columnasVisibles[index] = e.target.checked;
-                
-                if (this.dataTable) {
-                    this.dataTable.column(index).visible(e.target.checked);
-                }
-            });
         });
 
+        // Toggle dropdown
         btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
 
-        btnClose?.addEventListener('click', () => {
+        // Cerrar dropdown
+        btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             dropdown.classList.remove('show');
         });
 
+        // Cerrar al hacer clic fuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown-columns')) {
-                dropdown?.classList.remove('show');
+                dropdown.classList.remove('show');
             }
+        });
+
+        // Manejar cambios en checkboxes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
         });
     }
 
-    aplicarVisibilidadColumnas() {
-        Object.keys(this.columnasVisibles).forEach(index => {
-            if (this.dataTable) {
-                this.dataTable.column(parseInt(index)).visible(this.columnasVisibles[index]);
+    setupEventListeners() {
+        // Botones acción
+        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
+        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
+        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
+
+        // ETL
+        document.getElementById('btnETL')?.addEventListener('click', () => this.abrirModalETL());
+        document.getElementById('cancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
+        document.getElementById('confirmarETL')?.addEventListener('click', () => this.ejecutarETL());
+
+        // Filtro btn
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
+
+        // Modal
+        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
+        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
+
+        // Toggle filtros
+        document.getElementById('btnToggleFiltros')?.addEventListener('click', () => this.toggleFiltros());
+    }
+
+    toggleFiltros() {
+        const filterContent = document.getElementById('filterContent');
+        const toggleIcon = document.querySelector('#btnToggleFiltros i');
+        
+        if (filterContent.style.maxHeight) {
+            filterContent.style.maxHeight = null;
+            toggleIcon.classList.remove('fa-chevron-down');
+            toggleIcon.classList.add('fa-chevron-up');
+        } else {
+            filterContent.style.maxHeight = '0';
+            toggleIcon.classList.remove('fa-chevron-up');
+            toggleIcon.classList.add('fa-chevron-down');
+        }
+    }
+
+    renderizarTablaFiltrada() {
+        const table = $('#dataTable');
+        
+        // Destruir cualquier DataTable previo
+        if ($.fn.DataTable.isDataTable(table)) {
+            table.DataTable().clear().destroy();
+        }
+
+        // Inicializar DataTable con AJAX y filtros
+        this.dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: this.service.baseUrl + this.service.config.API.ENDPOINTS.FILTRO,
+                type: 'GET',
+                data: function (d) {
+                    // Extraer filtros desde los inputs del formulario
+                    const fechaInicio = document.getElementById('filterFechaInicio')?.value;
+                    const fechaFin = document.getElementById('filterFechaFin')?.value;
+                    
+                    if (fechaInicio) d.fechaInicio = fechaInicio;
+                    if (fechaFin) d.fechaFin = fechaFin;
+
+                    return d;
+                },
+                dataSrc: function(json) {
+                    return json.data || [];
+                }
+            },
+            columns: [
+                { data: 'id', className: 'text-center text-sm' },
+                { data: 'fecha', className: 'text-center text-sm' },
+                { data: 'distrito', className: 'text-sm' },
+                { data: 'zona', className: 'text-sm' },
+                { data: 'canal', className: 'text-sm' },
+                { data: 'codigo', className: 'text-center text-sm' },
+                { data: 'linea', className: 'text-sm' },
+                { data: 'sublinea', className: 'text-sm' },
+                { data: 'vendedor', className: 'text-sm' },
+                { data: 'cliente', className: 'text-sm' },
+                { data: 'descripcion', className: 'text-sm' },
+                { data: 'ruta', className: 'text-center text-sm' },
+                { data: 'nomruta', className: 'text-sm' },
+                { data: 'unidad', className: 'text-right text-sm' },
+                { data: 'peso', className: 'text-right text-sm' },
+                { data: 'importe', className: 'text-right text-sm' },
+                { data: 'nom_db', className: 'text-center text-sm' },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    className: 'text-center',
+                    render: (data, type, row, meta) => `
+                        <div class="flex gap-1 justify-center">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `
+                }
+            ],
+            order: [[1, 'desc']],
+            responsive: false,
+            scrollX: true,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            language: {
+                processing: "Procesando...",
+                search: "Buscar:",
+                lengthMenu: "Mostrar _MENU_ registros",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                loadingRecords: "Cargando...",
+                zeroRecords: "No se encontraron registros",
+                emptyTable: "No hay datos disponibles",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                }
+            },
+            drawCallback: () => {
+                // Aplicar visibilidad de columnas después de cada redibujado
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    if (column) {
+                        column.visible(this.columnasVisibles[columnIndex]);
+                    }
+                });
             }
+        });
+
+        // Aplicar visibilidad inicial
+        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+            const column = this.dataTable.column(parseInt(columnIndex));
+            if (column) {
+                column.visible(this.columnasVisibles[columnIndex]);
+            }
+        });
+
+        // Delegar eventos para los botones de acción
+        $('#dataTable tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        $('#dataTable tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
         });
     }
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
-        document.getElementById('modalTitle').textContent = 'Nuevo Registro';
+        document.getElementById('modalTitle').textContent = 'Nuevo Registro Cliente Procesado';
         this.limpiarFormulario();
-        this.mostrarModal();
+        const modal = document.getElementById('modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
     }
 
-    async editarRegistro(id) {
-        try {
-            // Obtener el registro de la tabla
-            const data = this.dataTable.rows().data();
-            let registro = null;
-            
-            data.each(function(row) {
-                if (row.id == id) {
-                    registro = row;
-                    return false;
-                }
-            });
-            
-            if (registro) {
-                this.registroSeleccionado = registro;
-                document.getElementById('modalTitle').textContent = 'Editar Registro';
-                this.cargarDatosEnFormulario(registro);
-                this.mostrarModal();
+    modificarSeleccionado() {
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
+            return;
+        }
+
+        document.getElementById('modalTitle').textContent = 'Modificar Registro Cliente Procesado';
+        this.cargarDatosEnFormulario();
+        const modal = document.getElementById('modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    cargarDatosEnFormulario() {
+        const r = this.registroSeleccionado;
+        console.log('Cargando datos en formulario:', r);
+
+        document.getElementById('modalFecha').value = r.fecha || '';
+        document.getElementById('modalDistrito').value = r.distrito || '';
+        document.getElementById('modalZona').value = r.zona || '';
+        document.getElementById('modalCanal').value = r.canal || '';
+        document.getElementById('modalCodigo').value = r.codigo || '';
+        document.getElementById('modalLinea').value = r.linea || '';
+        document.getElementById('modalSublinea').value = r.sublinea || '';
+        document.getElementById('modalVendedor').value = r.vendedor || '';
+        document.getElementById('modalCliente').value = r.cliente || '';
+        document.getElementById('modalDescripcion').value = r.descripcion || '';
+        document.getElementById('modalRuta').value = r.ruta || '';
+        document.getElementById('modalNomruta').value = r.nomruta || '';
+        document.getElementById('modalUnidad').value = r.unidad || '';
+        document.getElementById('modalPeso').value = r.peso || '';
+        document.getElementById('modalImporte').value = r.importe || '';
+    }
+
+    limpiarFormulario() {
+        document.querySelectorAll('#modalForm input, #modalForm select').forEach(input => {
+            if (input.type === 'date') {
+                input.value = new Date().toISOString().split('T')[0];
+            } else {
+                input.value = '';
             }
-        } catch (error) {
-            console.error('Error al editar:', error);
-            this.mostrarNotificacion('Error al cargar registro', 'error');
-        }
-    }
-
-    async eliminarRegistro(id) {
-        if (!confirm('¿Está seguro de eliminar este registro?')) return;
-        
-        try {
-            this.mostrarCargando(true);
-            await this.service.eliminar(id);
-            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
-            this.dataTable.ajax.reload();
-        } catch (error) {
-            console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('Error al eliminar registro', 'error');
-        } finally {
-            this.mostrarCargando(false);
-        }
+        });
     }
 
     async guardarRegistro() {
         const data = this.obtenerDatosFormulario();
-        
+
         if (!this.validarFormulario(data)) return;
-        
+
         try {
             this.mostrarCargando(true);
-            
+
             if (this.registroSeleccionado) {
                 data.id = this.registroSeleccionado.id;
-                await this.service.actualizar(data);
+                console.log('Actualizando registro ID:', data.id);
+                console.log('Datos a enviar:', data);
+
+                const resultado = await this.service.actualizar(data);
+                console.log('Resultado actualización:', resultado);
+
                 this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
-                await this.service.crear(data);
+                console.log('Creando nuevo registro');
+                console.log('Datos a enviar:', data);
+
+                const resultado = await this.service.crear(data);
+                console.log('Resultado creación:', resultado);
+
                 this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
-            
+
             this.cerrarModal();
             this.dataTable.ajax.reload();
+            
         } catch (error) {
             console.error('Error al guardar:', error);
-            this.mostrarNotificacion('Error al guardar registro: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     obtenerDatosFormulario() {
-        return {
+        const data = {
             fecha: document.getElementById('modalFecha').value,
-            distrito: document.getElementById('modalDistrito').value || '',
-            zona: document.getElementById('modalZona').value || '',
-            canal: document.getElementById('modalCanal').value || '',
-            codigo: document.getElementById('modalCodigo').value || '',
-            linea: document.getElementById('modalLinea').value || '',
-            sublinea: document.getElementById('modalSublinea').value || '',
-            vendedor: document.getElementById('modalVendedor').value || '',
-            cliente: document.getElementById('modalCliente').value || '',
-            descripcion: document.getElementById('modalDescripcion').value || '',
-            ruta: document.getElementById('modalRuta').value || '',
-            nomruta: document.getElementById('modalNomruta').value || '',
+            distrito: document.getElementById('modalDistrito').value,
+            zona: document.getElementById('modalZona').value,
+            canal: document.getElementById('modalCanal').value,
+            codigo: document.getElementById('modalCodigo').value,
+            linea: document.getElementById('modalLinea').value,
+            sublinea: document.getElementById('modalSublinea').value,
+            vendedor: document.getElementById('modalVendedor').value,
+            cliente: document.getElementById('modalCliente').value,
+            descripcion: document.getElementById('modalDescripcion').value,
+            ruta: document.getElementById('modalRuta').value,
+            nomruta: document.getElementById('modalNomruta').value,
             unidad: parseFloat(document.getElementById('modalUnidad').value) || 0,
             peso: parseFloat(document.getElementById('modalPeso').value) || 0,
             importe: parseFloat(document.getElementById('modalImporte').value) || 0,
             nom_db: 'grs',
-            usuarioRegistro: 'sistema',
+            usuarioRegistro: 'admin',
             fechaHoraRegistro: new Date().toISOString()
         };
-    }
 
-    cargarDatosEnFormulario(registro) {
-        document.getElementById('modalFecha').value = registro.fecha || '';
-        document.getElementById('modalDistrito').value = registro.distrito || '';
-        document.getElementById('modalZona').value = registro.zona || '';
-        document.getElementById('modalCanal').value = registro.canal || '';
-        document.getElementById('modalCodigo').value = registro.codigo || '';
-        document.getElementById('modalLinea').value = registro.linea || '';
-        document.getElementById('modalSublinea').value = registro.sublinea || '';
-        document.getElementById('modalVendedor').value = registro.vendedor || '';
-        document.getElementById('modalCliente').value = registro.cliente || '';
-        document.getElementById('modalDescripcion').value = registro.descripcion || '';
-        document.getElementById('modalRuta').value = registro.ruta || '';
-        document.getElementById('modalNomruta').value = registro.nomruta || '';
-        document.getElementById('modalUnidad').value = registro.unidad || '';
-        document.getElementById('modalPeso').value = registro.peso || '';
-        document.getElementById('modalImporte').value = registro.importe || '';
+        return data;
     }
 
     validarFormulario(data) {
@@ -320,182 +339,38 @@ class ClienteProcesadoController {
             this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
+        if (!data.cliente) {
+            this.mostrarNotificacion('El cliente es obligatorio', 'warning');
+            return false;
+        }
         return true;
     }
 
-    limpiarFormulario() {
-        document.getElementById('modalForm').reset();
-        document.getElementById('modalFecha').value = new Date().toISOString().split('T')[0];
-    }
+    async eliminarSeleccionado() {
+        console.log('=== ELIMINAR REGISTRO CLIENTE PROCESADO ===');
+        console.log('Registro seleccionado:', this.registroSeleccionado);
 
-    aplicarFiltros() {
-        if (this.dataTable) {
-            this.dataTable.ajax.reload();
-        }
-    }
-
-    limpiarFiltros() {
-        document.getElementById('filterFechaInicio').value = '';
-        document.getElementById('filterFechaFin').value = '';
-        this.aplicarFiltros();
-    }
-
-    async exportar() {
-        try {
-            this.service.exportar();
-            this.mostrarNotificacion('Descargando archivo Excel...', 'success');
-        } catch (error) {
-            this.mostrarNotificacion('Error al exportar', 'error');
-        }
-    }
-
-    async ejecutarETL() {
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
-        
-        if (!fechaInicio || !fechaFin) {
-            this.mostrarNotificacion('Debe ingresar ambas fechas', 'warning');
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
             return;
         }
-        
-        // Validar que fecha inicio no sea mayor que fecha fin
-        if (new Date(fechaInicio) > new Date(fechaFin)) {
-            this.mostrarNotificacion('La fecha inicio no puede ser mayor que la fecha fin', 'warning');
-            return;
-        }
-        
+
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+
         try {
             this.mostrarCargando(true);
-            console.log('Ejecutando ETL con fechas:', { fechaInicio, fechaFin });
-            
-            const resultado = await this.service.ejecutarETL({ 
-                fechaInicio: fechaInicio, 
-                fechaFin: fechaFin 
-            });
-            
-            console.log('Resultado ETL:', resultado);
-            
-            if (resultado && resultado.success) {
-                // Mostrar detalles del ETL
-                const eliminados = resultado.resumen?.eliminados || 0;
-                const insertados = resultado.resumen?.insertados || 0;
-                const total = resultado.resumen?.total || 0;
-                
-                this.mostrarAlertaETLExitoso(eliminados, insertados, total);
-                this.cerrarModalETL();
-                
-                // Recargar la tabla
-                if (this.dataTable) {
-                    this.dataTable.ajax.reload();
-                }
-            } else {
-                // Mostrar error detallado
-                const mensajeError = resultado?.mensaje || resultado?.error || 'Error desconocido en ETL';
-                this.mostrarNotificacion(`Error en ETL: ${mensajeError}`, 'error');
-                console.error('Error en ETL:', resultado);
-            }
+            console.log('Eliminando ID:', this.registroSeleccionado.id);
+
+            await this.service.eliminar(this.registroSeleccionado.id);
+            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
+            this.registroSeleccionado = null;
+            this.dataTable.ajax.reload();
         } catch (error) {
-            console.error('Error al ejecutar ETL:', error);
-            this.mostrarNotificacion(`Error al ejecutar ETL: ${error.message}`, 'error');
+            console.error('Error al eliminar:', error);
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
-    }
-
-    mostrarAlertaETLExitoso(eliminados, insertados, total) {
-        // Crear overlay
-        const overlay = document.createElement('div');
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        `;
-
-        // Crear modal de éxito
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            background-color: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 450px;
-            animation: slideDown 0.3s ease;
-        `;
-
-        modal.innerHTML = `
-            <div style="margin-bottom: 20px;">
-                <i class="fas fa-check-circle" style="font-size: 60px; color: #10b981;"></i>
-            </div>
-            <h3 style="color: #1f2937; margin-bottom: 15px; font-size: 24px; font-weight: bold;">
-                ETL Completado Exitosamente
-            </h3>
-            <div style="margin-bottom: 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
-                <p style="margin: 10px 0;">
-                    <strong>Registros eliminados:</strong> ${eliminados.toLocaleString()}
-                </p>
-                <p style="margin: 10px 0;">
-                    <strong>Registros insertados:</strong> ${insertados.toLocaleString()}
-                </p>
-                <p style="margin: 10px 0; padding-top: 10px; border-top: 1px solid #e5e7eb;">
-                    <strong>Total procesados:</strong> ${total.toLocaleString()}
-                </p>
-            </div>
-            <button id="btnCerrarAlertaETL" style="
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                border: none;
-                padding: 12px 30px;
-                border-radius: 8px;
-                font-size: 16px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                Aceptar
-            </button>
-        `;
-
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-
-        // Agregar animación
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-30px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Cerrar al hacer clic en el botón
-        document.getElementById('btnCerrarAlertaETL').addEventListener('click', () => {
-            overlay.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.3s';
-            setTimeout(() => {
-                document.body.removeChild(overlay);
-            }, 300);
-        });
-    }
-
-    mostrarModal() {
-        const modal = document.getElementById('modal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
     }
 
     cerrarModal() {
@@ -505,19 +380,165 @@ class ClienteProcesadoController {
         this.registroSeleccionado = null;
     }
 
+    exportarExcel() {
+        try {
+            this.service.exportarCSV();
+            this.mostrarNotificacion('Iniciando descarga de Excel...', 'success');
+        } catch (error) {
+            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+        }
+    }
+
+    async aplicarFiltros() {
+        this.dataTable.ajax.reload();
+        this.mostrarNotificacion('Filtros aplicados', 'info');
+    }
+
+    limpiarFiltros() {
+        document.getElementById('filterFechaInicio').value = '';
+        document.getElementById('filterFechaFin').value = '';
+        this.dataTable.ajax.reload();
+        this.mostrarNotificacion('Filtros limpiados', 'info');
+    }
+
     abrirModalETL() {
-        document.getElementById('modalETL').classList.remove('hidden');
         // Establecer fechas por defecto
         const hoy = new Date();
-        const ayer = new Date(hoy);
-        ayer.setDate(ayer.getDate() - 1);
+        const ayer = new Date();
+        ayer.setDate(hoy.getDate() - 1);
         
         document.getElementById('fechaInicio').value = ayer.toISOString().split('T')[0];
         document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
+        
+        document.getElementById('modalETL').classList.remove('hidden');
     }
 
     cerrarModalETL() {
         document.getElementById('modalETL').classList.add('hidden');
+    }
+
+    async ejecutarETL() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+
+        console.log('=== EJECUTANDO ETL CLIENTE PROCESADO (clienteProce) ===');
+        console.log('Fecha Inicio:', fechaInicio);
+        console.log('Fecha Fin:', fechaFin);
+
+        if (!fechaInicio || !fechaFin) {
+            this.mostrarNotificacion('Debe ingresar ambas fechas inicio y fin.', 'warning');
+            return;
+        }
+
+        // Validar que fecha inicio sea menor o igual a fecha fin
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+            this.mostrarNotificacion('La fecha inicio debe ser menor o igual a la fecha fin.', 'warning');
+            return;
+        }
+
+        try {
+            this.mostrarCargando(true);
+
+            const resultado = await this.service.ejecutarETL({ 
+                fechaInicio: fechaInicio, 
+                fechaFin: fechaFin 
+            });
+            
+            console.log('Resultado ETL clienteProce recibido:', resultado);
+
+            if (resultado && resultado.success) {
+                const total = resultado.resumen?.total || 
+                             resultado.resumen?.insertados || 
+                             resultado.resumen?.total_registros_procesados || 0;
+                
+                this.mostrarAlertaETL(total);
+                this.cerrarModalETL();
+                
+                // Recargar la tabla después del ETL
+                if (this.dataTable) {
+                    this.dataTable.ajax.reload();
+                }
+            } else {
+                const errorMsg = resultado?.mensaje || resultado?.error || 'Error en la ejecución del ETL';
+                this.mostrarNotificacion(errorMsg, 'error');
+            }
+
+        } catch (error) {
+            console.error('Error en ETL clienteProce:', error);
+            this.mostrarNotificacion('Error al ejecutar ETL: ' + error.message, 'error');
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+
+    mostrarAlertaETL(total) {
+        // Crear fondo oscuro
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+
+        // Crear ventana modal
+        const modal = document.createElement('div');
+        modal.style.backgroundColor = '#fff';
+        modal.style.borderRadius = '12px';
+        modal.style.padding = '25px 35px';
+        modal.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
+        modal.style.textAlign = 'center';
+        modal.style.maxWidth = '400px';
+        modal.style.fontFamily = 'Arial, sans-serif';
+        modal.style.animation = 'fadeIn 0.3s ease';
+
+        // Contenido del mensaje
+        modal.innerHTML = `
+            <h3 style="color: #2e7d32; margin-bottom: 10px;">
+                <i class="fas fa-check-circle" style="font-size: 48px;"></i><br>
+                ETL Cliente Procesado Completado
+            </h3>
+            <p style="margin-bottom: 20px; font-size: 15px; color: #333;">
+                Se procesaron un total de <strong style="color: #2e7d32; font-size: 18px;">${total}</strong> registros.<br><br>
+                El proceso ETL se ejecutó correctamente.
+            </p>
+            <button id="cerrarModalETL" style="
+                background-color: #2e7d32;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-size: 15px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            " onmouseover="this.style.backgroundColor='#1b5e20'" 
+               onmouseout="this.style.backgroundColor='#2e7d32'">
+                Cerrar
+            </button>
+        `;
+
+        // Insertar modal al overlay
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Cerrar modal al hacer clic en el botón
+        document.getElementById('cerrarModalETL').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+
+        // Animación de aparición
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     mostrarCargando(mostrar) {
@@ -529,60 +550,44 @@ class ClienteProcesadoController {
 
     mostrarNotificacion(mensaje, tipo = 'info') {
         console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-        
-        // Crear contenedor si no existe
+
         let container = document.getElementById('notificaciones-container');
         if (!container) {
             container = document.createElement('div');
             container.id = 'notificaciones-container';
-            container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;';
+            container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
             document.body.appendChild(container);
         }
-        
+
         const notif = document.createElement('div');
         const colores = {
-            success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-            error: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            warning: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-            info: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+            success: 'bg-green-500',
+            error: 'bg-red-500',
+            warning: 'bg-yellow-500',
+            info: 'bg-blue-500'
         };
-        
         const iconos = {
-            success: 'fa-check-circle',
-            error: 'fa-times-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
         };
-        
-        notif.style.cssText = `
-            background: ${colores[tipo]};
-            color: white;
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease;
-            font-size: 14px;
-            font-weight: 500;
-        `;
-        
+
+        notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
+        notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
-            <i class="fas ${iconos[tipo]}" style="font-size: 20px;"></i>
+            <span style="font-size: 20px;">${iconos[tipo]}</span>
             <span>${mensaje}</span>
         `;
-        
+
         container.appendChild(notif);
-        
-        // Auto-eliminar después de 5 segundos
+
+        // Auto-eliminar después de 4 segundos
         setTimeout(() => {
             notif.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notif.remove(), 300);
-        }, 5000);
+        }, 4000);
     }
 }
 
-// Instanciar el controlador
 window.clienteProcesadoController = new ClienteProcesadoController();

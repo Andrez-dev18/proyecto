@@ -1,217 +1,218 @@
 class ClienteProcesadoService {
     constructor() {
-        this.baseURL = ClienteProcesadoConfig.API.BASE_URL;
-        this.endpoints = ClienteProcesadoConfig.API.ENDPOINTS;
+        this.config = window.ClienteProcesadoConfig;
+        this.baseUrl = this.config.API.BASE_URL;
     }
 
     async getAll() {
         try {
-            const url = `${this.baseURL}${this.endpoints.ALL}`;
-            console.log('Fetching from:', url);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
+            console.log('Fetch URL Cliente Procesado:', url);
             
-            const response = await fetch(url);
-            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`Error ${response.status}: ${errorText}`);
             }
-            
+
             const data = await response.json();
-            console.log('Data received:', data);
+            console.log('Data received from clienteProce:', data);
+            
             return Array.isArray(data) ? data : [];
         } catch (error) {
-            console.error('Error in getAll:', error);
-            throw error;
+            console.error('Fetch error:', error);
+            throw new Error(`No se pudo cargar Cliente Procesado: ${error.message}`);
         }
     }
 
     async crear(data) {
         try {
-            const url = `${this.baseURL}${this.endpoints.CREAR}`;
-            console.log('Creando registro:', url, data);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
+            console.log('Crear Cliente Procesado URL:', url);
             
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
-            const responseText = await response.text();
-            console.log('Response crear:', responseText);
-
             if (!response.ok) {
-                let error;
-                try {
-                    error = JSON.parse(responseText);
-                } catch (e) {
-                    error = { message: responseText };
-                }
-                throw new Error(error.message || error.error || 'Error al crear registro');
+                const error = await response.json();
+                throw new Error(error.message || 'Error al crear registro');
             }
 
-            return JSON.parse(responseText);
+            return await response.json();
         } catch (error) {
-            console.error('Error en crear:', error);
+            console.error('Error en crear clienteProce:', error);
             throw error;
         }
     }
 
     async actualizar(data) {
         try {
-            const url = `${this.baseURL}${this.endpoints.EDITAR}`;
-            console.log('Actualizando registro:', url, data);
-            
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
+
+            console.log('=== ACTUALIZAR CLIENTE PROCESADO ===');
+            console.log('URL:', url);
+            console.log('Método: PUT');
+            console.log('Datos enviados:', JSON.stringify(data, null, 2));
+
             let response = await fetch(url, {
                 method: 'PUT',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
-            // Si PUT falla, intentar con POST
-            if (!response.ok && (response.status === 405 || response.status === 404)) {
-                console.log('PUT falló, intentando con POST...');
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-            }
+            console.log('Status respuesta:', response.status);
 
             const responseText = await response.text();
-            console.log('Response actualizar:', responseText);
+            console.log('Respuesta del servidor:', responseText);
 
             if (!response.ok) {
-                let error;
-                try {
-                    error = JSON.parse(responseText);
-                } catch (e) {
-                    error = { message: responseText };
+                // Retry with POST fallback
+                console.warn('PUT failed, status', response.status, 'retrying with POST fallback');
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const fallbackText = await response.text();
+                console.log('Fallback response:', fallbackText);
+                if (!response.ok) {
+                    let errorMsg = 'Error al actualizar registro';
+                    try {
+                        const errorData = JSON.parse(fallbackText);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = fallbackText || errorMsg;
+                    }
+                    throw new Error(errorMsg);
                 }
-                throw new Error(error.message || error.error || 'Error al actualizar registro');
+                return JSON.parse(fallbackText);
             }
-
             return JSON.parse(responseText);
         } catch (error) {
-            console.error('Error en actualizar:', error);
+            console.error('Error en actualizar clienteProce:', error);
             throw error;
         }
     }
 
     async eliminar(id) {
         try {
-            const url = `${this.baseURL}${this.endpoints.BORRAR}/${id}`;
-            console.log('Eliminando registro:', url);
-            
-            let response = await fetch(url, { 
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
 
-            // Si DELETE falla, intentar con POST
-            if (!response.ok && (response.status === 405 || response.status === 404)) {
-                console.log('DELETE falló, intentando con POST...');
-                response = await fetch(url, { 
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-            }
+            console.log('=== ELIMINAR CLIENTE PROCESADO ===');
+            console.log('URL:', url);
+            console.log('Método: DELETE');
+            console.log('ID:', id);
 
-            const responseText = await response.text();
-            console.log('Response eliminar:', responseText);
+            let response = await fetch(url, { method: 'DELETE' });
+
+            console.log('Status respuesta:', response.status);
+
+            let responseText = await response.text();
+            console.log('Respuesta del servidor:', responseText);
 
             if (!response.ok) {
-                let error;
-                try {
-                    error = JSON.parse(responseText);
-                } catch (e) {
-                    error = { message: responseText };
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('text/html') || response.status === 405 || response.status === 404) {
+                    console.warn('DELETE returned HTML or failed, retrying with POST fallback');
+                    response = await fetch(url, { method: 'POST' });
+                    responseText = await response.text();
+                    console.log('Fallback (POST) respuesta del servidor:', responseText);
                 }
-                throw new Error(error.message || error.error || 'Error al eliminar registro');
+
+                if (!response.ok) {
+                    let errorMsg = 'Error al eliminar registro';
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = responseText || errorMsg;
+                    }
+                    throw new Error(errorMsg);
+                }
             }
 
             return responseText ? JSON.parse(responseText) : { success: true };
         } catch (error) {
-            console.error('Error en eliminar:', error);
+            console.error('Error en eliminar clienteProce:', error);
             throw error;
         }
     }
 
-    async filtrar(params) {
+    async filtrar(filtros) {
         try {
-            const queryParams = new URLSearchParams();
-            
-            // Agregar parámetros de filtro
-            if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
-            if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
-            
-            // Agregar parámetros de DataTables
-            if (params.start !== undefined) queryParams.append('start', params.start);
-            if (params.length !== undefined) queryParams.append('length', params.length);
-            if (params.search && params.search.value) {
-                queryParams.append('search[value]', params.search.value);
+            const params = new URLSearchParams();
+
+            // Solo añadir los parámetros que tengan valor
+            if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
+            if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
+            if (filtros.distrito) params.append('distrito', filtros.distrito);
+            if (filtros.zona) params.append('zona', filtros.zona);
+            if (filtros.canal) params.append('canal', filtros.canal);
+            if (filtros.linea) params.append('linea', filtros.linea);
+            if (filtros.vendedor) params.append('vendedor', filtros.vendedor);
+            if (filtros.cliente) params.append('cliente', filtros.cliente);
+
+            // Agregar parámetros de DataTables si existen
+            if (filtros.start !== undefined) params.append('start', filtros.start);
+            if (filtros.length !== undefined) params.append('length', filtros.length);
+            if (filtros.search && filtros.search.value) {
+                params.append('search[value]', filtros.search.value);
             }
 
-            const url = `${this.baseURL}${this.endpoints.FILTRO}?${queryParams.toString()}`;
-            console.log('Filtering URL:', url);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
+            console.log('Filtrando clienteProce:', url);
 
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            const responseText = await response.text();
-            console.log('Response filtrar:', responseText);
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
 
             if (!response.ok) {
-                let error;
-                try {
-                    error = JSON.parse(responseText);
-                } catch (e) {
-                    error = { message: responseText };
-                }
-                throw new Error(error.message || error.error || `HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                throw new Error(`Error ${response.status}: ${errorText}`);
             }
 
-            const result = JSON.parse(responseText);
-            console.log('Filter result:', result);
+            const result = await response.json();
+            console.log('Filtered data received from clienteProce:', result);
+
             return result;
         } catch (error) {
-            console.error('Error en filtrar:', error);
+            console.error('Error en filtrar clienteProce:', error);
             throw error;
         }
     }
 
-    async exportar() {
+    async exportarCSV() {
         try {
-            const url = `${this.baseURL}${this.endpoints.EXPORTA}`;
-            console.log('Exportando desde:', url);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXPORTAR}`;
+            console.log('Exportar clienteProce URL:', url);
+            // Abrir en nueva pestaña para descargar
             window.open(url, '_blank');
         } catch (error) {
-            console.error('Error en exportar:', error);
+            console.error('Error en exportar clienteProce:', error);
             throw error;
         }
     }
 
     async ejecutarETL(data) {
         try {
-            const url = `${this.baseURL}${this.endpoints.ETL}`;
-            console.log('=== EJECUTANDO ETL ===');
-            console.log('URL:', url);
-            console.log('Datos enviados:', JSON.stringify(data));
+            // URL correcta según tu API
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ETL}`;
+            
+            console.log('=== EJECUTAR ETL CLIENTE PROCESADO ===');
+            console.log('URL ETL clienteProce:', url);
+            console.log('Datos enviados:', data);
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -222,76 +223,30 @@ class ClienteProcesadoService {
                 body: JSON.stringify(data)
             });
 
-            console.log('Response status:', response.status);
-            
-            // Obtener el texto de respuesta primero
-            const responseText = await response.text();
-            console.log('Response text completo:', responseText);
-            
-            // Verificar si la respuesta está vacía
-            if (!responseText) {
-                console.error('Respuesta vacía del servidor');
-                return {
-                    success: false,
-                    mensaje: 'El servidor no devolvió ninguna respuesta',
-                    error: 'Respuesta vacía'
-                };
-            }
-            
-            // Intentar parsear como JSON
-            let result;
-            try {
-                result = JSON.parse(responseText);
-                console.log('Respuesta parseada:', result);
-            } catch (parseError) {
-                console.error('Error al parsear JSON:', parseError);
-                console.error('Texto recibido:', responseText);
-                
-                // Si no es JSON válido, devolver error
-                return {
-                    success: false,
-                    mensaje: 'Respuesta inválida del servidor',
-                    error: responseText.substring(0, 200)
-                };
-            }
+            console.log('Response status ETL:', response.status);
 
-            // Verificar si la respuesta indica éxito
             if (!response.ok) {
-                console.error('Respuesta no OK:', response.status);
-                return {
-                    success: false,
-                    mensaje: result.mensaje || result.error || 'Error en el servidor',
-                    error: result.error || `Status: ${response.status}`
-                };
+                const errorText = await response.text();
+                console.error('Error response ETL:', errorText);
+                
+                // Intentar parsear como JSON si es posible
+                try {
+                    const error = JSON.parse(errorText);
+                    throw new Error(error.message || error.error || 'Error al ejecutar ETL');
+                } catch (e) {
+                    throw new Error('Error al ejecutar ETL clienteProce: ' + errorText);
+                }
             }
 
-            // Verificar el campo success en la respuesta
-            if (result.success === false) {
-                console.error('ETL reportó fallo:', result);
-                return {
-                    success: false,
-                    mensaje: result.mensaje || 'El ETL no se ejecutó correctamente',
-                    error: result.error || 'Error desconocido'
-                };
-            }
-
-            // Si llegamos aquí, el ETL fue exitoso
-            console.log('ETL ejecutado exitosamente:', result);
+            const result = await response.json();
+            console.log('Resultado ETL clienteProce:', result);
+            
             return result;
-            
         } catch (error) {
-            console.error('=== ERROR EN ETL ===');
-            console.error('Error completo:', error);
-            console.error('Stack:', error.stack);
-            
-            return {
-                success: false,
-                mensaje: 'Error al comunicarse con el servidor',
-                error: error.message
-            };
+            console.error('Error en ejecutarETL clienteProce:', error);
+            throw error;
         }
     }
 }
 
-// Hacer disponible globalmente
 window.ClienteProcesadoService = ClienteProcesadoService;
