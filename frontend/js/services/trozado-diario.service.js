@@ -1,20 +1,7 @@
-class ProductoSustitutoService {
+class TrozadoDiarioService {
     constructor() {
-        this.config = window.ProductoSustitutoConfig;
+        this.config = window.TrozadoDiarioConfig;
         this.baseUrl = this.config.API.BASE_URL;
-    }
-
-    async getTiposProducto() {
-        try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.TIPOS_PRODUCTO}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error al obtener tipos de producto');
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error en getTiposProducto:', error);
-            throw error;
-        }
     }
 
     async getAll() {
@@ -81,7 +68,6 @@ class ProductoSustitutoService {
             const params = new URLSearchParams();
             if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
             if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-            if (filters.producto) params.append('producto', filters.producto);
 
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
             const response = await fetch(url);
@@ -98,7 +84,6 @@ class ProductoSustitutoService {
             const params = new URLSearchParams();
             if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
             if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-            if (filters.producto) params.append('producto', filters.producto);
 
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
             window.open(url, '_blank');
@@ -107,7 +92,23 @@ class ProductoSustitutoService {
             throw error;
         }
     }
+
+    async ejecutarETL(fechaInicio, fechaFin) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ETL}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fechaInicio, fechaFin })
+            });
+            if (!response.ok) throw new Error('Error al ejecutar ETL');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en ejecutarETL:', error);
+            throw error;
+        }
+    }
 }
 
-window.ProductoSustitutoService = ProductoSustitutoService;
+window.TrozadoDiarioService = TrozadoDiarioService;
 

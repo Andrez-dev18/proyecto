@@ -2,11 +2,11 @@ class TableView {
     constructor() {
         this.tableHeaders = document.getElementById('tableHeaders');
         this.tableBody = document.getElementById('tableBody');
-        this.dataTable = null; // referencia al DataTable activo
+        this.dataTable = null;
+        this.columnasVisibles = {};
     }
 
     render(datos) {
-        // Si existe un DataTable previo, destruirlo antes de renderizar nuevos datos
         if (this.dataTable) {
             this.dataTable.destroy();
             this.dataTable = null;
@@ -17,17 +17,111 @@ class TableView {
             return;
         }
 
-        this.renderizarEncabezados(datos[0]);
-        this.renderizarFilas(datos);
+        const headers = Object.keys(datos[0]);
+        this.renderizarEncabezados(headers);
+        this.renderizarFilas(datos, headers);
+        
+        this.generarCheckboxesColumnas(headers);
 
-        // Esperar a que la tabla se renderice completamente
         setTimeout(() => this.inicializarDataTable(), 0);
+    }
+
+    generarCheckboxesColumnas(headers) {
+        const container = document.getElementById('columnCheckboxContainer');
+        
+        console.log('🔍 DEBUG generarCheckboxesColumnas:');
+        console.log('- Container encontrado:', !!container);
+        console.log('- Headers recibidos:', headers);
+        
+        if (!container) {
+            console.error('❌ Container "columnCheckboxContainer" NO encontrado');
+            console.log('Elementos con ID en el documento:', 
+                Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+            );
+            return;
+        }
+
+        container.innerHTML = '';
+        this.columnasVisibles = {};
+
+        const columnasConOpciones = [...headers, 'Opciones'];
+
+        columnasConOpciones.forEach((col, index) => {
+            const label = document.createElement('label');
+            label.className = 'column-toggle';
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'column-checkbox';
+            checkbox.dataset.column = index;
+            checkbox.checked = true;
+            
+            if (index === columnasConOpciones.length - 1) {
+                checkbox.disabled = true;
+            }
+            
+            this.columnasVisibles[index] = true;
+            
+            checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                const columnIndex = parseInt(e.target.dataset.column);
+                this.columnasVisibles[columnIndex] = e.target.checked;
+                
+                if (this.dataTable) {
+                    const column = this.dataTable.column(columnIndex);
+                    column.visible(e.target.checked);
+                }
+            });
+            
+            const span = document.createElement('span');
+            span.textContent = this.formatearNombreColumna(col);
+            
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            container.appendChild(label);
+        });
+
+        console.log('✅ Checkboxes generados:', container.children.length);
+        console.log('✅ Contenido del container:', container.innerHTML.substring(0, 200));
+
+        this.setupColumnToggle();
+    }
+
+    setupColumnToggle() {
+        const btnToggle = document.getElementById('btnToggleColumns');
+        const dropdown = document.getElementById('columnDropdown');
+        const btnClose = document.getElementById('btnCloseDropdown');
+
+        if (!btnToggle || !dropdown) {
+            console.warn('⚠️ Botón o dropdown no encontrado');
+            return;
+        }
+
+        btnToggle.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+            console.log('🔄 Toggle dropdown:', dropdown.classList.contains('show'));
+        };
+
+        if (btnClose) {
+            btnClose.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.remove('show');
+            };
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown-columns')) {
+                dropdown.classList.remove('show');
+            }
+        });
     }
 
     renderizarVacia() {
         if (!this.tableBody) return;
 
-        // Destruir DataTable si existía
         if (this.dataTable) {
             this.dataTable.destroy();
             this.dataTable = null;
@@ -46,10 +140,9 @@ class TableView {
         `;
     }
 
-    renderizarEncabezados(primerRegistro) {
+    renderizarEncabezados(headers) {
         if (!this.tableHeaders) return;
 
-        const headers = Object.keys(primerRegistro);
         const headerHTML = `
             ${headers.map(h => `
                 <th class="px-4 py-3 text-left text-sm font-semibold">${this.formatearNombreColumna(h)}</th>
@@ -60,10 +153,8 @@ class TableView {
         this.tableHeaders.innerHTML = headerHTML;
     }
 
-    renderizarFilas(datos) {
+    renderizarFilas(datos, headers) {
         if (!this.tableBody) return;
-
-        const headers = Object.keys(datos[0]);
 
         const filasHTML = datos.map((item, index) => {
             const celdas = headers.map(h => {
@@ -73,19 +164,21 @@ class TableView {
             }).join('');
 
             return `
-                <tr>
+                <tr class="hover:bg-blue-50 transition-colors">
                     ${celdas}
-                    <td class="px-4 py-3 text-center flex gap-2 justify-center">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded"
-                                onclick="window.editarRegistro(${index})"
-                                title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                                onclick="window.eliminarRegistro(${index})"
-                                title="Eliminar">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                    <td class="px-4 py-3 text-center">
+                        <div class="flex gap-2 justify-center">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg transition btn-hover-scale"
+                                    onclick="window.editarRegistro(${index})"
+                                    title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition btn-hover-scale"
+                                    onclick="window.eliminarRegistro(${index})"
+                                    title="Eliminar">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -104,11 +197,24 @@ class TableView {
                 responsive: true,
                 order: [[0, 'desc']],
                 language: {
-                    url: 'assets/i18n/es-ES.json'
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
                 },
                 columnDefs: [
-                    { orderable: false, targets: -1 } // Desactivar orden en la columna de "Opciones"
-                ]
+                    { orderable: false, targets: -1 }
+                ],
+                initComplete: () => {
+                    console.log('✅ DataTable inicializado');
+                    Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                        const column = this.dataTable.column(parseInt(columnIndex));
+                        column.visible(this.columnasVisibles[columnIndex]);
+                    });
+                },
+                drawCallback: () => {
+                    Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                        const column = this.dataTable.column(parseInt(columnIndex));
+                        column.visible(this.columnasVisibles[columnIndex]);
+                    });
+                }
             });
         }
     }
@@ -148,6 +254,10 @@ class TableView {
         }
 
         return valor;
+    }
+
+    marcarFilaSeleccionada(index) {
+        // Implementación si es necesaria
     }
 }
 
