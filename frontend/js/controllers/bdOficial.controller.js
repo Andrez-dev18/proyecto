@@ -195,49 +195,65 @@ class bdOficialController {
     }
 
     obtenerDatosFormulario() {
-       
+
         const data = {
+
+            // DATOS PRINCIPALES
             fecha: document.getElementById('modalFecha').value,
 
-            // Datos del cliente
+            // DATOS DEL CLIENTE
             ccod_cli: document.getElementById('modalCcodCli').value || '',
             crazn_soci: document.getElementById('modalCraznSoci').value || '',
+            cdesc_giro: document.getElementById('modalcdesc_giro').value || '',
             cdireccion: document.getElementById('modalCdireccion').value || '',
             cnom_ubige: document.getElementById('modalCnomUbige').value || '',
+            provincia: document.getElementById('modalprovincia').value || '',
+            cnom_departamento: document.getElementById('modaldepartamento').value || '',
+            dfec_alta: document.getElementById('modaldfec_alta').value || '',
+            ccod_ruta: document.getElementById('modalccod_ruta').value || '',
 
-            // Datos del vendedor
+            // DATOS DEL VENDEDOR
+            ccod_vend: document.getElementById('modalccod_vend').value || '',
             cnom_vend: document.getElementById('modalCnomVend').value || '',
+            ccod_fuerz: document.getElementById('modalccod_fuerz').value || '',
 
-            // Producto
+            // PRODUCTO
+            ccod_prod_distribuidor: document.getElementById('modaldistribuidor').value || '',
             cnom_prod: document.getElementById('modalCnomProd').value || '',
+            cnom_categ: document.getElementById('modalcateg').value || '',
+            cnom_lin: document.getElementById('modalcnom_lin').value || '',
+            cnom_sublin: document.getElementById('modalcnom_sublin').value || '',
 
-            // Cantidades
+            // CANTIDAD / PESO / PRECIO / TIPO DE VENTA
             ncant: parseFloat(document.getElementById('modalNcant').value) || 0,
             npeso: parseFloat(document.getElementById('modalNpeso').value) || 0,
-
-            // Nuevo campo precio
             precio: parseFloat(document.getElementById('modalPrecio').value) || 0,
-
-            // Nuevo campo tipo de venta
             tipo_venta: document.getElementById('modalTipoVenta').value || 'unit',
 
-            // Datos SF
+            // CLIENTE EXTRA
+            cruc_cli: document.getElementById('modalcruc_cli').value || '',
+            cdni_cli: document.getElementById('modalcdni_cli').value || '',
+
+            ccod_movil: document.getElementById('modalccod_movil').value || '',
+            cdesc_movi: document.getElementById('modalcdesc_movi').value || '',
+            cdesc_cana: document.getElementById('modalcdesc_cana').value || '',
+            cdia_visit: document.getElementById('modalcdia_visit').value || '',
+
+            // PRODUCTO SF
+            ccod_prod_sf: document.getElementById('modalccod_prod_sf').value || '',
+            cnom_prod_sf: document.getElementById('modalcnom_prod_sf').value || '',
             categoria_sf: document.getElementById('modalCategoriaSf').value || '',
             familia_sf: document.getElementById('modalFamiliaSf').value || '',
             subfamilia_sf: document.getElementById('modalSubfamiliaSf').value || '',
 
-            // Día de visita
-            cdia_visit: document.getElementById('modalDiaVisit')?.value || '',
-
-            // Fijo: lo agregas aquí o desde el backend (más seguro en backend)
-            //nom_db: 'excel',
-
-            // Usuario logueado
+            // CAMPOS FIJOS
+            //nom_db: 'excel',       // como en tu BD oficial
             //usuarioRegistro: localStorage.getItem('usuario') || 'desconocido'
         };
 
         return data;
     }
+
 
     validarFormulario(data) {
         if (!data.fecha) {
@@ -282,35 +298,77 @@ class bdOficialController {
 
         // Definir columnas base
         const columnas = [
-            'id', 'fecha', 'ccod_cli', 'ccod_cli_comp', 'crazn_soci', 'cdireccion',
-            'cnom_ubige', 'cnom_vend', 'cnom_prod',
-            'ncant', 'npeso', 'peso_final',
-            'impte_igv', 'impte_base',
-            'categoria_sf', 'familia_sf', 'subfamilia_sf',
-            'cond', 'nom_db'
+            "id", "fecha",
+            "ccod_cli", "ccod_cli_comp", "crazn_soci", "cdesc_giro",
+            "cdireccion", "cnom_ubige", "provincia", "cnom_departamento",
+            "dfec_alta", "ccod_ruta", "ccod_vend", "cnom_vend",
+            "ccod_fuerz", "ccod_prod_distribuidor",
+            "cnom_prod", "cnom_categ", "cnom_lin", "cnom_subli",
+            "ncant", "npeso", "peso_final",
+            "impte_igv", "impte_base",
+            "cruc_cli", "cdni_cli",
+            "ccod_movil", "cdesc_movi", "cdesc_cana",
+            "cdia_visit", "frec", "id_prov",
+            "dap",
+            "ccod_prod_sf", "cnom_prod_sf",
+            "categoria_sf", "familia_sf", "subfamilia_sf",
+            "cond"
         ];
 
         // Diccionario para nombres bonitos
         const nombresColumnas = {
             id: "ID",
             fecha: "Fecha",
+
             ccod_cli: "Código Cliente",
-            ccod_cli_comp: "Codigo cliente Comp",
+            ccod_cli_comp: "Código Cliente Comp",
             crazn_soci: "Razón Social",
+            cdesc_giro: "Giro",
             cdireccion: "Dirección",
             cnom_ubige: "Ubigeo",
+
+            provincia: "Provincia",
+            cnom_departamento: "Departamento",
+            dfec_alta: "Fecha Alta",
+
+            ccod_ruta: "Cod. Ruta",
+            ccod_vend: "Cod. Vendedor",
             cnom_vend: "Vendedor",
+            ccod_fuerz: "Cod. Fuerza",
+            ccod_prod_distribuidor: "Cod. Prod. Distribuidor",
+
             cnom_prod: "Producto",
+            cnom_categ: "Categoría",
+            cnom_lin: "Línea",
+            cnom_subli: "Sub Línea",
+
             ncant: "Cantidad",
             npeso: "Peso",
             peso_final: "Peso Final",
-            impte_igv: "Importe con IGV",
-            impte_base: "Importe sin IGV",
-            categoria_sf: "Categoría",
-            familia_sf: "Familia",
-            subfamilia_sf: "Subfamilia",
-            cond: "Condición",
-            nom_db: "Base"
+
+            impte_igv: "Importe c/IGV",
+            impte_base: "Importe s/IGV",
+
+            cruc_cli: "RUC Cliente",
+            cdni_cli: "DNI Cliente",
+
+            ccod_movil: "Cod. Móvil",
+            cdesc_movi: "Desc. Móvil",
+            cdesc_cana: "Canal",
+
+            cdia_visit: "Día Visita",
+            frec: "Frecuencia",
+            id_prov: "ID Proveedor",
+            dap: "Distribuidora",
+
+            ccod_prod_sf: "Cod. Prod SF",
+            cnom_prod_sf: "Producto SF",
+
+            categoria_sf: "Categoría SF",
+            familia_sf: "Familia SF",
+            subfamilia_sf: "Subfamilia SF",
+
+            cond: "Condición"
         };
 
         // Agregar columna de opciones
@@ -330,12 +388,11 @@ class bdOficialController {
             serverSide: true,
             ajax: {
                 url: this.service.baseURL + this.config.API.ENDPOINTS.FILTRO,
-                type: 'GET',
+                type: 'POST',
                 data: function (d) {
                     const filtros = {};
                     const campos = [
-                        'FechaInicio', 'FechaFin', 'TipoPollo', 'TipoLinea',
-                        'Provincia', 'Zona', 'Empresa', 'Proveedor', 'Producto'
+                        'FechaInicio', 'FechaFin'
                     ];
 
                     // Extraer filtros desde los inputs del formulario
@@ -434,41 +491,48 @@ class bdOficialController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        console.log('Cargando datos en formulario:', r);
+    console.log("Cargando datos en formulario:", r);
 
-        document.getElementById('modalFecha').value = r.fecha;
-        // Convertir nombres a IDs para los select
+    // Fecha
+    document.getElementById("modalFecha").value = r.fecha || "";
 
-        //buscar id de tipo pollo
-        const tipoPolloObj = this.catalogos.tiposPollo.find(e => e.tipoPollo == r.tipo);
-        document.getElementById('modalTipoPollo').value = tipoPolloObj ? tipoPolloObj.id : '';
+    // Textos simples (autocompletados)
+    document.getElementById("modalCcodCli").value = r.ccod_cli || "";
+    document.getElementById("modalCraznSoci").value = r.crazn_soci || "";
+    document.getElementById("modalcdesc_giro").value = r.cdesc_giro || "";
+    document.getElementById("modalCdireccion").value = r.cdireccion || "";
+    document.getElementById("modalCnomUbige").value = r.cnom_ubige || "";
+    document.getElementById("modalprovincia").value = r.provincia || "";
+    document.getElementById("modaldepartamento").value = r.cnom_departamento || "";
+    document.getElementById("modaldfec_alta").value = r.dfec_alta || "";
+    document.getElementById("modalccod_ruta").value = r.ccod_ruta || "";
+    document.getElementById("modalccod_vend").value = r.ccod_vend || "";
+    document.getElementById("modalCnomVend").value = r.cnom_vend || "";
+    document.getElementById("modalccod_fuerz").value = r.ccod_fuerz || "";
+    document.getElementById("modaldistribuidor").value = r.ccod_prod_distribuidor || "";
+    document.getElementById("modalCnomProd").value = r.cnom_prod || "";
+    document.getElementById("modalcateg").value = r.cnom_categ || "";
+    document.getElementById("modalcnom_lin").value = r.cnom_lin || "";
+    document.getElementById("modalcnom_sublin").value = r.cnom_sublin || "";
+    document.getElementById("modalcruc_cli").value = r.cruc_cli || "";
+    document.getElementById("modalcdni_cli").value = r.cdni_cli || "";
+    document.getElementById("modalccod_movil").value = r.ccod_movil || "";
+    document.getElementById("modalcdesc_movi").value = r.cdesc_movi || "";
+    document.getElementById("modalcdesc_cana").value = r.cdesc_cana || "";
+    document.getElementById("modalcdia_visit").value = r.cdia_visit || "";
+    document.getElementById("modalccod_prod_sf").value = r.ccod_prod_sf || "";
+    document.getElementById("modalcnom_prod_sf").value = r.cnom_prod_sf || "";
+    document.getElementById("modalCategoriaSf").value = r.categoria_sf || "";
+    document.getElementById("modalFamiliaSf").value = r.familia_sf || "";
+    document.getElementById("modalSubfamiliaSf").value = r.subfamilia_sf || "";
 
-        // Buscar ID de empresa por nombre
-        const empresaObj = this.catalogos.empresas.find(e => e.empresa === r.empresa);
-        document.getElementById('modalEmpresa').value = empresaObj ? empresaObj.id : '';
+    // Numéricos
+    document.getElementById("modalNcant").value = r.ncant || "";
+    document.getElementById("modalNpeso").value = r.npeso || "";
+    document.getElementById("modalPrecio").value = r.impte_base || ""; // precio sin IGV
 
-        // Buscar ID de provincia por nombre
-        const provinciaObj = this.catalogos.provincias.find(p => p.provincia === r.provincia);
-        document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.id : '';
-
-        const zonaObj = this.catalogos.provincias.find(z => z.provincia === r.zona);
-        document.getElementById('modalZona').value = zonaObj ? zonaObj.id : '';
-
-        // Buscar ID de tipoLinea por nombre
-        const tipoObj = this.catalogos.tipos.find(t => t.tipo === r.linea);
-        document.getElementById('modalTipo').value = tipoObj ? tipoObj.id : '';
-
-        // Buscar ID de proveedor por nombre
-        const proveedorObj = this.catalogos.proveedores.find(p => p.proveedor === r.proveedor);
-        document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.id : '';
-
-        const TipoPolloVivoObj = this.catalogos.tiposPolloVivo.find(pv => pv.tipoPolloVivo === r.producto);
-        document.getElementById('modalTipoPolloVivo').value = TipoPolloVivoObj ? TipoPolloVivoObj.id : '';
-
-        document.getElementById('modalCantidad').value = r.cantidad || '';
-        document.getElementById('modalPeso').value = r.peso || '';
-        document.getElementById('modalPromedio').value = r.prom || '';
-        document.getElementById('modalPrecio').value = r.precio || '';
+    // Tipo de venta (si no existe, default "unit")
+    document.getElementById("modalTipoVenta").value = r.tipo_venta || "unit";
     }
 
     async eliminarSeleccionado() {

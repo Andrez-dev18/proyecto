@@ -77,11 +77,11 @@ class OficialGRSController
     public function obtenerTodosDatosFiltro()
     {
         $params = [
-            'fechaInicio' => $_GET['fechaInicio'] ?? null,
-            'fechaFin'    => $_GET['fechaFin'] ?? null,
-            'start'       => intval($_GET['start'] ?? 0),
-            'length'      => intval($_GET['length'] ?? 10),
-            'search'      => $_GET['search'] ?? ['value' => '']
+            'fechaInicio' => $_POST['fechaInicio'] ?? null,
+            'fechaFin'    => $_POST['fechaFin'] ?? null,
+            'start'       => intval($_POST['start'] ?? 0),
+            'length'      => intval($_POST['length'] ?? 10),
+            'search'      => $_POST['search'] ?? ['value' => '']
         ];
 
         $datos = $this->service->obtenerDatosFiltrados($params);

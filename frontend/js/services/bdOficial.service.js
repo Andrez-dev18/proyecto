@@ -29,11 +29,6 @@ class bdOficialService {
         try {
             const url = `${this.baseURL + this.config.API.ENDPOINTS.EDITAR}`;
 
-            console.log('=== ACTUALIZAR REGISTRO ===');
-            console.log('URL:', url);
-            console.log('Método: PUT');
-            console.log('Datos enviados:', JSON.stringify(data, null, 2));
-
             let response = await fetch(url, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },

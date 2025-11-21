@@ -71,6 +71,17 @@
             border-radius: 6px;
         }
 
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-box {
+            position: absolute !important;
+            left: 0;
+            top: 100%;
+        }
+
+
         @keyframes slideDown {
             from {
                 opacity: 0;
@@ -399,7 +410,7 @@
                     </div>
 
                     <!-- Código Cliente -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Código Cliente *</label>
                         <input type="text" id="modalCcodCli" maxlength="200" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -407,7 +418,7 @@
                     </div>
 
                     <!-- Razón Social -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Razón Social *</label>
                         <input type="text" id="modalCraznSoci" maxlength="200" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -415,7 +426,7 @@
                     </div>
 
                     <!-- cdesc_giro-->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Desc giro</label>
                         <input type="text" id="modalcdesc_giro" maxlength="250"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -423,7 +434,7 @@
                     </div>
 
                     <!-- Dirección -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
                         <input type="text" id="modalCdireccion" maxlength="250"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -431,55 +442,55 @@
                     </div>
 
                     <!-- Ubigeo -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Ubigeo</label>
                         <input type="text" id="modalCnomUbige" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="cnom_ubige">
+                            data-campo="cnom_ubige">
                     </div>
 
                     <!-- provincia -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
                         <input type="text" id="modalprovincia" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="provincia">
+                            data-campo="provincia">
                     </div>
 
                     <!-- departamente -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
                         <input type="text" id="modaldepartamento" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="cnom_departamento">
+                            data-campo="cnom_departamento">
                     </div>
 
-                    <!-- dfec_alta -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fec alta</label>
-                        <input type="text" id="modaldfec_alta" maxlength="200"
+                    <!-- dfecha_alta -->
+                    <div class="autocomplete-wrapper">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha alta</label>
+                        <input type="date" id="modaldfec_alta" maxlength="200" 
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="dfec_alta">
+                            data-campo="dfec_alta">
                     </div>
 
                     <!-- ccod_ruta -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cod. ruta</label>
                         <input type="text" id="modalccod_ruta" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="ccod_ruta">
+                            data-campo="ccod_ruta">
                     </div>
 
                     <!-- ccod_vend -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cod. vendedor</label>
                         <input type="text" id="modalccod_vend" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                             data-campo="ccod_vend">
+                            data-campo="ccod_vend">
                     </div>
 
                     <!-- Vendedor -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Vendedor</label>
                         <input type="text" id="modalCnomVend" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -487,7 +498,7 @@
                     </div>
 
                     <!-- ccod_fuerz -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cod. fuerza</label>
                         <input type="text" id="modalccod_fuerz" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -495,7 +506,7 @@
                     </div>
 
                     <!-- ccod_prod_distribuidor -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cod. producto distribuidor</label>
                         <input type="text" id="modaldistribuidor" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -503,7 +514,7 @@
                     </div>
 
                     <!-- Producto -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Producto *</label>
                         <input type="text" id="modalCnomProd" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -511,7 +522,7 @@
                     </div>
 
                     <!-- cnom_categ -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                         <input type="text" id="modalcateg" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -519,7 +530,7 @@
                     </div>
 
                     <!-- cnom_lin -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Linea</label>
                         <input type="text" id="modalcnom_lin" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -527,7 +538,7 @@
                     </div>
 
                     <!-- cnom_sublin -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">SubLinea</label>
                         <input type="text" id="modalcnom_sublin" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -535,28 +546,28 @@
                     </div>
 
                     <!-- Cantidad -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
                         <input type="number" id="modalNcant" step="0.01" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Peso -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Peso *</label>
                         <input type="number" id="modalNpeso" step="0.01" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Precio -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Precio *</label>
                         <input type="number" id="modalPrecio" step="0.01" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Tipo de venta -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Venta *</label>
                         <select id="modalTipoVenta"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
@@ -566,7 +577,7 @@
                     </div>
 
                     <!-- cruc_cli -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Ruc cliente</label>
                         <input type="text" id="modalcruc_cli" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -574,7 +585,7 @@
                     </div>
 
                     <!-- cdni_cli -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">dni cliente</label>
                         <input type="text" id="modalcdni_cli" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -582,7 +593,7 @@
                     </div>
 
                     <!-- ccod_movil -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Movil</label>
                         <input type="text" id="modalccod_movil" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -590,15 +601,47 @@
                     </div>
 
                     <!-- cdesc_movi -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Desc. Movil</label>
                         <input type="text" id="modalcdesc_movi" maxlength="250" required
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                             data-campo="cdesc_movi">
                     </div>
 
+                    <!-- cdesc_cana -->
+                    <div class="autocomplete-wrapper">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Desc. Cana</label>
+                        <input type="text" id="modalcdesc_cana" maxlength="250" required
+                            class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            data-campo="cdesc_cana">
+                    </div>
+
+                    <!-- cdia_visit -->
+                    <div class="autocomplete-wrapper">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Día visita</label>
+                        <input type="text" id="modalcdia_visit" maxlength="250" required
+                            class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            data-campo="cdia_visit">
+                    </div>
+
+                    <!-- ccod_prod_sf -->
+                    <div class="autocomplete-wrapper">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cod. Producto SF</label>
+                        <input type="text" id="modalccod_prod_sf" maxlength="250" required
+                            class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            data-campo="ccod_prod_sf">
+                    </div>
+
+                    <!-- cnom_prod_sf -->
+                    <div class="autocomplete-wrapper">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Producto SF</label>
+                        <input type="text" id="modalcnom_prod_sf" maxlength="250" required
+                            class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            data-campo="cnom_prod_sf">
+                    </div>
+
                     <!-- Categoria SF -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Categoría SF</label>
                         <input type="text" id="modalCategoriaSf" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
@@ -606,14 +649,14 @@
                     </div>
 
                     <!-- Familia SF -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Familia SF</label>
                         <input type="text" id="modalFamiliaSf" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Subfamilia SF -->
-                    <div>
+                    <div class="autocomplete-wrapper">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Subfamilia SF</label>
                         <input type="text" id="modalSubfamiliaSf" maxlength="200"
                             class="autocomplete-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">

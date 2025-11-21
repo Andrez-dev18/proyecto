@@ -1229,7 +1229,7 @@ elseif (preg_match("/\/oficialGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     $OficialGRSController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/oficialGRS/filtro") !== false && $request == "GET") {
+}elseif (strpos($path, "/oficialGRS/filtro") !== false && $request == "POST") {
     $OficialGRSController->obtenerTodosDatosFiltro();
     exit;
 //EXPORTAR FORMATO EXCEL

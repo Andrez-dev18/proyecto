@@ -5,7 +5,7 @@ const bdOficialConfig = {
             ALL: '/oficialGRS/all',
             FILTRO: '/oficialGRS/filtro',
             CREAR: '/oficialGRS/crear',
-            ACTUALIZAR: '/oficialGRS/actualizar',
+            EDITAR: '/oficialGRS/actualizar',
             BORRAR: '/oficialGRS/borrar',
             EXCEL: '/oficialGRS/exportar',
             ETL: '/oficialGRS/etl',
