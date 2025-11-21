@@ -19,40 +19,47 @@ class OficialGRSService
     public function save($data)
     {
 
-        // -------------------------------------------------------
-        // 1. DEFINIR NOMBRE DISTRIBUIDORA (FIJO)
-        // -------------------------------------------------------
-        // Según tu BD, se usa el nombre completo con espacios
-        $nombreDistribuidora = "RINCONADA";
+        // Nombre fijo
         $data['dap'] = "RINCONADA DEL SUR AREQUIPA";
+        $data['ccod_cli_comp'] = "RINCONADA" . ($data['ccod_cli'] ?? '');
 
-        // Formato BD para comp (según tu lógica anterior):
-        $data['ccod_cli_comp'] = $nombreDistribuidora . $data['ccod_cli'];
-
-        // -------------------------------------------------------
-        // 3. FRECUENCIA (Texto -> Número)
-        // -------------------------------------------------------
-        // La BD espera '1' en frec si el día es 'Lunes'
+        // Frecuencia (día → número)
         if (!empty($data['cdia_visit'])) {
             $data['frec'] = $this->convertirDiaANumero($data['cdia_visit']);
         } else {
             $data['frec'] = '0';
         }
 
-        // PESO FINAL = NPESO (peso sin bonificaciones)
-        $data['peso_final'] = !empty($data['npeso']) ? floatval($data['npeso']) : 0;
+        // Peso final = npeso
+        $npeso = floatval($data['npeso'] ?? 0);
+        $data['peso_final'] = $npeso;
 
-        // COND = 1 (si importe base >= 0.70), 0 caso contrario
-        if (isset($data['impte_base'])) {
-            $importeBase = floatval($data['impte_base']);
-            $data['cond'] = ($importeBase >= 0.70) ? 1 : 0;
+        // Tipo de venta
+        $tipoVenta = $data['tipo_venta'] ?? "unit";
+        $precio = floatval($data['precio'] ?? 0);
+        $cantidad = floatval($data['ncant'] ?? 0);
+
+        // Calculo de importes
+        if ($precio > 0 && $cantidad > 0) {
+
+            if ($tipoVenta === "unit") {
+                $impte_igv = $precio * $cantidad;
+            } else { // weight
+                $impte_igv = $precio * $npeso * $cantidad;
+            }
+
+            $data['impte_igv'] = round($impte_igv, 4);
+            $data['impte_base'] = round($impte_igv / 1.18, 2);
         } else {
-            $data['cond'] = 0;
+            // Si no hay precio o cantidad
+            $data['impte_igv'] = 0;
+            $data['impte_base'] = 0;
         }
 
-        // Guardar en BD
-        return $this->repo->save($data);
+        // Calculo de cond
+        $data['cond'] = ($data['impte_base'] >= 0.70) ? 1 : 0;
 
+        return $this->repo->save($data);
     }
 
     public function autocomplete($campo, $query)
