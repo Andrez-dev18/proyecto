@@ -26,6 +26,7 @@ class ClienteProcesadoService {
     async actualizar(data) {
         try {
             const url = `${this.baseURL}/clienteProce/update`;
+            console.log('Actualizando registro:', data);
 
             let response = await fetch(url, {
                 method: 'PUT',
@@ -57,6 +58,7 @@ class ClienteProcesadoService {
     async eliminar(id) {
         try {
             const url = `${this.baseURL}/clienteProce/delete/${id}`;
+            console.log('Eliminando registro ID:', id);
 
             let response = await fetch(url, { method: 'DELETE' });
 
@@ -79,17 +81,14 @@ class ClienteProcesadoService {
         try {
             const queryParams = new URLSearchParams();
             
-            // Añadir parámetros de DataTables
             if (params.start !== undefined) queryParams.append('start', params.start);
             if (params.length !== undefined) queryParams.append('length', params.length);
             if (params.draw !== undefined) queryParams.append('draw', params.draw);
             
-            // Añadir búsqueda global si existe
             if (params.search && params.search.value) {
                 queryParams.append('search[value]', params.search.value);
             }
             
-            // Añadir filtros personalizados
             if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
             if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
             if (params.distrito) queryParams.append('distrito', params.distrito);
@@ -121,13 +120,7 @@ class ClienteProcesadoService {
 
     async exportarExcel() {
         try {
-            const link = document.createElement('a');
-            link.href = `${this.baseURL}/clienteProce/exportar`;
-            link.download = 'clientes_procesados.xlsx';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
+            window.open(`${this.baseURL}/clienteProce/exportar`, '_blank');
             return { success: true };
         } catch (error) {
             console.error('Error en exportar:', error);
@@ -176,4 +169,3 @@ class ClienteProcesadoService {
         }
     }
 }
-

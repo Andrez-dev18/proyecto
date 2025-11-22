@@ -1,6 +1,6 @@
 const AppConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             CLIENTES_PROCESADOS: {
                 ALL: '/clienteProce/all',

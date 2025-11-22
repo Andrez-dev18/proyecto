@@ -10,7 +10,6 @@ class ClienteProcesadoController {
     async init() {
         this.setupEventListeners();
         this.setupColumnToggle();
-        // Cargar todos los datos al inicio
         await this.cargarTodosLosDatos();
     }
 
@@ -18,11 +17,9 @@ class ClienteProcesadoController {
         try {
             this.mostrarCargando(true);
             
-            // Obtener todos los datos del backend
             const datos = await this.service.getAll();
             this.todosLosDatos = datos;
             
-            // Inicializar la tabla con los datos
             this.inicializarTablaConDatos(datos);
             
             this.mostrarNotificacion('Datos cargados correctamente', 'success');
@@ -35,21 +32,18 @@ class ClienteProcesadoController {
     }
 
     inicializarTablaConDatos(datos) {
-        // Verificar que jQuery y DataTables estén cargados
         if (typeof $ === 'undefined' || !$.fn.DataTable) {
             console.error('jQuery o DataTables no están cargados');
             setTimeout(() => this.inicializarTablaConDatos(datos), 100);
             return;
         }
 
-        // Si ya existe DataTable, destruirla
         if ($.fn.DataTable.isDataTable('#tablaClientes')) {
             $('#tablaClientes').DataTable().clear().destroy();
             $('#tablaClientes').empty();
         }
 
         try {
-            // Inicializar DataTable con datos locales
             this.dataTable = $('#tablaClientes').DataTable({
                 data: datos,
                 columns: [
@@ -139,7 +133,7 @@ class ClienteProcesadoController {
                         title: 'Importe',
                         defaultContent: '0',
                         render: function(data) {
-                            return `S/. ${parseFloat(data || 0).toFixed(2)}`;
+                            return 'S/. ' + parseFloat(data || 0).toFixed(2);
                         }
                     },
                     {
@@ -149,16 +143,14 @@ class ClienteProcesadoController {
                         searchable: false,
                         defaultContent: '',
                         render: function() {
-                            return `
-                                <div class="flex gap-2 justify-center">
-                                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded btn-editar" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded btn-eliminar" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            `;
+                            return '<div class="flex gap-2 justify-center">' +
+                                '<button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded btn-editar" title="Editar">' +
+                                '<i class="fas fa-edit"></i>' +
+                                '</button>' +
+                                '<button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded btn-eliminar" title="Eliminar">' +
+                                '<i class="fas fa-trash"></i>' +
+                                '</button>' +
+                                '</div>';
                         }
                     }
                 ],
@@ -192,7 +184,6 @@ class ClienteProcesadoController {
                 }
             });
 
-            // Event handlers para botones de acción
             $('#tablaClientes tbody').off('click').on('click', '.btn-editar', (e) => {
                 const data = this.dataTable.row($(e.currentTarget).closest('tr')).data();
                 this.editarRegistro(data);
@@ -212,7 +203,6 @@ class ClienteProcesadoController {
     aplicarFiltros() {
         if (!this.dataTable) return;
 
-        // Obtener valores de los filtros
         const fechaInicio = document.getElementById('filterFechaInicio').value;
         const fechaFin = document.getElementById('filterFechaFin').value;
         const distrito = document.getElementById('filterDistrito').value.toLowerCase();
@@ -223,29 +213,27 @@ class ClienteProcesadoController {
         const vendedor = document.getElementById('filterVendedor').value.toLowerCase();
         const cliente = document.getElementById('filterCliente').value.toLowerCase();
 
-        // Filtrar los datos
         let datosFiltrados = this.todosLosDatos.filter(item => {
             let cumple = true;
 
             if (fechaInicio && item.fecha < fechaInicio) cumple = false;
             if (fechaFin && item.fecha > fechaFin) cumple = false;
-            if (distrito && !item.distrito?.toLowerCase().includes(distrito)) cumple = false;
-            if (zona && !item.zona?.toLowerCase().includes(zona)) cumple = false;
-            if (canal && !item.canal?.toLowerCase().includes(canal)) cumple = false;
-            if (linea && !item.linea?.toLowerCase().includes(linea)) cumple = false;
-            if (sublinea && !item.sublinea?.toLowerCase().includes(sublinea)) cumple = false;
-            if (vendedor && !item.vendedor?.toLowerCase().includes(vendedor)) cumple = false;
-            if (cliente && !item.cliente?.toLowerCase().includes(cliente)) cumple = false;
+            if (distrito && !(item.distrito || '').toLowerCase().includes(distrito)) cumple = false;
+            if (zona && !(item.zona || '').toLowerCase().includes(zona)) cumple = false;
+            if (canal && !(item.canal || '').toLowerCase().includes(canal)) cumple = false;
+            if (linea && !(item.linea || '').toLowerCase().includes(linea)) cumple = false;
+            if (sublinea && !(item.sublinea || '').toLowerCase().includes(sublinea)) cumple = false;
+            if (vendedor && !(item.vendedor || '').toLowerCase().includes(vendedor)) cumple = false;
+            if (cliente && !(item.cliente || '').toLowerCase().includes(cliente)) cumple = false;
 
             return cumple;
         });
 
-        // Actualizar la tabla con los datos filtrados
         this.dataTable.clear();
         this.dataTable.rows.add(datosFiltrados);
         this.dataTable.draw();
 
-        this.mostrarNotificacion(`Se encontraron ${datosFiltrados.length} registros`, 'info');
+        this.mostrarNotificacion('Se encontraron ' + datosFiltrados.length + ' registros', 'info');
     }
 
     limpiarFiltros() {
@@ -259,7 +247,6 @@ class ClienteProcesadoController {
         document.getElementById('filterVendedor').value = '';
         document.getElementById('filterCliente').value = '';
 
-        // Restaurar todos los datos
         if (this.dataTable) {
             this.dataTable.clear();
             this.dataTable.rows.add(this.todosLosDatos);
@@ -275,23 +262,26 @@ class ClienteProcesadoController {
         const btnClose = document.getElementById('btnCloseDropdown');
         const checkboxes = document.querySelectorAll('.column-checkbox');
 
-        // Inicializar estado de columnas
         checkboxes.forEach(checkbox => {
             const columnIndex = parseInt(checkbox.dataset.column);
             this.columnasVisibles[columnIndex] = checkbox.checked;
         });
 
-        btnToggle?.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
+        if (btnToggle) {
+            btnToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+        }
 
-        btnClose?.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropdown.classList.remove('show');
-        });
+        if (btnClose) {
+            btnClose.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.remove('show');
+            });
+        }
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown-columns')) {
@@ -320,31 +310,43 @@ class ClienteProcesadoController {
     }
 
     setupEventListeners() {
-        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
-        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
-        document.getElementById('btnETL')?.addEventListener('click', () => this.abrirModalETL());
-        document.getElementById('btnCancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
-        document.getElementById('btnEjecutarETLConfirm')?.addEventListener('click', () => this.ejecutarETL());
-        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
-        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
-        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
+        const btnNuevo = document.getElementById('btnNuevo');
+        const btnExportar = document.getElementById('btnExportar');
+        const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+        const btnETL = document.getElementById('btnETL');
+        const btnCancelarETL = document.getElementById('btnCancelarETL');
+        const btnEjecutarETLConfirm = document.getElementById('btnEjecutarETLConfirm');
+        const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const btnToggleFiltros = document.getElementById('btnToggleFiltros');
 
-        // Toggle filtros
-        document.getElementById('btnToggleFiltros')?.addEventListener('click', () => {
-            const filterContent = document.getElementById('filterContent');
-            const icon = document.querySelector('#btnToggleFiltros i');
-            
-            if (filterContent.classList.contains('hidden')) {
-                filterContent.classList.remove('hidden');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-            } else {
-                filterContent.classList.add('hidden');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-            }
-        });
+        if (btnNuevo) btnNuevo.addEventListener('click', () => this.mostrarModalNuevo());
+        if (btnExportar) btnExportar.addEventListener('click', () => this.exportarExcel());
+        if (btnLimpiarFiltros) btnLimpiarFiltros.addEventListener('click', () => this.limpiarFiltros());
+        if (btnETL) btnETL.addEventListener('click', () => this.abrirModalETL());
+        if (btnCancelarETL) btnCancelarETL.addEventListener('click', () => this.cerrarModalETL());
+        if (btnEjecutarETLConfirm) btnEjecutarETLConfirm.addEventListener('click', () => this.ejecutarETL());
+        if (btnAplicarFiltros) btnAplicarFiltros.addEventListener('click', () => this.aplicarFiltros());
+        if (btnGuardar) btnGuardar.addEventListener('click', () => this.guardarRegistro());
+        if (btnCancelar) btnCancelar.addEventListener('click', () => this.cerrarModal());
+
+        if (btnToggleFiltros) {
+            btnToggleFiltros.addEventListener('click', () => {
+                const filterContent = document.getElementById('filterContent');
+                const icon = btnToggleFiltros.querySelector('i');
+                
+                if (filterContent.classList.contains('hidden')) {
+                    filterContent.classList.remove('hidden');
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    filterContent.classList.add('hidden');
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        }
     }
 
     aplicarVisibilidadColumnas() {
@@ -416,7 +418,6 @@ class ClienteProcesadoController {
             await this.service.eliminar(data.id);
             this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             
-            // Recargar datos
             await this.cargarTodosLosDatos();
         } catch (error) {
             this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
@@ -443,8 +444,6 @@ class ClienteProcesadoController {
             }
 
             this.cerrarModal();
-            
-            // Recargar datos
             await this.cargarTodosLosDatos();
         } catch (error) {
             this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
@@ -497,7 +496,7 @@ class ClienteProcesadoController {
         document.querySelectorAll('#modalForm input, #modalForm textarea').forEach(input => {
             if (input.type === 'date') {
                 input.value = new Date().toISOString().split('T')[0];
-            } else if (input.id !== 'modalNomDb') {
+            } else {
                 input.value = '';
             }
         });
@@ -545,7 +544,7 @@ class ClienteProcesadoController {
                 this.mostrarNotificacion('ETL ejecutado exitosamente', 'success');
                 
                 if (resultado.resumen) {
-                    const mensaje = `Eliminados: ${resultado.resumen.eliminados}, Insertados: ${resultado.resumen.insertados}`;
+                    const mensaje = 'Eliminados: ' + resultado.resumen.eliminados + ', Insertados: ' + resultado.resumen.insertados;
                     this.mostrarNotificacion(mensaje, 'info');
                 }
             } else {
@@ -553,8 +552,6 @@ class ClienteProcesadoController {
             }
             
             this.cerrarModalETL();
-            
-            // Recargar datos
             await this.cargarTodosLosDatos();
         } catch (error) {
             this.mostrarNotificacion('Error al ejecutar ETL: ' + error.message, 'error');
@@ -571,7 +568,7 @@ class ClienteProcesadoController {
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo}] ${mensaje}`);
+        console.log('[' + tipo + '] ' + mensaje);
 
         let container = document.getElementById('notificaciones-container');
         if (!container) {
@@ -595,12 +592,10 @@ class ClienteProcesadoController {
             info: 'ℹ'
         };
 
-        notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
+        notif.className = colores[tipo] + ' text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3';
         notif.style.animation = 'slideInRight 0.3s ease';
-        notif.innerHTML = `
-            <span style="font-size: 20px;">${iconos[tipo]}</span>
-            <span>${mensaje}</span>
-        `;
+        notif.innerHTML = '<span style="font-size: 20px;">' + iconos[tipo] + '</span>' +
+                         '<span>' + mensaje + '</span>';
 
         container.appendChild(notif);
 
@@ -611,6 +606,4 @@ class ClienteProcesadoController {
     }
 }
 
-// Crear instancia global
 const clienteProcesadoController = new ClienteProcesadoController();
-

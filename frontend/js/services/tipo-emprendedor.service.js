@@ -1,3 +1,4 @@
+
 class TipoEmprendedorService {
     constructor() {
         this.config = window.TipoEmprendedorConfig;
@@ -7,9 +8,12 @@ class TipoEmprendedorService {
     async getAll() {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
+            console.log('Fetching:', url);
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Error al obtener datos');
-            return await response.json();
+            if (!response.ok) throw new Error('Error en la petición');
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data;
         } catch (error) {
             console.error('Error en getAll:', error);
             throw error;
@@ -19,11 +23,13 @@ class TipoEmprendedorService {
     async create(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
+            console.log('Creating:', url, data);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+            
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Error al crear');
             return result;
@@ -36,6 +42,8 @@ class TipoEmprendedorService {
     async update(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
+            console.log('Updating:', url, data);
+            
             let response = await fetch(url, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -43,6 +51,7 @@ class TipoEmprendedorService {
             });
             
             if (!response.ok && response.status === 405) {
+                console.log('PUT failed, trying POST...');
                 response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -61,52 +70,34 @@ class TipoEmprendedorService {
 
     async delete(codigo) {
         try {
-            const url = `${this.baseUrl}/tipoEmpren/borrar/${codigo}`;
-            console.log('🗑️ DELETE URL:', url);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${codigo}`;
+            console.log('Deleting:', url);
             
-            let response = await fetch(url, { 
-                method: 'DELETE',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+            let response = await fetch(url, {
+                method: 'DELETE'
             });
             
-            console.log('Response status:', response.status);
-            
-            // Si DELETE no funciona, intentar con POST
-            if (response.status === 405 || response.status === 404) {
-                console.log('⚠️ Intentando con POST...');
-                response = await fetch(url, { 
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
+            if (!response.ok && (response.status === 405 || response.status === 404)) {
+                console.log('DELETE failed, trying POST...');
+                response = await fetch(url, {
+                    method: 'POST'
                 });
             }
             
-            // Leer respuesta como texto primero
             const responseText = await response.text();
-            console.log('Response text:', responseText);
             
-            // Si la respuesta está vacía pero el status es 200, asumir éxito
             if (response.ok && !responseText.trim()) {
-                return { message: 'Registro eliminado correctamente' };
+                return { success: true, message: 'Registro eliminado correctamente' };
             }
             
-            // Intentar parsear como JSON
             let result;
             try {
                 result = JSON.parse(responseText);
             } catch (e) {
-                // Si no es JSON válido pero el status es 200, asumir éxito
                 if (response.ok) {
-                    return { message: 'Registro eliminado correctamente' };
+                    return { success: true, message: 'Registro eliminado correctamente' };
                 }
-                // Si hay error y no es JSON, lanzar error con el texto
-                console.error('❌ Respuesta no es JSON:', responseText);
-                throw new Error('Error en el servidor. Revisa que no haya warnings de PHP.');
+                throw new Error('Error al procesar respuesta del servidor');
             }
             
             if (!response.ok) {
@@ -115,13 +106,13 @@ class TipoEmprendedorService {
             
             return result;
         } catch (error) {
-            console.error('❌ Error en delete:', error);
+            console.error('Error en delete:', error);
             throw error;
         }
     }
 
     exportToExcel() {
-        const url = `${this.baseUrl}/tipoEmpren/exportar`;
+        const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXPORTAR}`;
         window.open(url, '_blank');
     }
 }
