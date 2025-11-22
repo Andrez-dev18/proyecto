@@ -1167,7 +1167,7 @@ elseif (preg_match("/\/infoGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/infoGRS/exportar") !== false && $request == "GET") {
-    $reporteController->exportarTrozadoDiarioExcel();
+    $reporteController->exportarInfoGrsExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
 elseif (strpos($path, "/infoGRS/etl") !== false && $request == "POST") {
@@ -1202,9 +1202,9 @@ elseif (preg_match("/\/clientePv\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/clientePv/exportar") !== false && $request == "GET") {
-    $reporteController->exportarTrozadoDiarioExcel();
+    $reporteController->exportarCtrlClientePVExcel();
     exit;
-} ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
+} ################# FUNCION PARA EJECUTAR ETL##########################
 elseif (strpos($path, "/clientePv/etl") !== false && $request == "POST") {
     $TrozadoDiarioController->runETL();
     exit;
@@ -1236,7 +1236,7 @@ elseif (preg_match("/\/oficialGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/oficialGRS/exportar") !== false && $request == "GET") {
-    $reporteController->exportarTrozadoDiarioExcel();
+    $reporteController->exportarOficialGRSExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
 elseif (strpos($path, "/oficialGRS/etl") !== false && $request == "POST") {
@@ -1272,7 +1272,7 @@ elseif (strpos($path, "/mercadores/borrar") !== false && $request == "POST") {
     exit;
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/mercadores/exportar") !== false && $request == "GET") {
-    $reporteController->exportarTrozadoDiarioExcel();
+    $reporteController->exportarMercadoResExcel();
     exit;
 }
 
