@@ -7,12 +7,9 @@ class ProvinciaService {
     async getAll() {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
-            console.log('Fetching provincias:', url);
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error en la petición');
-            const data = await response.json();
-            console.log('Provincias recibidas:', data);
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('Error en getAll:', error);
             throw error;
@@ -22,20 +19,16 @@ class ProvinciaService {
     async create(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
-            console.log('Creating provincia:', url, data);
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
-            const result = await response.json();
-            
             if (!response.ok) {
-                throw new Error(result.error || 'Error al crear provincia');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear');
             }
-            
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Error en create:', error);
             throw error;
@@ -45,56 +38,39 @@ class ProvinciaService {
     async update(data) {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
-            console.log('Updating provincia:', url, data);
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-            
-            const result = await response.json();
-            
             if (!response.ok) {
-                throw new Error(result.error || 'Error al actualizar provincia');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al actualizar');
             }
-            
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Error en update:', error);
             throw error;
         }
     }
 
-    async delete(codigo) {
+    async delete(id) {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${codigo}`;
-            console.log('Deleting provincia:', url);
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
             const response = await fetch(url, {
                 method: 'DELETE'
             });
-            
-            const result = await response.json();
-            
             if (!response.ok) {
-                throw new Error(result.error || 'Error al eliminar provincia');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al eliminar');
             }
-            
-            return result;
+            return await response.json();
         } catch (error) {
             console.error('Error en delete:', error);
-            throw error;
-        }
-    }
-
-    async exportToExcel() {
-        try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXPORTAR}`;
-            window.open(url, '_blank');
-        } catch (error) {
-            console.error('Error al exportar:', error);
             throw error;
         }
     }
 }
 
 window.ProvinciaService = ProvinciaService;
+

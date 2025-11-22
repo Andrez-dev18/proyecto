@@ -1,112 +1,82 @@
 class EmpresaService {
     constructor() {
         this.config = window.EmpresaConfig;
-        this.baseURL = this.config.API.BASE_URL;
-        this.endpoints = this.config.API.ENDPOINTS;
+        this.baseUrl = this.config.API.BASE_URL;
     }
 
     async getAll() {
         try {
-            const url = `${this.baseURL}${this.endpoints.ALL}`;
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
             const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            return Array.isArray(data) ? data : [];
+            if (!response.ok) throw new Error('Error en la petición');
+            return await response.json();
         } catch (error) {
             console.error('Error en getAll:', error);
             throw error;
         }
     }
 
-    async crear(data) {
+    async create(data) {
         try {
-            const response = await fetch(`${this.baseURL}${this.endpoints.CREAR}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            
-            const responseText = await response.text();
-            
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                throw new Error('Respuesta inválida del servidor');
-            }
-            
-            if (!response.ok) {
-                throw new Error(result.error || `Error HTTP: ${response.status}`);
-            }
-            
-            return result;
-        } catch (error) {
-            console.error('Error en crear:', error);
-            throw error;
-        }
-    }
-
-    async actualizar(data) {
-        try {
-            const response = await fetch(`${this.baseURL}${this.endpoints.ACTUALIZAR}`, {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            
-            const responseText = await response.text();
-            
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                throw new Error('Respuesta inválida del servidor');
-            }
-            
-            if (!response.ok) {
-                throw new Error(result.error || `Error HTTP: ${response.status}`);
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Error en actualizar:', error);
-            throw error;
-        }
-    }
-
-    async eliminar(codigo) {
-        try {
-            const url = `${this.baseURL}${this.endpoints.ELIMINAR}/${codigo}`;
-            
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
             const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: codigo })
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
-
-            const responseText = await response.text();
-            
-            let result;
-            try {
-                result = JSON.parse(responseText);
-            } catch (e) {
-                throw new Error('Respuesta inválida del servidor');
-            }
-            
             if (!response.ok) {
-                throw new Error(result.error || `Error HTTP: ${response.status}`);
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear');
             }
-
-            return result;
+            return await response.json();
         } catch (error) {
-            console.error('Error en eliminar:', error);
+            console.error('Error en create:', error);
+            throw error;
+        }
+    }
+
+    async update(data) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al actualizar');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error en update:', error);
+            throw error;
+        }
+    }
+
+    async delete(id) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
+            const response = await fetch(url, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al eliminar');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error en delete:', error);
+            throw error;
+        }
+    }
+
+    async exportToExcel() {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`;
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error('Error al exportar:', error);
             throw error;
         }
     }

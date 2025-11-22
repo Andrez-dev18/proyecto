@@ -3,6 +3,7 @@ class TipoPolloController {
         this.service = new TipoPolloService();
         this.registroSeleccionado = null;
         this.datos = [];
+        this.datosFiltrados = [];
         this.config = window.TipoPolloConfig;
         this.dataTable = null;
         this.columnasVisibles = {};
@@ -10,9 +11,10 @@ class TipoPolloController {
 
     async init() {
         console.log('🚀 Inicializando Tipo Pollo Controller...');
+        await this.cargarDatos();
         this.setupEventListeners();
         this.setupColumnToggle();
-        await this.cargarDatos();
+        this.renderizarTablaCliente();
     }
 
     setupColumnToggle() {
@@ -58,21 +60,18 @@ class TipoPolloController {
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('📥 Cargando datos desde el backend...');
+            console.log('Cargando todos los datos...');
             
-            const response = await this.service.getAll();
-            console.log('✅ Respuesta recibida:', response);
+            this.datos = await this.service.getAll();
+            this.datosFiltrados = [...this.datos];
             
-            this.datos = Array.isArray(response) ? response : [];
-            console.log(`✅ ${this.datos.length} registros cargados`);
-            
-            this.renderizarTabla();
+            console.log(`${this.datos.length} registros cargados`);
             
         } catch (error) {
             console.error('❌ Error al cargar datos:', error);
-            this.mostrarNotificacion('Error al cargar datos: ' + error.message, 'error');
+            this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
-            this.renderizarTabla();
+            this.datosFiltrados = [];
         } finally {
             this.mostrarCargando(false);
         }
@@ -80,13 +79,12 @@ class TipoPolloController {
 
     setupEventListeners() {
         document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
     }
 
-    renderizarTabla() {
-        console.log('🔄 Renderizando tabla con', this.datos.length, 'registros...');
+    renderizarTablaCliente() {
+        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
         
         const table = $('#dataTable');
         
@@ -94,32 +92,38 @@ class TipoPolloController {
             table.DataTable().clear().destroy();
         }
 
+        $('#tableBody').empty();
+
         this.dataTable = table.DataTable({
-            data: this.datos,
+            data: this.datosFiltrados,
+            processing: false,
+            serverSide: false,
+            destroy: true,
+            scrollX: true,
+            scrollCollapse: true,
             columns: [
                 { 
-                    data: 'codigo',
-                    className: 'col-codigo px-4 py-2',
-                    render: (data) => data || '-'
+                    data: 'codigo', 
+                    className: 'text-center text-sm px-2',
+                    defaultContent: ''
                 },
                 { 
-                    data: 'nombre',
-                    className: 'col-nombre px-4 py-2',
-                    render: (data) => data || '-'
+                    data: 'nombre', 
+                    className: 'text-sm px-2',
+                    defaultContent: '-'
                 },
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
-                    className: 'col-opciones px-4 py-2',
+                    className: 'text-center px-2',
+                    defaultContent: '',
                     render: (data, type, row) => `
-                        <div class="flex gap-2 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-btn" 
-                                    data-id="${row.codigo}" title="Editar">
+                        <div class="flex gap-1 justify-center">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-btn" 
-                                    data-id="${row.codigo}" title="Eliminar">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -146,13 +150,24 @@ class TipoPolloController {
                     previous: "Anterior"
                 }
             },
+            responsive: false,
+            autoWidth: false,
+            dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
             drawCallback: () => {
                 Object.keys(this.columnasVisibles).forEach(columnIndex => {
                     const index = parseInt(columnIndex);
-                    if (this.dataTable && this.dataTable.column(index).length) {
-                        this.dataTable.column(index).visible(this.columnasVisibles[index]);
+                    try {
+                        if (this.dataTable && this.dataTable.column(index)) {
+                            this.dataTable.column(index).visible(this.columnasVisibles[index]);
+                        }
+                    } catch (e) {
+                        // Ignorar errores
                     }
                 });
+            },
+            initComplete: () => {
+                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
+                $('.dataTables_wrapper').addClass('w-full');
             }
         });
 
@@ -160,43 +175,21 @@ class TipoPolloController {
             .off('click')
             .on('click', '.edit-btn', (e) => {
                 e.stopPropagation();
-                const id = $(e.currentTarget).data('id');
-                this.registroSeleccionado = this.datos.find(d => d.codigo == id);
-                console.log('📝 Editando:', this.registroSeleccionado);
+                const row = $(e.currentTarget).closest('tr');
+                const rowData = this.dataTable.row(row).data();
+                this.registroSeleccionado = rowData;
+                console.log('📝 Editando:', rowData);
                 this.modificarSeleccionado();
             })
             .on('click', '.delete-btn', async (e) => {
                 e.stopPropagation();
-                const id = $(e.currentTarget).data('id');
-                this.registroSeleccionado = this.datos.find(d => d.codigo == id);
-                console.log('🗑️ Eliminando:', this.registroSeleccionado);
+                const row = $(e.currentTarget).closest('tr');
+                const rowData = this.dataTable.row(row).data();
+                this.registroSeleccionado = rowData;
+                console.log('🗑️ Eliminando:', rowData);
                 await this.eliminarSeleccionado();
             });
-
-        console.log('✅ Tabla renderizada correctamente');
     }
-
-    exportarExcel() {
-    try {
-        console.log('📊 Exportando a Excel...');
-        
-        if (!this.datos || this.datos.length === 0) {
-            this.mostrarNotificacion('No hay datos para exportar', 'warning');
-            return;
-        }
-
-        const url = `${this.service.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`;
-        console.log('🔗 URL de exportación:', url);
-        
-        window.open(url, '_blank');
-        this.mostrarNotificacion('Iniciando descarga de Excel...', 'info');
-        
-    } catch (error) {
-        console.error('❌ Error al exportar:', error);
-        this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
-    }
-}
-
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
@@ -208,10 +201,7 @@ class TipoPolloController {
     }
 
     modificarSeleccionado() {
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro para editar', 'warning');
-            return;
-        }
+        if (!this.registroSeleccionado) return;
 
         document.getElementById('modalTitle').textContent = 'Modificar Tipo Pollo';
         this.cargarDatosEnFormulario();
@@ -221,32 +211,23 @@ class TipoPolloController {
     }
 
     async eliminarSeleccionado() {
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro para eliminar', 'warning');
-            return;
-        }
-
-        const nombreRegistro = this.registroSeleccionado.nombre || 'este registro';
-        
-        if (!confirm(`¿Estás seguro de eliminar "${nombreRegistro}"?`)) {
-            console.log('❌ Eliminación cancelada por el usuario');
-            return;
-        }
+        if (!this.registroSeleccionado) return;
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
 
         try {
             this.mostrarCargando(true);
-            console.log('🗑️ Eliminando registro con código:', this.registroSeleccionado.codigo);
-            
             await this.service.delete(this.registroSeleccionado.codigo);
-            
-            console.log('✅ Registro eliminado del backend');
             this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             
-            this.registroSeleccionado = null;
             await this.cargarDatos();
             
+            if (this.dataTable) {
+                this.dataTable.destroy();
+            }
+            this.renderizarTablaCliente();
+            
         } catch (error) {
-            console.error('❌ Error al eliminar:', error);
+            console.error('Error al eliminar:', error);
             this.mostrarNotificacion(error.message || 'Error al eliminar el registro', 'error');
         } finally {
             this.mostrarCargando(false);
@@ -256,7 +237,8 @@ class TipoPolloController {
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
         if (!r) return;
-        console.log('📋 Cargando datos en formulario:', r);
+
+        console.log('Cargando en formulario:', r);
         document.getElementById('modalNombre').value = r.nombre || '';
     }
 
@@ -274,20 +256,25 @@ class TipoPolloController {
 
             if (this.registroSeleccionado) {
                 data.codigo = this.registroSeleccionado.codigo;
-                console.log('✏️ Actualizando registro:', data);
                 await this.service.update(data);
                 this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
-                console.log('➕ Creando nuevo registro:', data);
+                delete data.codigo;
                 await this.service.create(data);
                 this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
+            
             await this.cargarDatos();
             
+            if (this.dataTable) {
+                this.dataTable.destroy();
+            }
+            this.renderizarTablaCliente();
+            
         } catch (error) {
-            console.error('❌ Error al guardar:', error);
+            console.error('Error al guardar:', error);
             this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
         } finally {
             this.mostrarCargando(false);
@@ -301,10 +288,14 @@ class TipoPolloController {
     }
 
     validarFormulario(data) {
+        console.log('Validando formulario:', data);
+
         if (!data.nombre) {
-            this.mostrarNotificacion('El nombre del tipo pollo es obligatorio', 'warning');
+            this.mostrarNotificacion('El nombre del tipo es obligatorio', 'warning');
             return false;
         }
+
+        console.log('✅ Validación exitosa');
         return true;
     }
 

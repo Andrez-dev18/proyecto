@@ -156,9 +156,9 @@ class bdOficialService {
 
     async exportarCSV() {
         try {
-            console.log(`${this.baseURL + AppConfig.API.ENDPOINTS.TAMAMERDIA.EXPORTA}`, '_blank');
+            console.log(`${this.baseURL + this.config.API.ENDPOINTS.EXCEL}`, '_blank');
             // Abrir en nueva pestaña para descargar
-            window.open(`${this.baseURL + this.config.API.ENDPOINTS.EXPORTA}`, '_blank');
+            window.open(`${this.baseURL + this.config.API.ENDPOINTS.EXCEL}`, '_blank');
 
         } catch (error) {
             console.error('Error en exportar:', error);
