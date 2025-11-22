@@ -3,18 +3,15 @@ class MercadoController {
         this.service = new MercadoService();
         this.registroSeleccionado = null;
         this.datos = [];
-        this.datosFiltrados = [];
         this.config = window.MercadoConfig;
         this.dataTable = null;
         this.columnasVisibles = {};
     }
 
     async init() {
-        console.log('🚀 Inicializando Mercado Controller...');
-        await this.cargarDatos();
         this.setupEventListeners();
         this.setupColumnToggle();
-        this.renderizarTablaCliente();
+        await this.cargarDatos();
     }
 
     setupColumnToggle() {
@@ -47,6 +44,12 @@ class MercadoController {
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const columnIndex = parseInt(e.target.dataset.column);
+                
+                if (columnIndex === 2) {
+                    e.target.checked = true;
+                    return;
+                }
+                
                 this.columnasVisibles[columnIndex] = e.target.checked;
                 
                 if (this.dataTable) {
@@ -60,18 +63,14 @@ class MercadoController {
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('Cargando todos los datos...');
-            
-            this.datos = await this.service.getAll();
-            this.datosFiltrados = [...this.datos];
-            
-            console.log(`${this.datos.length} registros cargados`);
-            
+            const response = await this.service.getAll();
+            this.datos = Array.isArray(response) ? response : [];
+            this.renderizarTabla();
         } catch (error) {
-            console.error('❌ Error al cargar datos:', error);
+            console.error('Error al cargar datos:', error);
             this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
-            this.datosFiltrados = [];
+            this.renderizarTabla();
         } finally {
             this.mostrarCargando(false);
         }
@@ -84,47 +83,37 @@ class MercadoController {
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
     }
 
-    renderizarTablaCliente() {
-        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
-        
+    renderizarTabla() {
         const table = $('#dataTable');
         
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
 
-        $('#tableBody').empty();
-
         this.dataTable = table.DataTable({
-            data: this.datosFiltrados,
-            processing: false,
-            serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
+            data: this.datos,
             columns: [
                 { 
-                    data: 'codigo', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: ''
+                    data: 'codigo',
+                    className: 'col-codigo px-4 py-2 text-center'
                 },
                 { 
-                    data: 'nombre', 
-                    className: 'text-sm px-2',
-                    defaultContent: '-'
+                    data: 'nombre',
+                    className: 'col-nombre px-4 py-2'
                 },
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
-                    className: 'text-center px-2',
-                    defaultContent: '',
+                    className: 'col-opciones px-4 py-2 text-center',
                     render: (data, type, row) => `
-                        <div class="flex gap-1 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
+                        <div class="flex gap-2 justify-center">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded edit-btn" 
+                                    data-codigo="${row.codigo}" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded delete-btn" 
+                                    data-codigo="${row.codigo}" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -150,44 +139,19 @@ class MercadoController {
                     next: "Siguiente",
                     previous: "Anterior"
                 }
-            },
-            responsive: false,
-            autoWidth: false,
-            dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
-            drawCallback: () => {
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const index = parseInt(columnIndex);
-                    try {
-                        if (this.dataTable && this.dataTable.column(index)) {
-                            this.dataTable.column(index).visible(this.columnasVisibles[index]);
-                        }
-                    } catch (e) {
-                        // Ignorar errores
-                    }
-                });
-            },
-            initComplete: () => {
-                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
-                $('.dataTables_wrapper').addClass('w-full');
             }
         });
 
         $('#dataTable tbody')
             .off('click')
             .on('click', '.edit-btn', (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('📝 Editando:', rowData);
+                const codigo = $(e.currentTarget).data('codigo');
+                this.registroSeleccionado = this.datos.find(d => d.codigo == codigo);
                 this.modificarSeleccionado();
             })
             .on('click', '.delete-btn', async (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('🗑️ Eliminando:', rowData);
+                const codigo = $(e.currentTarget).data('codigo');
+                this.registroSeleccionado = this.datos.find(d => d.codigo == codigo);
                 await this.eliminarSeleccionado();
             });
     }
@@ -203,7 +167,7 @@ class MercadoController {
 
     modificarSeleccionado() {
         if (!this.registroSeleccionado) return;
-
+        
         document.getElementById('modalTitle').textContent = 'Modificar Mercado';
         this.cargarDatosEnFormulario();
         const modal = document.getElementById('modal');
@@ -218,29 +182,20 @@ class MercadoController {
         try {
             this.mostrarCargando(true);
             await this.service.delete(this.registroSeleccionado.codigo);
-            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
-            
+            this.mostrarNotificacion('Registro eliminado', 'success');
+            this.registroSeleccionado = null;
             await this.cargarDatos();
-            
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
-            console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('Error al eliminar el registro', 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion(error.message || 'Error al eliminar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     cargarDatosEnFormulario() {
-        const r = this.registroSeleccionado;
-        if (!r) return;
-
-        console.log('Cargando en formulario:', r);
-        document.getElementById('modalNombre').value = r.nombre || '';
+        if (!this.registroSeleccionado) return;
+        document.getElementById('modalNombre').value = this.registroSeleccionado.nombre || '';
     }
 
     limpiarFormulario() {
@@ -249,34 +204,26 @@ class MercadoController {
 
     async guardarRegistro() {
         const data = this.obtenerDatosFormulario();
-
+        
         if (!this.validarFormulario(data)) return;
 
         try {
             this.mostrarCargando(true);
-
+            
             if (this.registroSeleccionado) {
                 data.codigo = this.registroSeleccionado.codigo;
                 await this.service.update(data);
-                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
+                this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
-                delete data.codigo;
                 await this.service.create(data);
-                this.mostrarNotificacion('Registro creado exitosamente', 'success');
+                this.mostrarNotificacion('Registro creado', 'success');
             }
-
+            
             this.cerrarModal();
-            
             await this.cargarDatos();
-            
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
-            console.error('Error al guardar:', error);
-            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -289,14 +236,10 @@ class MercadoController {
     }
 
     validarFormulario(data) {
-        console.log('Validando formulario:', data);
-
         if (!data.nombre) {
-            this.mostrarNotificacion('El nombre del mercado es obligatorio', 'warning');
+            this.mostrarNotificacion('El nombre es obligatorio', 'warning');
             return false;
         }
-
-        console.log('✅ Validación exitosa');
         return true;
     }
 
@@ -308,10 +251,18 @@ class MercadoController {
     }
 
     exportarExcel() {
-        const url = `${this.config.API.BASE_URL}${this.config.API.ENDPOINTS.EXCEL}`;
-        console.log('📊 Exportando a Excel:', url);
-        window.open(url, '_blank');
-        this.mostrarNotificacion('Exportando a Excel...', 'info');
+        try {
+            if (!this.datos || this.datos.length === 0) {
+                this.mostrarNotificacion('No hay datos para exportar', 'warning');
+                return;
+            }
+            
+            window.open(`${this.service.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`, '_blank');
+            this.mostrarNotificacion('Descargando Excel...', 'info');
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al exportar', 'error');
+        }
     }
 
     mostrarCargando(mostrar) {
@@ -322,8 +273,6 @@ class MercadoController {
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
-
         let container = document.getElementById('notificaciones-container');
         if (!container) {
             container = document.createElement('div');
@@ -339,18 +288,9 @@ class MercadoController {
             warning: 'bg-yellow-500',
             info: 'bg-blue-500'
         };
-        const iconos = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
-        };
 
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
-        notif.innerHTML = `
-            <span style="font-size: 20px;">${iconos[tipo]}</span>
-            <span>${mensaje}</span>
-        `;
+        notif.innerHTML = `<span>${mensaje}</span>`;
         container.appendChild(notif);
 
         setTimeout(() => notif.remove(), 4000);
@@ -358,3 +298,4 @@ class MercadoController {
 }
 
 window.mercadoController = new MercadoController();
+

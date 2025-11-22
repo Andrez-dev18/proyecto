@@ -1,16 +1,182 @@
-const ClienteProcesadoAppConfig = {
-    API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
-        ENDPOINTS: {
-            ALL: '/clienteProce/all',
-            CREAR: '/clienteProce/crear',
-            ACTUALIZAR: '/clienteProce/actualizar',
-            ELIMINAR: '/clienteProce/borrar',
-            FILTRO: '/clienteProce/filtro',
-            EXPORTAR: '/clienteProce/exportar',
-            ETL: '/clienteProce/etl'
+class ClienteProcesadoService {
+    constructor() {
+        this.baseURL = AppConfig.API.BASE_URL;
+    }
+
+    async crear(data) {
+        try {
+            const response = await fetch(`${this.baseURL}/clienteProcesado/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al crear registro');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error en crear:', error);
+            throw error;
         }
     }
-};
 
-window.ClienteProcesadoConfig = ClienteProcesadoAppConfig;
+    async actualizar(data) {
+        try {
+            const url = `${this.baseURL}/clienteProcesado/update`;
+
+            let response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const responseText = await response.text();
+
+            if (!response.ok) {
+                // Retry with POST fallback
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const fallbackText = await response.text();
+                if (!response.ok) {
+                    throw new Error('Error al actualizar registro');
+                }
+                return JSON.parse(fallbackText);
+            }
+            return JSON.parse(responseText);
+        } catch (error) {
+            console.error('Error en actualizar:', error);
+            throw error;
+        }
+    }
+
+    async eliminar(id) {
+        try {
+            const url = `${this.baseURL}/clienteProcesado/delete/${id}`;
+
+            let response = await fetch(url, { method: 'DELETE' });
+
+            if (!response.ok) {
+                // Try POST fallback
+                response = await fetch(url, { method: 'POST' });
+                if (!response.ok) {
+                    throw new Error('Error al eliminar registro');
+                }
+            }
+
+            const responseText = await response.text();
+            return responseText ? JSON.parse(responseText) : { success: true };
+        } catch (error) {
+            console.error('Error en eliminar:', error);
+            throw error;
+        }
+    }
+
+    async filtrar(params = {}) {
+        try {
+            const queryParams = new URLSearchParams();
+            
+            // Añadir parámetros de DataTables
+            if (params.start !== undefined) queryParams.append('start', params.start);
+            if (params.length !== undefined) queryParams.append('length', params.length);
+            if (params.draw !== undefined) queryParams.append('draw', params.draw);
+            
+            // Añadir búsqueda global si existe
+            if (params.search && params.search.value) {
+                queryParams.append('search[value]', params.search.value);
+            }
+            
+            // Añadir filtros personalizados
+            if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
+            if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
+            if (params.distrito) queryParams.append('distrito', params.distrito);
+            if (params.zona) queryParams.append('zona', params.zona);
+            if (params.canal) queryParams.append('canal', params.canal);
+            if (params.linea) queryParams.append('linea', params.linea);
+            if (params.sublinea) queryParams.append('sublinea', params.sublinea);
+            if (params.vendedor) queryParams.append('vendedor', params.vendedor);
+            if (params.cliente) queryParams.append('cliente', params.cliente);
+
+            const url = `${this.baseURL}/clienteProcesado/filtro?${queryParams}`;
+            console.log('URL de filtrado:', url);
+
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Respuesta del servidor:', result);
+            
+            return result;
+        } catch (error) {
+            console.error('Error en filtrar:', error);
+            throw error;
+        }
+    }
+
+    async exportarExcel() {
+        try {
+            // Crear un enlace temporal para descargar
+            const link = document.createElement('a');
+            link.href = `${this.baseURL}/clienteProcesado/exportar`;
+            link.download = 'clientes_procesados.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Error en exportar:', error);
+            throw error;
+        }
+    }
+
+    async getAll() {
+        try {
+            const url = `${this.baseURL}/clienteProcesado/all`;
+            console.log('Fetch URL:', url);
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+
+            return Array.isArray(data) ? data : [];
+        } catch (error) {
+            console.error('Error al obtener todos:', error);
+            throw error;
+        }
+    }
+
+    async ejecutarETL(data) {
+        try {
+            const response = await fetch(`${this.baseURL}/clienteProcesado/etl/run`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al ejecutar ETL');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error en ejecutarETL:', error);
+            throw error;
+        }
+    }
+}
+

@@ -3,18 +3,16 @@ class EmpresaController {
         this.service = new EmpresaService();
         this.registroSeleccionado = null;
         this.datos = [];
-        this.datosFiltrados = [];
         this.config = window.EmpresaConfig;
         this.dataTable = null;
         this.columnasVisibles = {};
     }
 
     async init() {
-        console.log('🚀 Inicializando Empresa Controller...');
-        await this.cargarDatos();
+        console.log('Inicializando EmpresaController');
         this.setupEventListeners();
         this.setupColumnToggle();
-        this.renderizarTablaCliente();
+        await this.cargarDatos();
     }
 
     setupColumnToggle() {
@@ -29,11 +27,13 @@ class EmpresaController {
         });
 
         btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
 
         btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             dropdown.classList.remove('show');
         });
@@ -46,7 +46,15 @@ class EmpresaController {
 
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
                 const columnIndex = parseInt(e.target.dataset.column);
+                
+                if (columnIndex === 3) {
+                    e.target.checked = true;
+                    this.mostrarNotificacion('La columna de opciones no se puede ocultar', 'warning');
+                    return;
+                }
+                
                 this.columnasVisibles[columnIndex] = e.target.checked;
                 
                 if (this.dataTable) {
@@ -57,144 +65,139 @@ class EmpresaController {
         });
     }
 
+    setupEventListeners() {
+        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
+        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
+        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
+    }
+
     async cargarDatos() {
         try {
             this.mostrarCargando(true);
-            console.log('Cargando todos los datos...');
-            
             this.datos = await this.service.getAll();
-            this.datosFiltrados = [...this.datos];
-            
-            console.log(`${this.datos.length} registros cargados`);
-            
+            console.log(`${this.datos.length} empresas cargadas`);
+            this.renderizarTabla();
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
-            console.error('❌ Error al cargar datos:', error);
+            console.error('Error al cargar datos:', error);
             this.mostrarNotificacion('Error al cargar datos', 'error');
             this.datos = [];
-            this.datosFiltrados = [];
+            this.renderizarTabla();
         } finally {
             this.mostrarCargando(false);
         }
     }
 
-    setupEventListeners() {
-        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
-        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
-        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
-    }
-
-    renderizarTablaCliente() {
-        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
+    renderizarTabla() {
+        const tbody = document.getElementById('tableBody');
+        const tableElement = document.getElementById('dataTable');
         
-        const table = $('#dataTable');
-        
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
+        if (!tbody || !tableElement) {
+            console.error('No se encontró la tabla o tbody');
+            return;
         }
 
-        $('#tableBody').empty();
+        if (this.dataTable) {
+            try {
+                this.dataTable.destroy();
+                this.dataTable = null;
+            } catch (e) {
+                console.warn('Error al destruir DataTable:', e);
+            }
+        }
 
-        this.dataTable = table.DataTable({
-            data: this.datosFiltrados,
-            processing: false,
-            serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
-            columns: [
-                { 
-                    data: 'codigo', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: ''
-                },
-                { 
-                    data: 'nombre', 
-                    className: 'text-sm px-2',
-                    defaultContent: '-'
-                },
-                { 
-                    data: 'ruc', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: '-'
-                },
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center px-2',
-                    defaultContent: '',
-                    render: (data, type, row) => `
-                        <div class="flex gap-1 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `
-                }
-            ],
-            order: [[0, 'desc']],
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            language: {
-                processing: "Procesando...",
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ registros",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                loadingRecords: "Cargando...",
-                zeroRecords: "No se encontraron registros",
-                emptyTable: "No hay datos disponibles",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            responsive: false,
-            autoWidth: false,
-            dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
-            drawCallback: () => {
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const index = parseInt(columnIndex);
-                    try {
-                        if (this.dataTable && this.dataTable.column(index)) {
-                            this.dataTable.column(index).visible(this.columnasVisibles[index]);
+        tbody.innerHTML = '';
+        
+        if (!this.datos || this.datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
+            return;
+        }
+
+        this.datos.forEach((registro, index) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-blue-50 transition-colors';
+            tr.innerHTML = `
+                <td class="px-2 py-2 text-sm text-center">${registro.codigo || '-'}</td>
+                <td class="px-2 py-2 text-sm">${registro.nombre || '-'}</td>
+                <td class="px-2 py-2 text-sm text-center">${registro.ruc || '-'}</td>
+                <td class="px-2 py-2 text-sm text-center">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn ml-1" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            const editBtn = tr.querySelector('.edit-btn');
+            const deleteBtn = tr.querySelector('.delete-btn');
+            
+            editBtn.onclick = (e) => {
+                e.preventDefault();
+                this.registroSeleccionado = this.datos[index];
+                this.modificarSeleccionado();
+            };
+            
+            deleteBtn.onclick = async (e) => {
+                e.preventDefault();
+                this.registroSeleccionado = this.datos[index];
+                await this.eliminarSeleccionado();
+            };
+            
+            tbody.appendChild(tr);
+        });
+        
+        setTimeout(() => {
+            try {
+                this.dataTable = $(tableElement).DataTable({
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    language: {
+                        processing: "Procesando...",
+                        search: "Buscar:",
+                        lengthMenu: "Mostrar _MENU_ registros",
+                        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                        infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                        infoFiltered: "(filtrado de _MAX_ registros totales)",
+                        loadingRecords: "Cargando...",
+                        zeroRecords: "No se encontraron registros",
+                        emptyTable: "No hay datos disponibles",
+                        paginate: {
+                            first: "Primero",
+                            last: "Último",
+                            next: "Siguiente",
+                            previous: "Anterior"
                         }
-                    } catch (e) {
-                        // Ignorar errores
+                    },
+                    order: [[0, 'desc']],
+                    responsive: true,
+                    autoWidth: false,
+                    scrollX: true,
+                    columnDefs: [
+                        { width: '10%', targets: 0, className: 'text-center' },
+                        { width: '50%', targets: 1 },
+                        { width: '25%', targets: 2, className: 'text-center' },
+                        { width: '15%', targets: 3, className: 'text-center', orderable: false }
+                    ],
+                    drawCallback: () => {
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const index = parseInt(columnIndex);
+                            if (index !== 3 && this.dataTable && this.dataTable.column(index)) {
+                                this.dataTable.column(index).visible(this.columnasVisibles[index]);
+                            }
+                        });
+                        
+                        if (this.dataTable && this.dataTable.column(3)) {
+                            this.dataTable.column(3).visible(true);
+                        }
                     }
                 });
-            },
-            initComplete: () => {
-                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
-                $('.dataTables_wrapper').addClass('w-full');
+                console.log('DataTable inicializado correctamente');
+            } catch (error) {
+                console.error('Error al inicializar DataTable:', error);
             }
-        });
-
-        $('#dataTable tbody')
-            .off('click')
-            .on('click', '.edit-btn', (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('📝 Editando:', rowData);
-                this.modificarSeleccionado();
-            })
-            .on('click', '.delete-btn', async (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('🗑️ Eliminando:', rowData);
-                await this.eliminarSeleccionado();
-            });
+        }, 200);
     }
 
     mostrarModalNuevo() {
@@ -217,24 +220,49 @@ class EmpresaController {
     }
 
     async eliminarSeleccionado() {
-        if (!this.registroSeleccionado) return;
-        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        if (!this.registroSeleccionado) {
+            console.error('No hay registro seleccionado');
+            return;
+        }
+        
+        const nombreEmpresa = this.registroSeleccionado.nombre || 'esta empresa';
+        
+        if (!confirm(`¿Está seguro de eliminar "${nombreEmpresa}"?`)) {
+            console.log('Eliminación cancelada');
+            return;
+        }
 
         try {
             this.mostrarCargando(true);
-            await this.service.delete(this.registroSeleccionado.codigo);
-            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
+            
+            console.log('Eliminando empresa:', {
+                codigo: this.registroSeleccionado.codigo,
+                nombre: this.registroSeleccionado.nombre
+            });
+            
+            const resultado = await this.service.eliminar(this.registroSeleccionado.codigo);
+            
+            console.log('Resultado eliminación:', resultado);
+            
+            this.mostrarNotificacion('Empresa eliminada correctamente', 'success');
+            
+            this.registroSeleccionado = null;
             
             await this.cargarDatos();
             
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
-            console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('Error al eliminar el registro', 'error');
+            console.error('Error completo al eliminar:', {
+                message: error.message,
+                stack: error.stack,
+                error: error
+            });
+            
+            let mensajeError = 'Error al eliminar la empresa';
+            if (error.message && error.message !== 'Error al eliminar la empresa') {
+                mensajeError = error.message;
+            }
+            
+            this.mostrarNotificacion(mensajeError, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -242,9 +270,6 @@ class EmpresaController {
 
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
-        if (!r) return;
-
-        console.log('Cargando en formulario:', r);
         document.getElementById('modalNombre').value = r.nombre || '';
         document.getElementById('modalRuc').value = r.ruc || '';
     }
@@ -264,23 +289,15 @@ class EmpresaController {
 
             if (this.registroSeleccionado) {
                 data.codigo = this.registroSeleccionado.codigo;
-                await this.service.update(data);
-                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
+                await this.service.actualizar(data);
+                this.mostrarNotificacion('Empresa actualizada correctamente', 'success');
             } else {
-                delete data.codigo;
-                await this.service.create(data);
-                this.mostrarNotificacion('Registro creado exitosamente', 'success');
+                await this.service.crear(data);
+                this.mostrarNotificacion('Empresa creada correctamente', 'success');
             }
 
             this.cerrarModal();
-            
             await this.cargarDatos();
-            
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
             console.error('Error al guardar:', error);
             this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
@@ -297,19 +314,21 @@ class EmpresaController {
     }
 
     validarFormulario(data) {
-        console.log('Validando formulario:', data);
-
         if (!data.nombre) {
-            this.mostrarNotificacion('El nombre de la empresa es obligatorio', 'warning');
+            this.mostrarNotificacion('El nombre es obligatorio', 'warning');
+            return false;
+        }
+
+        if (data.nombre.length < 3) {
+            this.mostrarNotificacion('El nombre debe tener al menos 3 caracteres', 'warning');
             return false;
         }
 
         if (data.ruc && data.ruc.length !== 11) {
-            this.mostrarNotificacion('El RUC debe tener 11 dígitos', 'warning');
+            this.mostrarNotificacion('El RUC debe tener exactamente 11 dígitos', 'warning');
             return false;
         }
-
-        console.log('✅ Validación exitosa');
+        
         return true;
     }
 
@@ -320,13 +339,6 @@ class EmpresaController {
         this.registroSeleccionado = null;
     }
 
-    exportarExcel() {
-        const url = `${this.config.API.BASE_URL}${this.config.API.ENDPOINTS.EXCEL}`;
-        console.log('📊 Exportando a Excel:', url);
-        window.open(url, '_blank');
-        this.mostrarNotificacion('Exportando a Excel...', 'info');
-    }
-
     mostrarCargando(mostrar) {
         const loading = document.getElementById('loading');
         if (loading) {
@@ -335,7 +347,7 @@ class EmpresaController {
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+        console.log(`[${tipo}] ${mensaje}`);
 
         let container = document.getElementById('notificaciones-container');
         if (!container) {
@@ -353,22 +365,25 @@ class EmpresaController {
             info: 'bg-blue-500'
         };
         const iconos = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
         };
 
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
+        notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
-            <span style="font-size: 20px;">${iconos[tipo]}</span>
+            <i class="fas ${iconos[tipo]} text-xl"></i>
             <span>${mensaje}</span>
         `;
         container.appendChild(notif);
 
-        setTimeout(() => notif.remove(), 4000);
+        setTimeout(() => {
+            notif.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notif.remove(), 300);
+        }, 4000);
     }
 }
 
 window.empresaController = new EmpresaController();
-
