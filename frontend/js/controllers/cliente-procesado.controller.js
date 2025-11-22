@@ -324,8 +324,8 @@ class ClienteProcesadoController {
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
         document.getElementById('btnETL')?.addEventListener('click', () => this.abrirModalETL());
-        document.getElementById('cancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
-        document.getElementById('confirmarETL')?.addEventListener('click', () => this.ejecutarETL());
+        document.getElementById('btnCancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
+        document.getElementById('btnEjecutarETLConfirm')?.addEventListener('click', () => this.ejecutarETL());
         document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
@@ -519,8 +519,8 @@ class ClienteProcesadoController {
 
         const formatDate = (date) => date.toISOString().split('T')[0];
 
-        document.getElementById('fechaInicio').value = formatDate(ayer);
-        document.getElementById('fechaFin').value = formatDate(hoy);
+        document.getElementById('etlFechaInicio').value = formatDate(ayer);
+        document.getElementById('etlFechaFin').value = formatDate(hoy);
         document.getElementById('modalETL').classList.remove('hidden');
     }
 
@@ -529,8 +529,8 @@ class ClienteProcesadoController {
     }
 
     async ejecutarETL() {
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
+        const fechaInicio = document.getElementById('etlFechaInicio').value;
+        const fechaFin = document.getElementById('etlFechaFin').value;
         
         if (!fechaInicio || !fechaFin) {
             this.mostrarNotificacion('Por favor seleccione ambas fechas', 'warning');
@@ -613,3 +613,4 @@ class ClienteProcesadoController {
 
 // Crear instancia global
 const clienteProcesadoController = new ClienteProcesadoController();
+
