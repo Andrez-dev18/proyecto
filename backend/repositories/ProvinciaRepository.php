@@ -81,7 +81,7 @@ class ProvinciaRepository
 
     public function delete($id)
     {
-        $query = "DELETE FROM com_provincia WHERE id = :id";
+        $query = "DELETE FROM com_provincia WHERE codigo = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $id]);
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas

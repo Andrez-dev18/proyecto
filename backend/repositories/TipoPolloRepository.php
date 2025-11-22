@@ -54,7 +54,7 @@ class TipoPolloRepository
 
     public function delete($id)
     {
-        $query = "DELETE FROM com_tipo_pollo WHERE id = :id";
+        $query = "DELETE FROM com_tipo_pollo WHERE codigo = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $id]);
         return $stmt->rowCount(); // ← devuelve cuántas filas fueron afectadas
