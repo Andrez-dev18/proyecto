@@ -18,6 +18,15 @@ class ClientePvService
 
     public function save($data)
     {
+
+        $totalUnidad = floatval($data['carne_unidad'] ?? 0) +  floatval($data['brasa_unidad'] ?? 0);
+        $totalKilos = floatval($data['carne_kilos'] ?? 0) + floatval($data['brasa_kilos'] ?? 0);
+        $totalSoles = floatval($data['carne_soles'] ?? 0) + floatval($data['brasa_soles'] ?? 0);
+
+        $data['total_unidad'] = $totalUnidad;
+        $data['total_kilos'] = $totalKilos;
+        $data['total_soles'] = $totalSoles;
+
         return $this->repo->save($data);
     }
 

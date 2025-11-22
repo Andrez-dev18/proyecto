@@ -1,6 +1,6 @@
-class bdOficialService {
+class InfoGRSService {
     constructor() {
-        this.config = window.bdOficialConfig;
+        this.config = window.InfoGRSConfig;
         this.baseURL = AppConfig.API.BASE_URL;
     }
 
@@ -72,18 +72,10 @@ class bdOficialService {
     async eliminar(id) {
         try {
             const url = `${this.baseURL + this.config.API.ENDPOINTS.BORRAR}/${id}`;
-
-            console.log('=== ELIMINAR REGISTRO ===');
-            console.log('URL:', url);
-            console.log('Método: DELETE');
-            console.log('ID:', id);
-
+   
             let response = await fetch(url, { method: 'DELETE' });
-
-            console.log('Status respuesta:', response.status);
-
+    
             let responseText = await response.text();
-            console.log('Respuesta del servidor:', responseText);
 
             if (!response.ok) {
                 // If server returned HTML (unexpected) or DELETE not allowed, try POST fallback
@@ -199,91 +191,7 @@ class bdOficialService {
         }
     }
 
-    async autocomplete(campo, query) {
-        return fetch(`${this.baseURL}/oficialGRS/autocomplete?campo=${campo}&query=${query}`)
-            .then(r => r.json());
-    }
-
-
-    async getEmpresas() {
-        const response = await fetch(`${this.baseURL}/empresa/all`);
-        if (!response.ok) throw new Error('Error al obtener empresas');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            empresa: item.nombre
-        }));
-    }
-
-    async getMercados() {
-        const response = await fetch(`${this.baseURL}/mercado/all`);
-        if (!response.ok) throw new Error('Error al obtener mercados');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            mercado: item.nombre
-        }));
-    }
-
-    async getProveedores() {
-        const response = await fetch(`${this.baseURL}/proveedor/all`);
-        if (!response.ok) throw new Error('Error al obtener proveedores');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            proveedor: item.nombre
-        }));
-    }
-
-    async getProvincias() {
-        const response = await fetch(`${this.baseURL}/provincia/all`);
-        if (!response.ok) throw new Error('Error al obtener provincias');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            provincia: item.nombre
-        }));
-    }
-
-    async getCondiciones() {
-        const response = await fetch(`${this.baseURL}/condicion/all`);
-        if (!response.ok) throw new Error('Error al obtener condiciones');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            condicion: item.nombre
-        }));
-    }
-
-    async getTipos() {
-        const response = await fetch(`${this.baseURL}/tipo/all`);
-        if (!response.ok) throw new Error('Error al obtener tipos');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            tipo: item.nombre
-        }));
-    }
-
-    async getTipoPollo() {
-        const response = await fetch(`${this.baseURL}/tipoPollo/all`);
-        if (!response.ok) throw new Error('Error al obtener tipos');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            tipoPollo: item.nombre
-        }));
-    }
-
-    async getTipoPolloVivo() {
-        const response = await fetch(`${this.baseURL}/tipoPolloVivo/all`);
-        if (!response.ok) throw new Error('Error al obtener tipos');
-        const data = await response.json();
-        return data.map(item => ({
-            id: item.codigo,
-            tipoPolloVivo: item.nombre
-        }));
-    }
+    
 
     async ejecutarETL(data) {
         try {
