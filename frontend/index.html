@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de Gestión de Pollo - Múltiples Dashboards">
     <title>Sistema de Gestión - Dashboard</title>
-
-     <!-- Tailwind CSS -->
+      <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
 
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-style.css">
 
     <style>
         /* Sidebar */
@@ -382,7 +382,7 @@
                 <div id="clientes-procesados" class="submenu hidden pl-10 mt-2 space-y-2">
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-clientes-procesados.html','clientes-procesados')"
-                        class="menu-link block text-gray-400 hover:text-white">Data2</a>
+                        class="menu-link block text-gray-400 hover:text-white">Data</a>
                     <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vendedor.html','vendedor')"
                         class="menu-link block text-gray-400 hover:text-white">Vendedores</a>
                     <a href="#"
@@ -404,10 +404,10 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                     onclick="activateAndLoad(this, 'dashboard_clientePV.html','clientePV', 'Control de Clientes Pollo Vivo')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">11.- DataBase</span>
+                        <span class="font-medium">11.- Control de Clientes Pollo Vivo</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
@@ -415,10 +415,10 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="activateAndLoad(this, 'info-grs-dashboard.html', 'info-grs','Información GRS')">
+                    onclick="activateAndLoad(this, 'dashboard_infoGRS.html','infoGRS', 'Informacion de GRS')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-database w-5"></i>
-                        <span class="font-medium">12.- info-grs-dashboard</span>
+                        <span class="font-medium">12.- Informacion GRS</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
@@ -652,8 +652,10 @@
                 'dashboard-tipo-alterno.html': title || 'Tipo Alternos',
                 'dashboard-tipo-emprendedor.html': title || 'Tipo Emprendedor',
                 'dashboard_bdOficial.html': title || 'Base de datos oficial',
-                'info-grs-dashboard.html': title || 'Información GRS'
-
+                'info-grs-dashboard.html': title || 'Información GRS',
+                'dashboard_bdOficial.html': title || 'Base de datos oficial',
+                'dashboard_clientePV.html': title || 'Control de Clientes Pollo Vivo',
+                'dashboard_infoGRS.html': title || 'Informacion de GRS'
 
             };
 
