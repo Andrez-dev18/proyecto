@@ -268,13 +268,21 @@
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-2')">
+                    onclick="toggleSubmenu('PuestoMercado')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">6.- DataBase</span>
+                        <span class="font-medium">6.- Puesto Mercado y Tiendas Aledañas</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
+
+                <div id="PuestoMercado" class="submenu hidden pl-10 mt-2 space-y-2">                   
+                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-MercadoRes.html','MercadoRes')"
+                        class="menu-link block text-gray-400 hover:text-white">Mercado Res</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-producto.html','Productos')"
+                        class="menu-link block text-gray-400 hover:text-white">Mercado Det</a>
+                </div>
             </div>
 
             <!-- TAMAÑO MERCADO -->
@@ -652,6 +660,7 @@
                 'dashboard_bdOficial.html': title || 'Base de datos oficial',
                 'dashboard_clientePV.html': title || 'Control de Clientes Pollo Vivo',
                 'dashboard_infoGRS.html': title || 'Informacion de GRS',
+                'dashboard-MercadoRes.html': title || 'Gestion de Mercado Res'
 
             };
 

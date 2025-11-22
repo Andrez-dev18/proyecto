@@ -44,6 +44,7 @@ require_once __DIR__ . '/../controllers/TipoProdSustitutoController.php';
 require_once __DIR__ . '/../controllers/ClientePvController.php';
 require_once __DIR__ . '/../controllers/InfoGRSController.php';
 require_once __DIR__ . '/../controllers/OficialGRSController.php';
+require_once __DIR__ . '/../controllers/MercadoResController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -105,6 +106,7 @@ $TipoProSutitutoController = new TipoProdSustitutoController($db);
 $ClientePvController = new ClientePvController($db);
 $InfoGRSController = new InfoGRSController($db);
 $OficialGRSController = new OficialGRSController($db);
+$MercadoResController = new MercadoResController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -1242,6 +1244,35 @@ elseif (strpos($path, "/oficialGRS/etl") !== false && $request == "POST") {
     exit;
 }elseif (strpos($path, "/oficialGRS/autocomplete") !== false && $request == "GET") {
     $OficialGRSController->autocomplete();
+    exit;
+}
+
+
+######### RUTAS COM_MERCADO_RES #########
+// obtener todos
+elseif (strpos($path, "/mercadores/all") !== false && $request == "GET") {
+    $MercadoResController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/mercadores/crear") !== false && $request == "POST") {
+    $MercadoResController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/mercadores/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $MercadoResController->update();
+    exit;
+}//borrar con regex para ids con caracteres
+elseif (strpos($path, "/mercadores/borrar") !== false && $request == "POST") {
+    $MercadoResController->delete();
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/mercadores/filtro") !== false && $request == "GET") {
+    $MercadoResController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/mercadores/exportar") !== false && $request == "GET") {
+    $reporteController->exportarTrozadoDiarioExcel();
     exit;
 }
 
