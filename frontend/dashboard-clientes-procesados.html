@@ -8,9 +8,13 @@
 
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
-    <link rel="stylesheet" href="assets/css/datatables.min.css">
+    
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    
     <style>
         .table-scroll {
             max-height: calc(100vh - 450px);
@@ -64,7 +68,6 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -80,7 +83,6 @@
                 opacity: 0;
                 transform: translateX(100%);
             }
-
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -92,7 +94,6 @@
                 opacity: 1;
                 transform: translateX(0);
             }
-
             to {
                 opacity: 0;
                 transform: translateX(100%);
@@ -154,24 +155,40 @@
             align-items: center;
         }
 
-        #filterContent {
-            transition: max-height 0.3s ease-in-out;
-            overflow: hidden;
+        /* Estilos para DataTables personalizado */
+        #tablaClientes_wrapper {
+            padding: 0;
+        }
+
+        #tablaClientes thead {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            color: white;
+        }
+
+        #tablaClientes thead th {
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        #tablaClientes tbody td {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            margin: 1rem 0;
         }
     </style>
 </head>
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-4">
-
-        <!-- Header -->
-        <div class="mb-6 text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-users text-purple-600 mr-2"></i>
-                Gestión de Clientes Procesados
-            </h1>
-            <p class="text-gray-600">Sistema de control y análisis de datos de clientes</p>
-        </div>
 
         <!-- Acciones -->
         <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
@@ -192,7 +209,7 @@
                         Exportar Excel
                     </button>
                     <button id="btnETL"
-                        class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
                         <i class="fa-solid fa-rotate mr-2"></i>
                         Cargar ETL
                     </button>
@@ -296,19 +313,18 @@
                     <i class="fas fa-sliders-h text-purple-600"></i>
                     Filtros
                 </h2>
-                <div class="flex gap-3">
-                    <!-- Botón para ocultar/mostrar filtros -->
-                    <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
-                        <i class="fas fa-chevron-up"></i>
-                    </button>
-                    <button id="btnLimpiarFiltros" class="text-purple-600 hover:text-purple-700 font-semibold">
-                        <i class="fas fa-times-circle mr-1"></i>
-                        Limpiar filtros
-                    </button>
-                </div>
+                <!-- Botón para ocultar/mostrar filtros -->
+                <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+                <button id="btnLimpiarFiltros" class="text-purple-600 hover:text-purple-700 font-semibold">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    Limpiar filtros
+                </button>
             </div>
-            <div id="filterContent" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <!-- Filtros principales -->
+            <div id="filterContent"
+                class="grid grid-cols-1 md:grid-cols-4 gap-4 transition-all duration-300 ease-in-out overflow-hidden">
+                <!-- Filtros principales siempre visibles -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
@@ -384,7 +400,7 @@
                 <div class="mt-6 flex items-end">
                     <button id="btnAplicarFiltros"
                         class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
-                        <i class="fa-solid fa-filter mr-2"></i>
+                        <i class="fa-solid fa-filter"></i>
                         Filtrar
                     </button>
                 </div>
@@ -392,29 +408,29 @@
         </section>
 
         <!-- Tabla -->
-<section class="bg-white rounded-2xl card-shadow p-6 slide-down">
-    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-        <i class="fas fa-table text-purple-600"></i>
-        Registros de Clientes Procesados
-    </h2>
-    <div class="overflow-x-auto">
-        <table id="tablaClientes" class="min-w-full display">
-            <!-- DataTables generará el contenido automáticamente -->
-        </table>
-    </div>
-</section>
-
+        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Registros de Clientes Procesados
+            </h2>
+            <div class="overflow-x-auto">
+                <!-- IMPORTANTE: La tabla debe tener ID tablaClientes para que funcione con el JavaScript -->
+                <table id="tablaClientes" class="min-w-full display" style="width:100%">
+                    <!-- DataTables generará el contenido automáticamente -->
+                </table>
+            </div>
+        </section>
     </div>
 
     <!-- Modal Formulario -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
         style="display: none; overflow-y: auto;">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full my-8" style="max-height: calc(100vh - 4rem);">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8" style="max-height: calc(100vh - 4rem);">
             <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl sticky top-0 z-10">
                 <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
             </div>
             <form id="modalForm" class="p-6" style="max-height: calc(100vh - 12rem); overflow-y: auto;">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Fecha -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
@@ -479,10 +495,10 @@
                     </div>
 
                     <!-- Descripción -->
-                    <div class="md:col-span-3">
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                        <textarea id="modalDescripcion" rows="2"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></textarea>
+                        <input type="text" id="modalDescripcion"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
 
                     <!-- Ruta -->
@@ -519,13 +535,6 @@
                         <input type="number" id="modalImporte" step="0.01"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                     </div>
-
-                    <!-- Base de Datos -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Base de Datos</label>
-                        <input type="text" id="modalNomDb" value="grs" readonly
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100">
-                    </div>
                 </div>
 
                 <div class="flex justify-end gap-3 mt-6">
@@ -546,11 +555,8 @@
     <!-- Modal ETL -->
     <div id="modalETL" class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
-                <i class="fas fa-database text-indigo-600 mr-2"></i>
-                Ejecutar ETL - Clientes Procesados
-            </h2>
-            <p class="text-gray-600 mb-4">Ingrese el rango de fechas para procesar los datos de clientes.</p>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Ejecutar ETL</h2>
+            <p class="text-gray-600 mb-4">Ingrese el rango de fechas para procesar los datos.</p>
 
             <div class="space-y-4">
                 <div>
@@ -569,8 +575,7 @@
                 <button id="btnCancelarETL" class="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded-lg shadow">
                     Cancelar
                 </button>
-                <button id="btnEjecutarETLConfirm" class="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg shadow">
-                    <i class="fas fa-play mr-2"></i>
+                <button id="btnEjecutarETLConfirm" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow">
                     Ejecutar
                 </button>
             </div>
@@ -582,7 +587,7 @@
         style="display: none;">
         <div class="bg-white p-6 rounded-xl shadow-2xl">
             <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
-            <p class="text-gray-700">Procesando...</p>
+            <p class="text-gray-700">Cargando...</p>
         </div>
     </div>
 
@@ -590,8 +595,7 @@
     <!-- jQuery (requerido por DataTables) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- DataTables CSS y JS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 
     <!-- Scripts DE CONFIGURACION IMPORTANTE EL ORDEN -->
@@ -609,4 +613,3 @@
 </body>
 
 </html>
-

@@ -7,10 +7,8 @@
     <link rel="stylesheet" href="css/output.css">
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
-    <link rel="stylesheet" href="css/dashboard-style.css">
     
     <style>
-        /* Distribución mejorada de columnas */
         .col-codigo {
             width: 100px;
             max-width: 100px;
@@ -39,20 +37,42 @@
         .table-scroll {
             overflow-x: auto;
         }
+
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-hover-scale {
+            transition: transform 0.2s ease;
+        }
+
+        .btn-hover-scale:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-4">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <i class="fas fa-user-tie text-purple-600"></i>
+                Gestión de Tipos de Emprendedor
+            </h1>
+            <p class="text-gray-600 mt-2">Administra los tipos de emprendedor del sistema</p>
+        </header>
+
         <!-- Acciones -->
         <section class="bg-white rounded-2xl card-shadow p-4 mb-4">
-            <h2 class="text-xl font-bold text-gray-700 mb-4">
-                <i class="fas fa-tools text-purple-600"></i> Acciones
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-purple-600"></i>
+                Acciones
             </h2>
             <div class="flex gap-3">
-                <button id="btnNuevo" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                <button id="btnNuevo" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg btn-hover-scale">
                     <i class="fas fa-plus mr-2"></i>Nuevo Tipo de Emprendedor
                 </button>
-                <button id="btnExportar" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                <button id="btnExportar" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg btn-hover-scale">
                     <i class="fas fa-file-excel mr-2"></i>Exportar Excel
                 </button>
             </div>
@@ -60,8 +80,9 @@
 
         <!-- Tabla -->
         <section class="bg-white rounded-2xl card-shadow p-6">
-            <h2 class="text-xl font-bold text-gray-700 mb-4">
-                <i class="fas fa-table text-purple-600"></i> Listado de Tipos de Emprendedor
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Listado de Tipos de Emprendedor
             </h2>
             <div class="table-scroll">
                 <table id="tablaEmprendedor" class="min-w-full display">
@@ -123,12 +144,17 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+    
+    <!-- Archivos de configuración y lógica -->
     <script src="js/config/config.tipo-emprendedor.js"></script>
     <script src="js/services/tipo-emprendedor.service.js"></script>
     <script src="js/controllers/tipo-emprendedor.controller.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            tipoEmprendedorController.init();
+            if (window.tipoEmprendedorController) {
+                window.tipoEmprendedorController.init();
+            }
         });
     </script>
 </body>
