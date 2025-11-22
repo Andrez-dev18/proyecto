@@ -31,12 +31,14 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            font-weight: normal; 
         }
 
         .table-scroll th,
         .table-scroll td {
             border-bottom: 1px solid #e5e7eb;
             white-space: nowrap;
+            font-weight: normal; 
         }
 
         .table-scroll tbody tr:hover {
@@ -204,12 +206,12 @@
                 <table class="min-w-full">
                     <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0">
                         <tr>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider w-12">ID</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">CÓDIGO</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">DESCRIPCIÓN</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">LÍNEA</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">SUBLÍNEA</th>
-                            <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES</th>
+                            <th class="px-4 py-3 text-center text-xs uppercase tracking-wider w-12">ID</th>
+                            <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">CÓDIGO</th>
+                            <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">DESCRIPCIÓN</th>
+                            <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">LÍNEA</th>
+                            <th class="px-4 py-3 text-left text-xs uppercase tracking-wider">SUBLÍNEA</th>
+                            <th class="px-4 py-3 text-center text-xs uppercase tracking-wider">OPCIONES</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
