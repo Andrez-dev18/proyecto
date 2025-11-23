@@ -11,9 +11,120 @@
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
     
-    <link rel="stylesheet" href="css/dashboard-style.css">
-    
     <style>
+        /* Estilos para optimizar el espacio de la tabla */
+        #dataTable {
+            width: 100% !important;
+        }
+
+        #dataTable thead th {
+            padding: 12px 8px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        #dataTable tbody td {
+            padding: 8px;
+            font-size: 0.875rem;
+        }
+
+        /* Distribución de columnas optimizada */
+        #dataTable thead th:nth-child(1), /* Código */
+        #dataTable tbody td:nth-child(1) {
+            width: 20%;
+            text-align: center;
+        }
+
+        #dataTable thead th:nth-child(2), /* Nombre */
+        #dataTable tbody td:nth-child(2) {
+            width: 60%;
+            text-align: left;
+        }
+
+        #dataTable thead th:nth-child(3), /* Opciones */
+        #dataTable tbody td:nth-child(3) {
+            width: 20%;
+            text-align: center;
+        }
+
+        /* Estilo para nombres largos */
+        #dataTable tbody td:nth-child(2) {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #dataTable tbody td:nth-child(2):hover {
+            overflow: visible;
+            white-space: normal;
+            word-break: break-word;
+            background-color: #f9fafb;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Estilos para DataTables */
+        .dataTables_wrapper .dataTables_filter {
+            float: right !important;
+            text-align: right !important;
+        }
+
+        .dataTables_wrapper .dataTables_length {
+            float: left !important;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            padding: 0.375rem 2rem 0.375rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .dataTables_wrapper .dataTables_info {
+            padding-top: 0.755em;
+            font-size: 0.875rem;
+        }
+
+        .dataTables_wrapper .dataTables_paginate {
+            padding-top: 0.25em;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.25rem 0.75rem;
+            margin: 0 0.125rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #f3f4f6 !important;
+            color: #111827 !important;
+            border: 1px solid #d1d5db !important;
+        }
+
+        /* Dropdown de columnas */
         .dropdown-columns {
             position: relative;
             display: inline-block;
@@ -66,9 +177,46 @@
             align-items: center;
         }
 
-        .dataTables_wrapper {
-            width: 100% !important;
-            overflow-x: auto;
+        /* Animaciones */
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-hover-scale {
+            transition: transform 0.2s ease;
+        }
+
+        .btn-hover-scale:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-down {
+            animation: slideDown 0.4s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #dataTable tbody td:nth-child(2) {
+                max-width: 150px;
+            }
+            
+            .dataTables_wrapper .dataTables_filter,
+            .dataTables_wrapper .dataTables_length {
+                float: none !important;
+                text-align: center !important;
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
@@ -76,7 +224,6 @@
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
 
-        
         <!-- Acciones -->
         <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
             <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
@@ -88,8 +235,13 @@
                     <button id="btnNuevo"
                         class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
                         <i class="fas fa-plus mr-2"></i>
-                        Nuevo Tipo de Huevo
+                        Nuevo Tipo Huevo
                     </button>
+                   <!-- <button id="btnExportar"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Exportar Excel
+                    </button>-->
                 </div>
 
                 <div class="dropdown-columns">
@@ -139,9 +291,9 @@
                         <table class="min-w-full divide-y divide-gray-200" id="dataTable">
                             <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
                                 <tr>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">CÓDIGO</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NOMBRE</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider" style="width: 20%;">CÓDIGO</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="width: 60%;">NOMBRE DEL TIPO</th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider" style="width: 20%;">OPCIONES</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -166,10 +318,10 @@
             <form id="modalForm" class="p-6">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tipo *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tipo de Huevo *</label>
                         <input type="text" id="modalNombre" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
-                            placeholder="Ej: Blanco, Marrón, Orgánico, etc.">
+                            placeholder="Ingrese el nombre del tipo de huevo">
                     </div>
                 </div>
 
@@ -216,6 +368,15 @@
                 console.error('❌ tipoHuevoController no está disponible');
             }
         });
+
+        // Función global para compatibilidad con el iframe
+        window.cargarDatos = async function () {
+            if (window.tipoHuevoController && typeof window.tipoHuevoController.cargarDatos === 'function') {
+                await window.tipoHuevoController.cargarDatos();
+            } else {
+                console.error("tipoHuevoController.cargarDatos no está definido");
+            }
+        };
     </script>
 </body>
 </html>

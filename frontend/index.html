@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sistema de Gestión de Pollo - Múltiples Dashboards">
     <title>Sistema de Gestión - Dashboard</title>
-      <!-- Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
 
     <!-- Font Awesome para iconos -->
@@ -275,9 +275,9 @@
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
-
-                <div id="PuestoMercado" class="submenu hidden pl-10 mt-2 space-y-2">                   
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-MercadoRes.html','MercadoRes')"
+                <div id="PuestoMercado" class="submenu hidden pl-10 mt-2 space-y-2">
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-MercadoRes.html','MercadoRes')"
                         class="menu-link block text-gray-400 hover:text-white">Mercado Res</a>
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-producto.html','Productos')"
@@ -391,7 +391,8 @@
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-clientes-procesados.html','clientes-procesados')"
                         class="menu-link block text-gray-400 hover:text-white">Data</a>
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vendedor.html','vendedor')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-vendedor.html','vendedor')"
                         class="menu-link block text-gray-400 hover:text-white">Vendedores</a>
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-producto.html','Productos')"
@@ -405,92 +406,87 @@
                     onclick="activateAndLoad(this, 'dashboard_bdOficial.html','bdoficial', 'Base de datos oficial')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">10.- Base de datos oficial</span>
+                        <span class="font-medium">10. Base de datos oficial</span>
                     </span>
                 </button>
             </div>
 
-            <div class="menu-group">
-                <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="activateAndLoad(this, 'dashboard_clientePV.html','clientePV', 'Control de Clientes Pollo Vivo')">
-                    <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">11.- Control de Clientes Pollo Vivo</span>
-                    </span>
-                </button>
-            </div>
+            <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
+                onclick="activateAndLoad(this, 'dashboard_clientePV.html','clientePV', 'Control de Clientes Pollo Vivo')">
+                <span class="flex items-center gap-3">
+                    <i class="fas fa-shopping-cart w-5"></i>
+                    <span class="font-medium">11.- Control de Clientes Pollo Vivo</span>
+                </span>
+            </button>
 
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
                     onclick="activateAndLoad(this, 'dashboard_infoGRS.html','infoGRS', 'Informacion de GRS')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
+                        <i class="fas fa-database w-5"></i>
                         <span class="font-medium">12.- Informacion GRS</span>
                     </span>
                 </button>
             </div>
 
+            <!-- 13.- Trozado Diario -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="activateAndLoad(this, 'dashdoard-trozado-diario.html', 'trozado-diario','Gestión Trozado Diario')">
+                    onclick="activateAndLoad(this, 'dashboard-trozado-diario.html', 'trozado-diario','Gestión Trozado Diario')">
                     <span class="flex items-center gap-3">
                         <i class="fas fa-database w-5"></i>
-                        <span class="font-medium">13.- Precio Trozado Diario</span>
+                        <span class="font-medium">13.- Trozado Diario</span>
                     </span>
                 </button>
             </div>
 
+            <!-- 14.- Maestros del Sistema -->
             <div class="menu-group">
                 <button class="menu-item flex items-center justify-between w-full px-4 py-3 text-white rounded-lg"
-                    onclick="toggleSubmenu('submenu-precio-trozado-diario')">
+                    onclick="toggleSubmenu('submenu-maestros-sistema')">
                     <span class="flex items-center gap-3">
-                        <i class="fas fa-shopping-cart w-5"></i>
-                        <span class="font-medium">14.- Precio Trozado Diario</span>
+                        <i class="fas fa-cogs w-5"></i>
+                        <span class="font-medium">14.- Maestros del Sistema</span>
                     </span>
                     <i class="fas fa-chevron-down text-sm"></i>
                 </button>
 
-                <div id="submenu-precio-trozado-diario" class="submenu hidden pl-10 mt-2 space-y-2">
-
+                <div id="submenu-maestros-sistema" class="submenu hidden pl-10 mt-2 space-y-2">
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-mercado.html','mercado', 'Mercado')"
                         class="menu-link block text-gray-400 hover:text-white">Mercado</a>
                     <a href="#"
                         onclick="selectMenuItem(this); loadDashboardAndData('dashboard-empresa.html','empresa', 'Empresa')"
                         class="menu-link block text-gray-400 hover:text-white">Empresa</a>
-                    
                     <a href="#"
-                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-condicion.html','condicion')"
-                        class="menu-link block text-gray-400 hover:text-white">Condicion</a>
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-proveedor.html','proveedor')"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-condicion.html','condicion', 'Condición')"
+                        class="menu-link block text-gray-400 hover:text-white">Condición</a>
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-proveedor.html','proveedor', 'Proveedor')"
                         class="menu-link block text-gray-400 hover:text-white">Proveedor</a>
                     <a href="#"
-                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-provincia.html','provincia')"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-provincia.html','provincia', 'Provincia')"
                         class="menu-link block text-gray-400 hover:text-white">Provincia</a>
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-pollo.html','pollo')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-pollo.html','tipo-pollo', 'Tipo Pollo')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Pollo</a>
-
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tienda.html','tienda')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-tienda.html','tipo-tienda', 'Tipo Tienda')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Tienda</a>
-
-
-                    <a href="#" onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-huevo.html','tipo huevo')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-huevo.html','tipo-huevo', 'Tipo Huevo')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Huevo</a>
-                    
-                    
-                        <a href="#"
-                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-gallina.html','tipo-gallina')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-gallina.html','tipo-gallina', 'Tipo Gallina')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Gallina</a>
                     <a href="#"
-                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-alterno.html','tipo-alterno')"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-alterno.html','tipo-alterno', 'Tipo Alternos')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Alternos</a>
-                        <a href="#"
-                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-emprendedor.html','tipo-emprendedor')"
+                    <a href="#"
+                        onclick="selectMenuItem(this); loadDashboardAndData('dashboard-tipo-emprendedor.html','tipo-emprendedor', 'Tipo Emprendedor')"
                         class="menu-link block text-gray-400 hover:text-white">Tipo Emprendedor</a>
-
                 </div>
             </div>
-
         </nav>
 
 
@@ -652,15 +648,17 @@
                 'dashboard-proveedor.html': title || 'Proveedor',
                 'dashboard-provincia.html': title || 'Provincia',
                 'dashboard-tipo-pollo.html': title || 'Tipo Pollo',
-                'daashboard-tienda.html': title || 'Tipo Tienda',
+                'dashboard-tipo-tienda.html': title || 'Tipo Tienda',
                 'dashboard-tipo-huevo.html': title || 'Tipo Huevo',
-                'dashboard-gallina.html': title || 'Tipo Gallina',
+                'dashboard-tipo-gallina.html': title || 'Tipo Gallina',
                 'dashboard-tipo-alterno.html': title || 'Tipo Alternos',
                 'dashboard-tipo-emprendedor.html': title || 'Tipo Emprendedor',
                 'dashboard_bdOficial.html': title || 'Base de datos oficial',
+                'info-grs-dashboard.html': title || 'Información GRS',
+                'dashboard-MercadoRes.html': title || 'Gestion de Mercado Res',
+                'dashboard_bdOficial.html': title || 'Base de datos oficial',
                 'dashboard_clientePV.html': title || 'Control de Clientes Pollo Vivo',
-                'dashboard_infoGRS.html': title || 'Informacion de GRS',
-                'dashboard-MercadoRes.html': title || 'Gestion de Mercado Res'
+                'dashboard_infoGRS.html': title || 'Informacion de GRS'
 
             };
 
