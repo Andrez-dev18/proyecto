@@ -5,126 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Trozado Diario</title>
 
+    <!-- ... -->
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
-    <!-- Font Awesome para iconos -->
+    <!-- Dashboard Styles Generales -->
+    <link rel="stylesheet" href="css/dashboard-styles.css">
+    <!-- DataTables Dashboard Compartido -->
+    <link rel="stylesheet" href="css/datatables-dashboard.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="css/dashboard-style.css">
-    
-    <style>
-        .dropdown-columns {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 250px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            z-index: 1000;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .dropdown-content.show {
-            display: block;
-        }
-
-        .column-toggle {
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .column-toggle:hover {
-            background-color: #f3f4f6;
-        }
-
-        .column-toggle input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .dropdown-header {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        #btnToggleFiltros {
-            transition: transform 0.3s ease, background-color 0.2s ease;
-        }
-
-        #btnToggleFiltros:hover {
-            background-color: rgba(139, 92, 246, 0.1);
-        }
-
-        /* Eliminado el estilo anterior de filterContent */
-        
-        .dataTables_wrapper {
-            width: 100% !important;
-            overflow-x: auto;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .card-shadow {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-hover-scale {
-            transition: transform 0.2s ease;
-        }
-
-        .btn-hover-scale:hover {
-            transform: translateY(-2px);
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .slide-down {
-            animation: slideDown 0.4s ease;
-        }
-    </style>
 </head>
+
 
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
