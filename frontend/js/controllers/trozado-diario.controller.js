@@ -2,8 +2,6 @@ class TrozadoDiarioController {
     constructor() {
         this.service = new TrozadoDiarioService();
         this.registroSeleccionado = null;
-        this.datos = [];
-        this.datosFiltrados = [];
         this.config = window.TrozadoDiarioConfig;
         this.dataTable = null;
         this.columnasVisibles = {};
@@ -11,11 +9,10 @@ class TrozadoDiarioController {
 
     async init() {
         console.log('🚀 Inicializando TrozadoDiario Controller...');
-        await this.cargarDatos();
         this.setupEventListeners();
         this.setupColumnToggle();
         this.setupToggleFiltros();
-        this.renderizarTablaCliente();
+        this.renderizarTablaServerSide();
     }
 
     setupColumnToggle() {
@@ -63,43 +60,19 @@ class TrozadoDiarioController {
         const filterContent = document.getElementById('filterContent');
 
         if (!btnToggle || !filterContent) return;
-
-        filterContent.classList.add('show');
         
         btnToggle.addEventListener('click', () => {
-            const isOpen = filterContent.classList.contains('show');
+            filterContent.classList.toggle('hidden');
             const icon = btnToggle.querySelector('i');
             
-            if (isOpen) {
-                filterContent.classList.remove('show');
+            if (filterContent.classList.contains('hidden')) {
                 icon.classList.remove('fa-chevron-up');
                 icon.classList.add('fa-chevron-down');
             } else {
-                filterContent.classList.add('show');
                 icon.classList.remove('fa-chevron-down');
                 icon.classList.add('fa-chevron-up');
             }
         });
-    }
-
-    async cargarDatos() {
-        try {
-            this.mostrarCargando(true);
-            console.log('Cargando todos los datos...');
-            
-            this.datos = await this.service.getAll();
-            this.datosFiltrados = [...this.datos];
-            
-            console.log(`${this.datos.length} registros cargados`);
-            
-        } catch (error) {
-            console.error('❌ Error al cargar datos:', error);
-            this.mostrarNotificacion('Error al cargar datos', 'error');
-            this.datos = [];
-            this.datosFiltrados = [];
-        } finally {
-            this.mostrarCargando(false);
-        }
     }
 
     setupEventListeners() {
@@ -116,58 +89,8 @@ class TrozadoDiarioController {
         document.getElementById('btnCancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
     }
 
-    aplicarFiltros() {
-        console.log('Aplicando filtros localmente...');
-        
-        const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-        const fechaFin = document.getElementById('filterFechaFin')?.value;
-
-        this.datosFiltrados = this.datos.filter(registro => {
-            let cumple = true;
-            
-            if (fechaInicio && registro.fecha) {
-                cumple = cumple && registro.fecha >= fechaInicio;
-            }
-            
-            if (fechaFin && registro.fecha) {
-                cumple = cumple && registro.fecha <= fechaFin;
-            }
-            
-            return cumple;
-        });
-
-        console.log(`Filtrados: ${this.datosFiltrados.length} de ${this.datos.length} registros`);
-
-        if (this.dataTable) {
-            this.dataTable.destroy();
-            this.renderizarTablaCliente();
-        } else {
-            this.renderizarTablaCliente();
-        }
-
-        this.mostrarNotificacion(`${this.datosFiltrados.length} registros encontrados`, 'info');
-    }
-
-    limpiarFiltros() {
-        console.log('Limpiando filtros...');
-        
-        document.getElementById('filterFechaInicio').value = '';
-        document.getElementById('filterFechaFin').value = '';
-        
-        this.datosFiltrados = [...this.datos];
-        
-        if (this.dataTable) {
-            this.dataTable.destroy();
-            this.renderizarTablaCliente();
-        } else {
-            this.renderizarTablaCliente();
-        }
-        
-        this.mostrarNotificacion(`Mostrando ${this.datosFiltrados.length} registros`, 'success');
-    }
-
-    renderizarTablaCliente() {
-        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
+    renderizarTablaServerSide() {
+        console.log('Renderizando tabla con server-side processing...');
         
         const table = $('#dataTable');
         
@@ -175,20 +98,31 @@ class TrozadoDiarioController {
             table.DataTable().clear().destroy();
         }
 
-        $('#tableBody').empty();
-
         this.dataTable = table.DataTable({
-            data: this.datosFiltrados,
-            processing: false,
-            serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: `${this.service.baseUrl}${this.config.API.ENDPOINTS.FILTRO}`,
+                type: 'GET',
+                data: (d) => {
+                    // Agregar filtros personalizados
+                    const fechaInicio = document.getElementById('filterFechaInicio')?.value;
+                    const fechaFin = document.getElementById('filterFechaFin')?.value;
+                    
+                    if (fechaInicio) d.fechaInicio = fechaInicio;
+                    if (fechaFin) d.fechaFin = fechaFin;
+                    
+                    return d;
+                },
+                dataSrc: function(json) {
+                    console.log('Datos recibidos:', json);
+                    return json.data || [];
+                }
+            },
             columns: [
                 { 
                     data: 'id', 
                     className: 'text-center text-xs px-2',
-                    visible: true,
                     defaultContent: ''
                 },
                 { 
@@ -276,7 +210,7 @@ class TrozadoDiarioController {
             ],
             order: [[1, 'desc']],
             pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
                 processing: "Procesando...",
                 search: "Buscar:",
@@ -298,6 +232,7 @@ class TrozadoDiarioController {
             autoWidth: false,
             dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
             drawCallback: () => {
+                // Aplicar visibilidad de columnas
                 Object.keys(this.columnasVisibles).forEach(columnIndex => {
                     const index = parseInt(columnIndex);
                     try {
@@ -310,11 +245,12 @@ class TrozadoDiarioController {
                 });
             },
             initComplete: () => {
-                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
+                console.log('✅ Tabla inicializada con server-side processing');
                 $('.dataTables_wrapper').addClass('w-full');
             }
         });
 
+        // Event handlers para botones de acción
         $('#dataTable tbody')
             .off('click')
             .on('click', '.edit-btn', (e) => {
@@ -335,6 +271,26 @@ class TrozadoDiarioController {
             });
     }
 
+    aplicarFiltros() {
+        console.log('Aplicando filtros...');
+        if (this.dataTable) {
+            this.dataTable.ajax.reload();
+            this.mostrarNotificacion('Filtros aplicados', 'success');
+        }
+    }
+
+    limpiarFiltros() {
+        console.log('Limpiando filtros...');
+        
+        document.getElementById('filterFechaInicio').value = '';
+        document.getElementById('filterFechaFin').value = '';
+        
+        if (this.dataTable) {
+            this.dataTable.ajax.reload();
+            this.mostrarNotificacion('Filtros limpiados', 'success');
+        }
+    }
+
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
         document.getElementById('modalTitle').textContent = 'Nuevo Registro';
@@ -345,7 +301,6 @@ class TrozadoDiarioController {
     }
 
     mostrarModalETL() {
-        // Establecer fechas por defecto (último mes)
         const hoy = new Date();
         const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
         
@@ -382,12 +337,10 @@ class TrozadoDiarioController {
                     `ETL ejecutado exitosamente. ${resultado.resumen?.insertados || 0} registros procesados`, 
                     'success'
                 );
-                // Recargar datos
-                await this.cargarDatos();
+                // Recargar tabla
                 if (this.dataTable) {
-                    this.dataTable.destroy();
+                    this.dataTable.ajax.reload();
                 }
-                this.renderizarTablaCliente();
             } else {
                 this.mostrarNotificacion(
                     `Error en ETL: ${resultado.mensaje || 'Error desconocido'}`, 
@@ -427,18 +380,9 @@ class TrozadoDiarioController {
             await this.service.delete(this.registroSeleccionado.id);
             this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
             
-            await this.cargarDatos();
-            
-            const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-            const fechaFin = document.getElementById('filterFechaFin')?.value;
-            
-            if (fechaInicio || fechaFin) {
-                this.aplicarFiltros();
-            } else {
-                if (this.dataTable) {
-                    this.dataTable.destroy();
-                }
-                this.renderizarTablaCliente();
+            // Recargar tabla
+            if (this.dataTable) {
+                this.dataTable.ajax.reload();
             }
             
         } catch (error) {
@@ -498,18 +442,9 @@ class TrozadoDiarioController {
 
             this.cerrarModal();
             
-            await this.cargarDatos();
-            
-            const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-            const fechaFin = document.getElementById('filterFechaFin')?.value;
-            
-            if (fechaInicio || fechaFin) {
-                this.aplicarFiltros();
-            } else {
-                if (this.dataTable) {
-                    this.dataTable.destroy();
-                }
-                this.renderizarTablaCliente();
+            // Recargar tabla
+            if (this.dataTable) {
+                this.dataTable.ajax.reload();
             }
             
         } catch (error) {
@@ -613,3 +548,4 @@ class TrozadoDiarioController {
 }
 
 window.trozadoDiarioController = new TrozadoDiarioController();
+

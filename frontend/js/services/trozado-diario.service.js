@@ -4,15 +4,37 @@ class TrozadoDiarioService {
         this.baseUrl = this.config.API.BASE_URL;
     }
 
-    async getAll() {
+    async getFiltered(params = {}) {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
+            const queryParams = new URLSearchParams();
+            
+            // Parámetros de DataTables
+            if (params.draw) queryParams.append('draw', params.draw);
+            if (params.start !== undefined) queryParams.append('start', params.start);
+            if (params.length !== undefined) queryParams.append('length', params.length);
+            if (params.search?.value) queryParams.append('search', params.search.value);
+            
+            // Ordenamiento
+            if (params.order && params.order.length > 0) {
+                const orderColumn = params.columns[params.order[0].column].data;
+                queryParams.append('orderBy', orderColumn);
+                queryParams.append('orderDir', params.order[0].dir);
+            }
+            
+            // Filtros personalizados
+            if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
+            if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
+
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${queryParams}`;
+            console.log('Fetching:', url);
+            
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error en la petición');
+            
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error('Error en getAll:', error);
+            console.error('Error en getFiltered:', error);
             throw error;
         }
     }
@@ -59,22 +81,6 @@ class TrozadoDiarioService {
             return await response.json();
         } catch (error) {
             console.error('Error en delete:', error);
-            throw error;
-        }
-    }
-
-    async getFiltered(filters) {
-        try {
-            const params = new URLSearchParams();
-            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
-            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error en filtrado');
-            return await response.json();
-        } catch (error) {
-            console.error('Error en getFiltered:', error);
             throw error;
         }
     }
