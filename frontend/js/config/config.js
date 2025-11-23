@@ -14,6 +14,15 @@ const AppConfig = {
                 ACTUALIZAR: '/vivo/actualizar',
                 ELIMINAR: '/vivo/borrar'
             },
+            TIPO: {
+                ALL: '/tipo/all',
+                CREAR: '/tipo/crear',
+                EDITAR: '/tipo/actualizar',
+                BORRAR: '/tipo/borrar',
+                FILTRO: '/tipo/filtrar',
+                EXPORTAR: '/tipo/exportar'
+            },
+            
             BENEFICIADO: {
                 AREQUIPA: '/beneficiado/arequipa',
                 PROVINCIA: '/beneficiado/provincia',

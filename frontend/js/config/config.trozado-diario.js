@@ -18,4 +18,3 @@ const TrozadoDiarioConfig = {
 };
 
 window.TrozadoDiarioConfig = TrozadoDiarioConfig;
-

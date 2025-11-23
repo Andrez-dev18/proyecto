@@ -1,13 +1,11 @@
 const ProductoConfig = {
-    API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
-        ENDPOINTS: {
-            ALL: '/producto/all',
-            CREAR: '/producto/crear',
-            ACTUALIZAR: '/producto/actualizar',
-            ELIMINAR: '/producto/borrar',
-            FILTRO: '/producto/filtro'
-        }
+    ENDPOINTS: {
+        ALL: '/producto/all',
+        CREAR: '/producto/crear',
+        ACTUALIZAR: '/producto/actualizar',
+        ELIMINAR: '/producto/borrar',
+        FILTRO: '/producto/filtro',
+        EXPORTAR: '/producto/exportar'
     },
     
     MENSAJES: {

@@ -1,11 +1,13 @@
+
 const TipoEmprendedorConfig = {
     API: {
         BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
-            ALL: '/tipoEmprendedor/all',
-            CREAR: '/tipoEmprendedor/crear',
-            ACTUALIZAR: '/tipoEmprendedor/actualizar',
-            ELIMINAR: '/tipoEmprendedor/borrar'
+            ALL: '/tipoEmpren/all',
+            CREAR: '/tipoEmpren/crear',
+            ACTUALIZAR: '/tipoEmpren/actualizar',
+            ELIMINAR: '/tipoEmpren/borrar',
+            EXPORTAR: '/tipoEmpren/exportar'
         }
     }
 };
