@@ -45,6 +45,7 @@ require_once __DIR__ . '/../controllers/ClientePvController.php';
 require_once __DIR__ . '/../controllers/InfoGRSController.php';
 require_once __DIR__ . '/../controllers/OficialGRSController.php';
 require_once __DIR__ . '/../controllers/MercadoResController.php';
+require_once __DIR__ . '/../controllers/MercadoDetController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -107,6 +108,7 @@ $ClientePvController = new ClientePvController($db);
 $InfoGRSController = new InfoGRSController($db);
 $OficialGRSController = new OficialGRSController($db);
 $MercadoResController = new MercadoResController($db);
+$MercadoDetController = new MercadoDetController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -1273,6 +1275,34 @@ elseif (strpos($path, "/mercadores/borrar") !== false && $request == "POST") {
 //EXPORTAR FORMATO EXCEL
 }elseif (strpos($path, "/mercadores/exportar") !== false && $request == "GET") {
     $reporteController->exportarMercadoResExcel();
+    exit;
+}
+
+######### RUTAS COM_MERCADO_DET #########
+// obtener todos
+elseif (strpos($path, "/mercadodet/all") !== false && $request == "GET") {
+    $MercadoDetController->getAll();
+    exit;
+    //crear
+}elseif (strpos($path, "/mercadodet/crear") !== false && $request == "POST") {
+    $MercadoDetController->create();
+    exit;
+}
+//actualizar
+elseif (strpos($path, "/mercadodet/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $MercadoDetController->update();
+    exit;
+}//borrar con regex para ids con caracteres
+elseif (preg_match("/\/mercadodet\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $MercadoDetController->delete($matches[1]);
+    exit;
+    //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
+}elseif (strpos($path, "/mercadodet/filtro") !== false && $request == "GET") {
+    $MercadoDetController->obtenerTodosDatosFiltro();
+    exit;
+//EXPORTAR FORMATO EXCEL
+}elseif (strpos($path, "/mercadodet/exportar") !== false && $request == "GET") {
+    $reporteController->exportarMercadoResExcel();  
     exit;
 }
 

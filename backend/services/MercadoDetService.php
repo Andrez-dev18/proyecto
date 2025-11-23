@@ -1,14 +1,14 @@
 <?php
-require_once __DIR__ . '/../repositories/MercadoResRepository.php';
+require_once __DIR__ . '/../repositories/MercadoDetRepository.php';
 
 
-class MercadoResService
+class MercadoDetService
 {
     private $repo;
 
     public function __construct($db)
     {
-        $this->repo = new MercadoResRepository($db);
+        $this->repo = new MercadoDetRepository($db);
     }
 
     public function getAll()
@@ -16,19 +16,14 @@ class MercadoResService
         return $this->repo->findAll();
     }
 
-    public function create($data)
+    public function save($data)
     {
-        return $this->repo->insertMercadoRes($data);
+        return $this->repo->save($data);
     }
 
-    public function update($data)
+    public function delete($id)
     {
-        return $this->repo->updateMercadoRes($data);
-    }
-
-    public function delete($provincia, $tipo_establecimiento, $tamanio)
-    {
-        return $this->repo->delete($provincia, $tipo_establecimiento, $tamanio);
+        return $this->repo->delete($id);
     }
 
     public function obtenerDatosFiltrados($params = [])

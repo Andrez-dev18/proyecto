@@ -53,6 +53,7 @@ class ReporteController
     private $CtrlClientePV;
     private $OficialGRS;
     private $MercadoRes;
+    private $MercadoDet;
 
     public function __construct($db)
     {
@@ -83,6 +84,7 @@ class ReporteController
         $this->CtrlClientePV = new ClientePvService($db);
         $this->OficialGRS = new OficialGRSService($db);
         $this->MercadoRes = new MercadoResService($db);
+        $this->MercadoDet = new MercadoDetController($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1713,6 +1715,51 @@ public function exportarMercadoResExcel()
         $mapper
     );
 }
+
+public function exportarMercadoDetExcel()
+{
+    // 1. Obtener datos
+    $datos = $this->MercadoDet->getAll();
+
+    // 2. Encabezados del CSV
+    $headers = [
+        'ID',
+        'FECHA',
+        'MERCADO',
+        'TIPO ESTABLECIMIENTO',
+        'TAMAÑO',
+        'CANTIDAD',
+        'USUARIO REGISTRO',
+        'FECHA REGISTRO',
+        'USUARIO TRANSFERENCIA',
+        'FECHA TRANSFERENCIA'
+    ];
+
+    // 3. Mapeo de cada fila
+    $mapper = function ($d) {
+        return [
+            $d['id'] ?? '',
+            $d['fecha'] ?? '',
+            strtoupper($d['mercado'] ?? ''),
+            strtoupper($d['tipo_establecimiento'] ?? ''),
+            strtoupper($d['tamanio'] ?? ''),
+            $d['cantidad'] ?? '',
+            strtoupper($d['usuarioRegistro'] ?? ''),
+            $d['fechaHoraRegistro'] ?? '',
+            strtoupper($d['usuarioTransferencia'] ?? ''),
+            $d['fechaHoraTransferencia'] ?? ''
+        ];
+    };
+
+    // 4. Generar CSV
+    $this->outputCSV(
+        'Mercado_Detallado_' . date('Y-m-d') . '.csv',
+        $headers,
+        $datos,
+        $mapper
+    );
+}
+
 
 
 }
