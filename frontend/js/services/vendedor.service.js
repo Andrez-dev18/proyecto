@@ -54,12 +54,14 @@ class VendedorService {
                 body: JSON.stringify(data)
             });
 
+            const responseText = await response.text();
+            console.log('Respuesta crear:', responseText);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al crear vendedor');
+                throw new Error(responseText || 'Error al crear vendedor');
             }
 
-            return await response.json();
+            return JSON.parse(responseText);
         } catch (error) {
             console.error('Error al crear:', error);
             throw error;
@@ -68,18 +70,21 @@ class VendedorService {
 
     async actualizar(data) {
         try {
+            // Usar POST en lugar de PUT ya que tu backend acepta ambos
             const response = await fetch(`${this.baseURL}${this.endpoints.ACTUALIZAR}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
+            const responseText = await response.text();
+            console.log('Respuesta actualizar:', responseText);
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al actualizar vendedor');
+                throw new Error(responseText || 'Error al actualizar vendedor');
             }
 
-            return await response.json();
+            return JSON.parse(responseText);
         } catch (error) {
             console.error('Error al actualizar:', error);
             throw error;
@@ -89,14 +94,20 @@ class VendedorService {
     async eliminar(id) {
         try {
             const url = `${this.baseURL}${this.endpoints.ELIMINAR}/${id}`;
-            const response = await fetch(url, { method: 'DELETE' });
+            // Usar POST como fallback ya que tu backend acepta ambos
+            const response = await fetch(url, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const responseText = await response.text();
+            console.log('Respuesta eliminar:', responseText);
 
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Error al eliminar vendedor');
+                throw new Error(responseText || 'Error al eliminar vendedor');
             }
 
-            return await response.json();
+            return responseText ? JSON.parse(responseText) : { success: true };
         } catch (error) {
             console.error('Error al eliminar:', error);
             throw error;

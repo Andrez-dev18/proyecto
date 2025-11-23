@@ -2,8 +2,10 @@ class CriadorEmprendedorController {
     constructor() {
         this.service = new CriadorEmprendedorService();
         this.registroSeleccionado = null;
+        this.datos = [];
         this.catalogos = {};
-        this.dataTable = null; 
+        this.config = window.CriadorEmprendedorConfig;
+        this.dataTable = null;
         this.columnasVisibles = {};
     }
 
@@ -11,37 +13,45 @@ class CriadorEmprendedorController {
         await this.cargarCatalogos();
         this.setupEventListeners();
         this.setupColumnToggle();
+        this.setupToggleFiltros();
+        await this.cargarDatos();
     }
 
+    // MÉTODO: Toggle de columnas
     setupColumnToggle() {
         const btnToggle = document.getElementById('btnToggleColumns');
         const dropdown = document.getElementById('columnDropdown');
         const btnClose = document.getElementById('btnCloseDropdown');
         const checkboxes = document.querySelectorAll('.column-checkbox');
 
+        // Inicializar estado de columnas
         checkboxes.forEach(checkbox => {
             const columnIndex = parseInt(checkbox.dataset.column);
             this.columnasVisibles[columnIndex] = checkbox.checked;
         });
 
+        // Toggle dropdown
         btnToggle?.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
 
+        // Cerrar dropdown
         btnClose?.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dropdown.classList.remove('show');
         });
 
+        // Cerrar al hacer clic fuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown-columns')) {
                 dropdown.classList.remove('show');
             }
         });
 
+        // Manejar cambios en checkboxes
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 e.stopPropagation();
@@ -56,49 +66,60 @@ class CriadorEmprendedorController {
         });
     }
 
+    // MÉTODO: Toggle de filtros
+    setupToggleFiltros() {
+        const btnToggle = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+
+        if (!btnToggle || !filterContent) return;
+
+        filterContent.classList.remove('show');
+        
+        btnToggle.addEventListener('click', () => {
+            const isOpen = filterContent.classList.contains('show');
+            const icon = btnToggle.querySelector('i');
+            
+            if (isOpen) {
+                filterContent.classList.remove('show');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+                btnToggle.style.transform = 'rotate(0deg)';
+            } else {
+                filterContent.classList.add('show');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+                btnToggle.style.transform = 'rotate(180deg)';
+            }
+        });
+    }
+
     async cargarCatalogos() {
         try {
             console.log('Cargando catálogos...');
-
-            const [tiposCriador, zonas, estados, categorias] = await Promise.all([
-                this.service.getTiposCriador(),
-                this.service.getZonas(),
-                this.service.getEstados(),
-                this.service.getCategorias()
+            
+            const [provincias, proveedores, tipos] = await Promise.all([
+                this.service.getProvincias(),
+                this.service.getProveedores(),
+                this.service.getTipos()
             ]);
-
-            console.log('Catálogos cargados:', {
-                tiposCriador: tiposCriador.length,
-                zonas: zonas.length,
-                estados: estados.length,
-                categorias: categorias.length
-            });
-
-            this.catalogos = {
-                tiposCriador,
-                zonas,
-                estados,
-                categorias
-            };
-
+            
+            this.catalogos = { provincias, proveedores, tipos };
+            
+            console.log('Catálogos cargados:', this.catalogos);
+            
             this.poblarSelects();
-            console.log('Catálogos poblados correctamente');
         } catch (error) {
             console.error('Error al cargar catálogos:', error);
-            this.mostrarNotificacion('Error al cargar catálogos: ' + error.message, 'error');
         }
     }
 
     poblarSelects() {
-        this.poblarSelect('filterTipoCriador', this.catalogos.tiposCriador, 'id', 'tipoCriador');
-        this.poblarSelect('filterZona', this.catalogos.zonas, 'id', 'zona');
-        this.poblarSelect('filterEstado', this.catalogos.estados, 'id', 'estado');
-        this.poblarSelect('filterCategoria', this.catalogos.categorias, 'id', 'categoria');
-
-        this.poblarSelect('modalTipoCriador', this.catalogos.tiposCriador, 'id', 'tipoCriador');
-        this.poblarSelect('modalZona', this.catalogos.zonas, 'id', 'zona');
-        this.poblarSelect('modalEstado', this.catalogos.estados, 'id', 'estado');
-        this.poblarSelect('modalCategoria', this.catalogos.categorias, 'id', 'categoria');
+        this.poblarSelect('filterProvincia', this.catalogos.provincias, 'codigo', 'nombre');
+        this.poblarSelect('filterProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
+        this.poblarSelect('filterTipo', this.catalogos.tipos, 'codigo', 'nombre');
+        this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
+        this.poblarSelect('modalProveedor', this.catalogos.proveedores, 'codigo', 'nombre');
+        this.poblarSelect('modalTipo', this.catalogos.tipos, 'codigo', 'nombre');
     }
 
     poblarSelect(selectId, datos, valueField, textField) {
@@ -116,13 +137,239 @@ class CriadorEmprendedorController {
         }
     }
 
+    setupEventListeners() {
+        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
+        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
+        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
+        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
+        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
+        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
+    }
+
+    async cargarDatos() {
+        try {
+            this.mostrarCargando(true);
+            this.datos = await this.service.getAll();
+            this.renderizarTabla();
+            this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al cargar datos', 'error');
+            this.datos = [];
+            this.renderizarTabla();
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+
+    async aplicarFiltros() {
+        try {
+            this.mostrarCargando(true);
+            console.log('=== INICIANDO FILTRADO ===');
+
+            const filtros = {};
+            const fechaInicio = document.getElementById('filterFechaInicio').value;
+            const fechaFin = document.getElementById('filterFechaFin').value;
+            const provincia = document.getElementById('filterProvincia').value;
+            const proveedor = document.getElementById('filterProveedor').value;
+            const tipo = document.getElementById('filterTipo').value;
+
+            if (fechaInicio) filtros.fechaInicio = fechaInicio;
+            if (fechaFin) filtros.fechaFin = fechaFin;
+            if (provincia) filtros.provincia = provincia;
+            if (proveedor) filtros.proveedor = proveedor;
+            if (tipo) filtros.tipo = tipo;
+
+            console.log('Filtros a aplicar:', filtros);
+            
+            // Si no hay filtros, cargar todos los datos
+            if (!fechaInicio && !fechaFin && !provincia && !proveedor && !tipo) {
+                console.log('Sin filtros, cargando todos los datos');
+                await this.cargarDatos();
+                return;
+            }
+            
+            // Aplicar filtros
+            const resultado = await this.service.getFiltered(filtros);
+            
+            // Procesar resultado
+            if (Array.isArray(resultado)) {
+                this.datos = resultado;
+            } else if (resultado && Array.isArray(resultado.data)) {
+                this.datos = resultado.data;
+            } else {
+                this.datos = [];
+            }
+            
+            console.log(`Filtrado completado: ${this.datos.length} registros`);
+            
+            // Renderizar la tabla
+            this.renderizarTabla();
+            
+            this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
+            
+        } catch (error) {
+            console.error('Error al filtrar:', error);
+            this.mostrarNotificacion('Error al filtrar: ' + error.message, 'error');
+            await this.cargarDatos();
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+
+    limpiarFiltros() {
+        document.getElementById('filterFechaInicio').value = '';
+        document.getElementById('filterFechaFin').value = '';
+        document.getElementById('filterProvincia').value = '';
+        document.getElementById('filterProveedor').value = '';
+        document.getElementById('filterTipo').value = '';
+        this.cargarDatos();
+    }
+
+    renderizarTabla() {
+        console.log('Renderizando tabla con', this.datos.length, 'registros');
+        
+        const tbody = document.getElementById('tableBody');
+        if (!tbody) {
+            console.error('No se encontró tbody');
+            return;
+        }
+
+        // Destruir DataTable si existe
+        const table = $('#dataTable');
+        if ($.fn.DataTable.isDataTable(table)) {
+            table.DataTable().destroy();
+        }
+
+        // Limpiar tbody
+        tbody.innerHTML = '';
+        
+        if (this.datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-gray-500">No hay registros para mostrar</td></tr>';
+            return;
+        }
+
+        // Crear filas mostrando el ID que viene del backend
+        this.datos.forEach((registro, i) => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-blue-50 transition-colors';
+            tr.innerHTML = `
+                <td class="px-2 py-1 border-b text-sm text-center font-semibold">${registro.id}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.fecha || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.provincia || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.proveedor || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.tipo || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">${registro.cantidad || 0}</td>
+                <td class="px-2 py-1 border-b text-sm text-center">S/. ${registro.precio || '0'}</td>
+                <td class="px-2 py-1 border-b text-sm">${registro.observaciones || '-'}</td>
+                <td class="px-2 py-1 border-b text-sm text-center space-x-2">
+                    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            // Agregar eventos directamente
+            const editBtn = tr.querySelector('.edit-btn');
+            const deleteBtn = tr.querySelector('.delete-btn');
+            
+            editBtn.onclick = () => {
+                this.registroSeleccionado = this.datos[i];
+                console.log('Editando:', this.registroSeleccionado);
+                this.modificarSeleccionado();
+            };
+            
+            deleteBtn.onclick = async () => {
+                this.registroSeleccionado = this.datos[i];
+                console.log('Eliminando:', this.registroSeleccionado);
+                await this.eliminarSeleccionado();
+            };
+            
+            tbody.appendChild(tr);
+        });
+        
+        // Re-inicializar DataTable después
+        setTimeout(() => {
+            try {
+                this.dataTable = $('#dataTable').DataTable({
+                    pageLength: 10,
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+                    },
+                    responsive: true,
+                    order: [[1, 'desc']], // Ordenar por fecha
+                    scrollX: true,
+                    drawCallback: () => {
+                        // Aplicar visibilidad de columnas después de cada redibujado
+                        Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                            const column = this.dataTable.column(parseInt(columnIndex));
+                            column.visible(this.columnasVisibles[columnIndex]);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error al inicializar DataTable:', error);
+            }
+        }, 100);
+    }
+
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
-        document.getElementById('modalTitle').textContent = 'Nuevo Criador';
+        document.getElementById('modalTitle').textContent = 'Nuevo Registro';
         this.limpiarFormulario();
         const modal = document.getElementById('modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
+    }
+
+    modificarSeleccionado() {
+        if (!this.registroSeleccionado) return;
+
+        document.getElementById('modalTitle').textContent = 'Modificar Registro';
+        this.cargarDatosEnFormulario();
+        const modal = document.getElementById('modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+
+    async eliminarSeleccionado() {
+        if (!this.registroSeleccionado) return;
+        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+
+        try {
+            this.mostrarCargando(true);
+            // Usar el ID que viene del backend
+            await this.service.delete(this.registroSeleccionado.id);
+            this.mostrarNotificacion('Registro eliminado', 'success');
+            await this.cargarDatos();
+        } catch (error) {
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al eliminar', 'error');
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+
+    cargarDatosEnFormulario() {
+        const r = this.registroSeleccionado;
+        console.log('Cargando en formulario:', r);
+        
+        document.getElementById('modalFecha').value = r.fecha || '';
+        
+        // Buscar los códigos por nombre si es necesario
+        const provinciaObj = this.catalogos.provincias.find(p => p.nombre === r.provincia);
+        const proveedorObj = this.catalogos.proveedores.find(p => p.nombre === r.proveedor);
+        const tipoObj = this.catalogos.tipos.find(t => t.nombre === r.tipo);
+        
+        document.getElementById('modalProvincia').value = provinciaObj ? provinciaObj.codigo : '';
+        document.getElementById('modalProveedor').value = proveedorObj ? proveedorObj.codigo : '';
+        document.getElementById('modalTipo').value = tipoObj ? tipoObj.codigo : '';
+        document.getElementById('modalCantidad').value = r.cantidad || '';
+        document.getElementById('modalPrecio').value = r.precio || '';
+        document.getElementById('modalObservaciones').value = r.observaciones || '';
     }
 
     limpiarFormulario() {
@@ -135,28 +382,6 @@ class CriadorEmprendedorController {
         });
     }
 
-    cerrarModal() {
-        const modal = document.getElementById('modal');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-        this.registroSeleccionado = null;
-    }
-
-    setupEventListeners() {
-        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
-        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
-
-        document.getElementById('btnETL').addEventListener('click', () => this.abrirModalETL());
-        document.getElementById('cancelarETL').addEventListener('click', () => this.cerrarModalETL());
-        document.getElementById('confirmarETL').addEventListener('click', () => this.ejecutarETL());
-
-        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
-
-        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
-        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
-    }
-
     async guardarRegistro() {
         const data = this.obtenerDatosFormulario();
 
@@ -166,260 +391,90 @@ class CriadorEmprendedorController {
             this.mostrarCargando(true);
 
             if (this.registroSeleccionado) {
+                // Para actualizar, incluir el ID existente
                 data.id = this.registroSeleccionado.id;
-                console.log('Actualizando criador ID:', data.id);
-                console.log('Datos a enviar:', data);
-
-                const resultado = await this.service.actualizar(data);
-                console.log('Resultado actualización:', resultado);
-
-                this.mostrarNotificacion('Criador actualizado exitosamente', 'success');
+                await this.service.update(data);
+                this.mostrarNotificacion('Registro actualizado', 'success');
             } else {
-                console.log('Creando nuevo criador');
-                console.log('Datos a enviar:', data);
-
-                const resultado = await this.service.crear(data);
-                console.log('Resultado creación:', resultado);
-
-                this.mostrarNotificacion('Criador creado exitosamente', 'success');
+                // Para crear nuevo, NO enviar ID - el backend lo genera
+                await this.service.create(data);
+                this.mostrarNotificacion('Registro creado', 'success');
             }
 
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            console.error('Error al guardar:', error);
-            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
+            console.error('Error:', error);
+            this.mostrarNotificacion('Error al guardar', 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     obtenerDatosFormulario() {
-        const tipoCriadorId = parseInt(document.getElementById('modalTipoCriador').value) || null;
-        const zonaId = parseInt(document.getElementById('modalZona').value) || null;
-        const estadoId = parseInt(document.getElementById('modalEstado').value) || null;
-        const categoriaId = parseInt(document.getElementById('modalCategoria').value) || null;
-
-        const data = {
-            fecha_registro: document.getElementById('modalFechaRegistro').value,
-            nombre_criador: document.getElementById('modalNombreCriador').value,
-            ruc: document.getElementById('modalRuc').value,
-            tipo_criador: tipoCriadorId,
-            zona: zonaId,
-            direccion: document.getElementById('modalDireccion').value,
-            telefono: document.getElementById('modalTelefono').value,
-            email: document.getElementById('modalEmail').value,
-            capacidad_produccion: parseFloat(document.getElementById('modalCapacidad').value) || 0,
-            estado: estadoId,
-            categoria: categoriaId,
-            observaciones: document.getElementById('modalObservaciones').value
+        const provinciaId = document.getElementById('modalProvincia').value;
+        const proveedorId = document.getElementById('modalProveedor').value;
+        const tipoId = document.getElementById('modalTipo').value;
+        
+        // NO incluir ID en los datos del formulario para nuevos registros
+        const datos = {
+            fecha: document.getElementById('modalFecha').value,
+            provincia: provinciaId || null,
+            proveedor: proveedorId || null,
+            tipo: tipoId || null,
+            cantidad: parseInt(document.getElementById('modalCantidad').value) || 0,
+            precio: parseFloat(document.getElementById('modalPrecio').value) || 0,
+            observaciones: document.getElementById('modalObservaciones').value || '',
+            usuarioRegistro: 'admin',
+            fechaHoraRegistro: new Date().toISOString().slice(0, 19).replace('T', ' '),
+            usuarioTransferencia: 'sistema',
+            fechaHoraTransferencia: new Date().toISOString().slice(0, 19).replace('T', ' ')
         };
-
-        return data;
+        
+        return datos;
     }
 
     validarFormulario(data) {
-        if (!data.fecha_registro) {
-            this.mostrarNotificacion('La fecha de registro es obligatoria', 'warning');
+        console.log('Validando formulario:', data);
+        
+        if (!data.fecha) {
+            this.mostrarNotificacion('La fecha es obligatoria', 'warning');
             return false;
         }
-        if (!data.nombre_criador) {
-            this.mostrarNotificacion('El nombre del criador es obligatorio', 'warning');
+        
+        if (!data.provincia) {
+            this.mostrarNotificacion('La provincia es obligatoria', 'warning');
             return false;
         }
-        if (!data.ruc) {
-            this.mostrarNotificacion('El RUC es obligatorio', 'warning');
+        
+        if (!data.tipo) {
+            this.mostrarNotificacion('El tipo es obligatorio', 'warning');
             return false;
         }
+        
+        console.log('Validación exitosa');
         return true;
     }
 
-    async cargarDatos() {
-        try {
-            this.mostrarCargando(true);
-            this.renderizarTablaFiltrada();
-            this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
-        } catch (error) {
-            console.error('Error detallado:', error);
-            this.mostrarNotificacion(error.message, 'error');
-        } finally {
-            this.mostrarCargando(false);
+    cerrarModal() {
+        const modal = document.getElementById('modal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        this.registroSeleccionado = null;
+    }
+
+    exportarExcel() {
+        if (this.datos.length === 0) {
+            this.mostrarNotificacion('No hay datos para exportar', 'warning');
+            return;
         }
+        window.open(`${this.service.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`, '_blank');
     }
 
     mostrarCargando(mostrar) {
         const loading = document.getElementById('loading');
         if (loading) {
             loading.style.display = mostrar ? 'flex' : 'none';
-        }
-    }
-
-    renderizarTablaFiltrada() {
-        const table = $('.min-w-full');
-        const thead = document.querySelector('thead tr');
-        if (!thead) return;
-
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
-        }
-
-        const columnas = CriadorEmprendedorConfig.TABLA.COLUMNAS;
-        const columnasConOpciones = [...columnas, 'Opciones'];
-
-        thead.innerHTML = columnasConOpciones
-            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c.replace(/_/g, ' ')}</th>`)
-            .join('');
-
-        this.dataTable = table.DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: this.service.baseURL + this.service.endpoints.FILTRO,
-                type: 'GET',
-                data: function (d) {
-                    const filtros = {};
-                    const campos = [
-                        'FechaInicio', 'FechaFin', 'TipoCriador', 'Zona', 'Estado', 'Categoria'
-                    ];
-
-                    campos.forEach(campo => {
-                        const el = document.getElementById(`filter${campo}`);
-                        if (el && el.value.trim() !== '') {
-                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
-                            filtros[key] = el.value.trim();
-                        }
-                    });
-
-                    return Object.assign(d, filtros);
-                },
-                dataSrc: json => json.data
-            },
-            columns: [
-                ...columnas.map(col => ({ data: col })),
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: (data, type, row, meta) => `
-                    <div class="text-center space-x-2">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `
-                }
-            ],
-            order: [[1, 'desc']],
-            responsive: true,
-            pageLength: 10,
-            language: {
-                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
-            },
-            drawCallback: () => {
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const column = this.dataTable.column(parseInt(columnIndex));
-                    if (column) {
-                        column.visible(this.columnasVisibles[columnIndex]);
-                    }
-                });
-            }
-        });
-
-        Object.keys(this.columnasVisibles).forEach(columnIndex => {
-            const column = this.dataTable.column(parseInt(columnIndex));
-            if (column) {
-                column.visible(this.columnasVisibles[columnIndex]);
-            }
-        });
-
-        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
-            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            this.modificarSeleccionado();
-        });
-
-        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
-            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            await this.eliminarSeleccionado();
-        });
-    }
-
-    exportarExcel() {
-        try {
-            this.service.exportarCSV();
-            this.mostrarNotificacion('Iniciando descarga de CSV...', 'success');
-        } catch (error) {
-            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
-        }
-    }
-
-    modificarSeleccionado() {
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
-            return;
-        }
-
-        document.getElementById('modalTitle').textContent = 'Modificar Criador';
-        this.cargarDatosEnFormulario();
-        const modal = document.getElementById('modal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-    }
-
-    cargarDatosEnFormulario() {
-        const r = this.registroSeleccionado;
-        console.log('Cargando datos en formulario:', r);
-
-        document.getElementById('modalFechaRegistro').value = r.fecha_registro;
-        document.getElementById('modalNombreCriador').value = r.nombre_criador || '';
-        document.getElementById('modalRuc').value = r.ruc || '';
-        document.getElementById('modalDireccion').value = r.direccion || '';
-        document.getElementById('modalTelefono').value = r.telefono || '';
-        document.getElementById('modalEmail').value = r.email || '';
-        document.getElementById('modalCapacidad').value = r.capacidad_produccion || '';
-        document.getElementById('modalObservaciones').value = r.observaciones || '';
-
-        const tipoCriadorObj = this.catalogos.tiposCriador.find(t => t.tipoCriador === r.tipo_criador);
-        document.getElementById('modalTipoCriador').value = tipoCriadorObj ? tipoCriadorObj.id : '';
-
-        const zonaObj = this.catalogos.zonas.find(z => z.zona === r.zona);
-        document.getElementById('modalZona').value = zonaObj ? zonaObj.id : '';
-
-        const estadoObj = this.catalogos.estados.find(e => e.estado === r.estado);
-        document.getElementById('modalEstado').value = estadoObj ? estadoObj.id : '';
-
-        const categoriaObj = this.catalogos.categorias.find(c => c.categoria === r.categoria);
-        document.getElementById('modalCategoria').value = categoriaObj ? categoriaObj.id : '';
-    }
-
-    async eliminarSeleccionado() {
-        console.log('=== ELIMINAR CRIADOR ===');
-        console.log('Registro seleccionado:', this.registroSeleccionado);
-
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
-            return;
-        }
-
-        if (!confirm('¿Estás seguro de eliminar este criador?')) return;
-
-        try {
-            this.mostrarCargando(true);
-            console.log('Eliminando ID:', this.registroSeleccionado.id);
-
-            await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('Criador eliminado exitosamente', 'success');
-            this.registroSeleccionado = null;
-            await this.cargarDatos();
-        } catch (error) {
-            console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
-        } finally {
-            this.mostrarCargando(false);
         }
     }
 
@@ -444,76 +499,20 @@ class CriadorEmprendedorController {
         const iconos = {
             success: '✅',
             error: '❌',
-            warning: '⚠',
-            info: 'ℹ'
+            warning: '⚠️',
+            info: 'ℹ️'
         };
 
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
-        notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
             <span style="font-size: 20px;">${iconos[tipo]}</span>
             <span>${mensaje}</span>
         `;
-
         container.appendChild(notif);
 
-        setTimeout(() => {
-            notif.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => notif.remove(), 300);
-        }, 4000);
-    }
-
-    async aplicarFiltros() {
-        this.renderizarTablaFiltrada();
-    }
-
-    limpiarFiltros() {
-        document.getElementById('filterFechaInicio').value = '';
-        document.getElementById('filterFechaFin').value = '';
-        document.getElementById('filterTipoCriador').value = '';
-        document.getElementById('filterZona').value = '';
-        document.getElementById('filterEstado').value = '';
-        document.getElementById('filterCategoria').value = '';
-
-        this.cargarDatos();
-    }
-
-    abrirModalETL() {
-        document.getElementById('modalETL').classList.remove('hidden');
-    }
-
-    cerrarModalETL() {
-        document.getElementById('modalETL').classList.add('hidden');
-    }
-
-    async ejecutarETL() {
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
-
-        if (!fechaInicio || !fechaFin) {
-            this.mostrarNotificacion('Debe seleccionar ambas fechas', 'warning');
-            return;
-        }
-
-        try {
-            this.mostrarCargando(true);
-            const resultado = await this.service.ejecutarETL({ fechaInicio, fechaFin });
-            
-            if (resultado.success) {
-                this.mostrarNotificacion('ETL ejecutado exitosamente', 'success');
-                this.cerrarModalETL();
-                this.cargarDatos();
-            } else {
-                this.mostrarNotificacion('Error en ETL: ' + resultado.mensaje, 'error');
-            }
-        } catch (error) {
-            console.error('Error al ejecutar ETL:', error);
-            this.mostrarNotificacion('Error al ejecutar ETL: ' + error.message, 'error');
-        } finally {
-            this.mostrarCargando(false);
-        }
+        setTimeout(() => notif.remove(), 4000);
     }
 }
 
-const criadorEmprendedorController = new CriadorEmprendedorController();
+window.criadorEmprendedorController = new CriadorEmprendedorController();
 

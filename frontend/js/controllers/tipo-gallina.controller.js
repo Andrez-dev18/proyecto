@@ -3,18 +3,21 @@ class TipoGallinaController {
         this.service = new TipoGallinaService();
         this.registroSeleccionado = null;
         this.datos = [];
-        this.datosFiltrados = [];
-        this.config = window.TipoGallinaConfig;
         this.dataTable = null;
         this.columnasVisibles = {};
+         this.datosYaCargados = false;
     }
 
     async init() {
-        console.log('🚀 Inicializando Tipo Gallina Controller...');
-        await this.cargarDatos();
+        if (document.readyState !== 'complete') {
+            await new Promise(resolve => {
+                window.addEventListener('load', resolve);
+            });
+        }
+        
         this.setupEventListeners();
         this.setupColumnToggle();
-        this.renderizarTablaCliente();
+        await this.cargarDatos();
     }
 
     setupColumnToggle() {
@@ -29,11 +32,13 @@ class TipoGallinaController {
         });
 
         btnToggle?.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             dropdown.classList.toggle('show');
         });
 
         btnClose?.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             dropdown.classList.remove('show');
         });
@@ -46,6 +51,7 @@ class TipoGallinaController {
 
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
+                e.stopPropagation();
                 const columnIndex = parseInt(e.target.dataset.column);
                 this.columnasVisibles[columnIndex] = e.target.checked;
                 
@@ -57,139 +63,219 @@ class TipoGallinaController {
         });
     }
 
-    async cargarDatos() {
-        try {
-            this.mostrarCargando(true);
-            console.log('Cargando todos los datos...');
-            
-            this.datos = await this.service.getAll();
-            this.datosFiltrados = [...this.datos];
-            
-            console.log(`${this.datos.length} registros cargados`);
-            
-        } catch (error) {
-            console.error('❌ Error al cargar datos:', error);
-            this.mostrarNotificacion('Error al cargar datos', 'error');
-            this.datos = [];
-            this.datosFiltrados = [];
-        } finally {
-            this.mostrarCargando(false);
-        }
-    }
-
     setupEventListeners() {
         document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
+        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
     }
 
-    renderizarTablaCliente() {
-        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
+    async cargarDatos() {
+    try {
+        console.log('Cargando tipos de gallina...');
+        this.mostrarCargando(true);
         
-        const table = $('#dataTable');
-        
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
+        // Destruir tabla existente antes de cargar nuevos datos
+        if ($.fn.DataTable.isDataTable('#dataTable')) {
+            $('#dataTable').DataTable().destroy();
         }
+        
+        this.datos = await this.service.getAll();
+        console.log(`${this.datos.length} tipos de gallina cargados`);
+        
+        this.renderizarTabla();
+        this.mostrarNotificacion('Datos cargados correctamente', 'success');
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+        this.mostrarNotificacion(error.message, 'error');
+    } finally {
+        this.mostrarCargando(false);
+    }
+}
 
-        $('#tableBody').empty();
 
-        this.dataTable = table.DataTable({
-            data: this.datosFiltrados,
-            processing: false,
-            serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
+    renderizarTabla() {
+    console.log(`Renderizando tabla con ${this.datos.length} registros...`);
+    
+    // Verificar que jQuery y DataTables estén disponibles
+    if (typeof $ === 'undefined' || !$.fn.DataTable) {
+        console.error('jQuery o DataTables no está disponible');
+        return;
+    }
+
+    // Verificar que el elemento tabla existe
+    const tableElement = document.getElementById('dataTable');
+    if (!tableElement) {
+        console.error('Elemento tabla no encontrado');
+        return;
+    }
+
+    // IMPORTANTE: Destruir DataTable existente si ya fue inicializado
+    if ($.fn.DataTable.isDataTable('#dataTable')) {
+        $('#dataTable').DataTable().destroy();
+        // Limpiar el HTML de la tabla
+        $('#dataTable').empty();
+    }
+
+    // Limpiar el tbody manualmente
+    const tbody = document.getElementById('tableBody');
+    if (tbody) {
+        tbody.innerHTML = '';
+    }
+
+    // Verificar que hay datos
+    if (!this.datos || this.datos.length === 0) {
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-gray-500">No hay datos disponibles</td></tr>';
+        }
+        return;
+    }
+
+    try {
+        // Inicializar DataTable con configuración completa
+        this.dataTable = $('#dataTable').DataTable({
+            data: this.datos,
+            destroy: true, // Permite reinicializar
+            retrieve: false, // No reutilizar instancia existente
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            autoWidth: false,
+            responsive: true,
             columns: [
                 { 
-                    data: 'codigo', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: ''
+                    data: 'codigo',
+                    className: 'text-center',
+                    width: '20%',
+                    defaultContent: '',
+                    render: function(data) {
+                        return data || '';
+                    }
                 },
                 { 
-                    data: 'nombre', 
-                    className: 'text-sm px-2',
-                    defaultContent: '-'
+                    data: 'nombre',
+                    className: 'text-left',
+                    width: '60%',
+                    defaultContent: '',
+                    render: function(data) {
+                        return data || '';
+                    }
                 },
                 {
                     data: null,
                     orderable: false,
                     searchable: false,
-                    className: 'text-center px-2',
+                    className: 'text-center',
+                    width: '20%',
                     defaultContent: '',
-                    render: (data, type, row) => `
-                        <div class="flex gap-1 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `
+                    render: function(data, type, row) {
+                        if (!row || !row.codigo) return '';
+                        return `
+                            <div class="flex justify-center gap-2">
+                                <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg transition-colors btn-editar" 
+                                        data-id="${row.codigo}"
+                                        title="Editar">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </button>
+                                <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg transition-colors btn-eliminar" 
+                                        data-id="${row.codigo}"
+                                        title="Eliminar">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </button>
+                            </div>
+                        `;
+                    }
                 }
             ],
             order: [[0, 'desc']],
             pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+            lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             language: {
-                processing: "Procesando...",
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ registros",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                loadingRecords: "Cargando...",
+                lengthMenu: "Mostrar _MENU_ registros por página",
                 zeroRecords: "No se encontraron registros",
-                emptyTable: "No hay datos disponibles",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                infoEmpty: "No hay registros disponibles",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                search: "Buscar:",
                 paginate: {
                     first: "Primero",
                     last: "Último",
                     next: "Siguiente",
                     previous: "Anterior"
+                },
+                processing: "Procesando..."
+            },
+            dom: '<"flex flex-col sm:flex-row justify-between mb-4"lf>rtip',
+            drawCallback: function(settings) {
+                console.log('Tabla dibujada con', settings.aoData.length, 'filas');
+            },
+            initComplete: function(settings, json) {
+                console.log('DataTable inicializado correctamente');
+                
+                // Personalizar estilos después de inicializar
+                const searchInput = document.querySelector('.dataTables_filter input');
+                if (searchInput) {
+                    searchInput.setAttribute('placeholder', 'Buscar tipo de gallina...');
+                    searchInput.className = 'px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 ml-2';
                 }
-            },
-            responsive: false,
-            autoWidth: false,
-            dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
-            drawCallback: () => {
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const index = parseInt(columnIndex);
-                    try {
-                        if (this.dataTable && this.dataTable.column(index)) {
-                            this.dataTable.column(index).visible(this.columnasVisibles[index]);
-                        }
-                    } catch (e) {
-                        // Ignorar errores
-                    }
-                });
-            },
-            initComplete: () => {
-                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
-                $('.dataTables_wrapper').addClass('w-full');
+                
+                const lengthSelect = document.querySelector('.dataTables_length select');
+                if (lengthSelect) {
+                    lengthSelect.className = 'px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 mx-2';
+                }
             }
         });
 
-        $('#dataTable tbody')
-            .off('click')
-            .on('click', '.edit-btn', (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('📝 Editando:', rowData);
-                this.modificarSeleccionado();
-            })
-            .on('click', '.delete-btn', async (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('🗑️ Eliminando:', rowData);
-                await this.eliminarSeleccionado();
-            });
+        // Configurar eventos con delegación
+        this.configurarEventosTabla();
+        
+        console.log('Tabla renderizada exitosamente');
+    } catch (error) {
+        console.error('Error al inicializar DataTable:', error);
+        // Mostrar mensaje de error en la tabla
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center py-8 text-red-500">Error al cargar la tabla</td></tr>';
+        }
     }
+}
+
+configurarEventosTabla() {
+    // Limpiar eventos anteriores para evitar duplicados
+    $('#dataTable tbody').off('click', '.btn-editar');
+    $('#dataTable tbody').off('click', '.btn-eliminar');
+    
+    // Event delegation para botón editar
+    $('#dataTable tbody').on('click', '.btn-editar', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const id = $(e.currentTarget).data('id');
+        console.log('Editando tipo gallina ID:', id);
+        
+        const registro = this.datos.find(p => p.codigo == id);
+        if (registro) {
+            this.registroSeleccionado = registro;
+            this.modificarSeleccionado();
+        }
+    });
+
+    // Event delegation para botón eliminar
+    $('#dataTable tbody').on('click', '.btn-eliminar', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const id = $(e.currentTarget).data('id');
+        console.log('Eliminando tipo gallina ID:', id);
+        
+        const registro = this.datos.find(p => p.codigo == id);
+        if (registro) {
+            this.registroSeleccionado = registro;
+            await this.eliminarSeleccionado();
+        }
+    });
+}
+
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
@@ -201,7 +287,10 @@ class TipoGallinaController {
     }
 
     modificarSeleccionado() {
-        if (!this.registroSeleccionado) return;
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro', 'warning');
+            return;
+        }
 
         document.getElementById('modalTitle').textContent = 'Modificar Tipo de Gallina';
         this.cargarDatosEnFormulario();
@@ -211,23 +300,21 @@ class TipoGallinaController {
     }
 
     async eliminarSeleccionado() {
-        if (!this.registroSeleccionado) return;
-        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+        if (!this.registroSeleccionado) {
+            this.mostrarNotificacion('Selecciona un registro', 'warning');
+            return;
+        }
+
+        if (!confirm(`¿Estás seguro de eliminar "${this.registroSeleccionado.nombre}"?`)) return;
 
         try {
             this.mostrarCargando(true);
             await this.service.delete(this.registroSeleccionado.codigo);
             this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
-            
+            this.registroSeleccionado = null;
             await this.cargarDatos();
-            
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
-            console.error('Error al eliminar:', error);
+            console.error('❌ Error al eliminar:', error);
             this.mostrarNotificacion(error.message || 'Error al eliminar el registro', 'error');
         } finally {
             this.mostrarCargando(false);
@@ -237,8 +324,7 @@ class TipoGallinaController {
     cargarDatosEnFormulario() {
         const r = this.registroSeleccionado;
         if (!r) return;
-
-        console.log('Cargando en formulario:', r);
+        
         document.getElementById('modalNombre').value = r.nombre || '';
     }
 
@@ -259,22 +345,15 @@ class TipoGallinaController {
                 await this.service.update(data);
                 this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
-                delete data.codigo;
                 await this.service.create(data);
                 this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
-            
             await this.cargarDatos();
             
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
         } catch (error) {
-            console.error('Error al guardar:', error);
+            console.error('❌ Error al guardar:', error);
             this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
         } finally {
             this.mostrarCargando(false);
@@ -288,15 +367,20 @@ class TipoGallinaController {
     }
 
     validarFormulario(data) {
-        console.log('Validando formulario:', data);
-
         if (!data.nombre) {
             this.mostrarNotificacion('El nombre del tipo de gallina es obligatorio', 'warning');
             return false;
         }
-
-        console.log('✅ Validación exitosa');
         return true;
+    }
+
+    exportarExcel() {
+        try {
+            this.service.exportToExcel();
+            this.mostrarNotificacion('Iniciando descarga de Excel...', 'success');
+        } catch (error) {
+            this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
+        }
     }
 
     cerrarModal() {

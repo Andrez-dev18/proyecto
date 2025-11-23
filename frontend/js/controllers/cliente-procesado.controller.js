@@ -2,16 +2,359 @@ class ClienteProcesadoController {
     constructor() {
         this.service = new ClienteProcesadoService();
         this.registroSeleccionado = null;
-        this.datos = [];
         this.dataTable = null;
         this.columnasVisibles = {};
+        this.todosLosDatos = [];
+        this.valoresUnicos = {
+            distritos: new Set(),
+            zonas: new Set(),
+            canales: new Set(),
+            lineas: new Set(),
+            sublineas: new Set(),
+            vendedores: new Set()
+        };
     }
 
     async init() {
-        console.log('🚀 Inicializando Cliente Procesado Controller (clienteProce)...');
         this.setupEventListeners();
         this.setupColumnToggle();
-        this.renderizarTablaFiltrada();
+        await this.cargarTodosLosDatos();
+    }
+
+    async cargarTodosLosDatos() {
+        try {
+            this.mostrarCargando(true);
+            
+            const datos = await this.service.getAll();
+            this.todosLosDatos = datos;
+            
+            // Extraer valores únicos para los combobox
+            this.extraerValoresUnicos(datos);
+            
+            // Poblar los combobox
+            this.poblarComboboxFiltros();
+            
+            // Inicializar la tabla con los datos
+            this.inicializarTablaConDatos(datos);
+            
+            this.mostrarNotificacion('Datos cargados correctamente', 'success');
+        } catch (error) {
+            console.error('Error al cargar datos:', error);
+            this.mostrarNotificacion('Error al cargar datos', 'error');
+        } finally {
+            this.mostrarCargando(false);
+        }
+    }
+
+    extraerValoresUnicos(datos) {
+        // Limpiar sets anteriores
+        Object.keys(this.valoresUnicos).forEach(key => {
+            this.valoresUnicos[key].clear();
+        });
+
+        // Extraer valores únicos
+        datos.forEach(item => {
+            if (item.distrito) this.valoresUnicos.distritos.add(item.distrito);
+            if (item.zona) this.valoresUnicos.zonas.add(item.zona);
+            if (item.canal) this.valoresUnicos.canales.add(item.canal);
+            if (item.linea) this.valoresUnicos.lineas.add(item.linea);
+            if (item.sublinea) this.valoresUnicos.sublineas.add(item.sublinea);
+            if (item.vendedor) this.valoresUnicos.vendedores.add(item.vendedor);
+        });
+    }
+
+    poblarComboboxFiltros() {
+        // Poblar Distritos
+        const selectDistrito = document.getElementById('filterDistrito');
+        if (selectDistrito) {
+            const distritosOrdenados = Array.from(this.valoresUnicos.distritos).sort();
+            selectDistrito.innerHTML = '<option value="">Todos los distritos</option>';
+            distritosOrdenados.forEach(distrito => {
+                selectDistrito.innerHTML += '<option value="' + distrito + '">' + distrito + '</option>';
+            });
+        }
+
+        // Poblar Zonas
+        const selectZona = document.getElementById('filterZona');
+        if (selectZona) {
+            const zonasOrdenadas = Array.from(this.valoresUnicos.zonas).sort();
+            selectZona.innerHTML = '<option value="">Todas las zonas</option>';
+            zonasOrdenadas.forEach(zona => {
+                selectZona.innerHTML += '<option value="' + zona + '">' + zona + '</option>';
+            });
+        }
+
+        // Poblar Canales
+        const selectCanal = document.getElementById('filterCanal');
+        if (selectCanal) {
+            const canalesOrdenados = Array.from(this.valoresUnicos.canales).sort();
+            selectCanal.innerHTML = '<option value="">Todos los canales</option>';
+            canalesOrdenados.forEach(canal => {
+                selectCanal.innerHTML += '<option value="' + canal + '">' + canal + '</option>';
+            });
+        }
+
+        // Poblar Líneas
+        const selectLinea = document.getElementById('filterLinea');
+        if (selectLinea) {
+            const lineasOrdenadas = Array.from(this.valoresUnicos.lineas).sort();
+            selectLinea.innerHTML = '<option value="">Todas las líneas</option>';
+            lineasOrdenadas.forEach(linea => {
+                selectLinea.innerHTML += '<option value="' + linea + '">' + linea + '</option>';
+            });
+        }
+
+        // Poblar Sublíneas
+        const selectSublinea = document.getElementById('filterSublinea');
+        if (selectSublinea) {
+            const sublineasOrdenadas = Array.from(this.valoresUnicos.sublineas).sort();
+            selectSublinea.innerHTML = '<option value="">Todas las sublíneas</option>';
+            sublineasOrdenadas.forEach(sublinea => {
+                selectSublinea.innerHTML += '<option value="' + sublinea + '">' + sublinea + '</option>';
+            });
+        }
+
+        // Poblar Vendedores
+        const selectVendedor = document.getElementById('filterVendedor');
+        if (selectVendedor) {
+            const vendedoresOrdenados = Array.from(this.valoresUnicos.vendedores).sort();
+            selectVendedor.innerHTML = '<option value="">Todos los vendedores</option>';
+            vendedoresOrdenados.forEach(vendedor => {
+                selectVendedor.innerHTML += '<option value="' + vendedor + '">' + vendedor + '</option>';
+            });
+        }
+    }
+
+    inicializarTablaConDatos(datos) {
+        // Verificar que jQuery y DataTables estén cargados
+        if (typeof $ === 'undefined' || !$.fn.DataTable) {
+            console.error('jQuery o DataTables no están cargados');
+            setTimeout(() => this.inicializarTablaConDatos(datos), 100);
+            return;
+        }
+
+        // Si ya existe DataTable, destruirla
+        if ($.fn.DataTable.isDataTable('#tablaClientes')) {
+            $('#tablaClientes').DataTable().clear().destroy();
+            $('#tablaClientes').empty();
+        }
+
+        try {
+            // Inicializar DataTable con datos locales
+            this.dataTable = $('#tablaClientes').DataTable({
+                data: datos,
+                columns: [
+                    { 
+                        data: 'id', 
+                        title: 'ID',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'fecha', 
+                        title: 'Fecha',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'distrito', 
+                        title: 'Distrito',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'zona', 
+                        title: 'Zona',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'canal', 
+                        title: 'Canal',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'codigo', 
+                        title: 'Código',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'linea', 
+                        title: 'Línea',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'sublinea', 
+                        title: 'Sublínea',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'vendedor', 
+                        title: 'Vendedor',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'cliente', 
+                        title: 'Cliente',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'descripcion', 
+                        title: 'Descripción',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'ruta', 
+                        title: 'Ruta',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'nomruta', 
+                        title: 'Nom. Ruta',
+                        defaultContent: ''
+                    },
+                    { 
+                        data: 'unidad', 
+                        title: 'Unidad',
+                        defaultContent: '0',
+                        render: function(data) {
+                            return parseFloat(data || 0).toFixed(2);
+                        }
+                    },
+                    { 
+                        data: 'peso', 
+                        title: 'Peso',
+                        defaultContent: '0',
+                        render: function(data) {
+                            return parseFloat(data || 0).toFixed(2);
+                        }
+                    },
+                    { 
+                        data: 'importe', 
+                        title: 'Importe',
+                        defaultContent: '0',
+                        render: function(data) {
+                            return 'S/. ' + parseFloat(data || 0).toFixed(2);
+                        }
+                    },
+                    {
+                        data: null,
+                        title: 'Acciones',
+                        orderable: false,
+                        searchable: false,
+                        defaultContent: '',
+                        render: function() {
+                            return '<div class="flex gap-2 justify-center">' +
+                                '<button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded btn-editar" title="Editar">' +
+                                '<i class="fas fa-edit"></i>' +
+                                '</button>' +
+                                '<button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded btn-eliminar" title="Eliminar">' +
+                                '<i class="fas fa-trash"></i>' +
+                                '</button>' +
+                                '</div>';
+                        }
+                    }
+                ],
+                order: [[1, 'desc']],
+                pageLength: 10,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                language: {
+                    processing: "Procesando...",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    zeroRecords: "No se encontraron resultados",
+                    emptyTable: "Ningún dato disponible en esta tabla",
+                    info: "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    infoEmpty: "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    infoFiltered: "(filtrado de un total de _MAX_ registros)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    }
+                },
+                responsive: true,
+                dom: '<"top"lf>rt<"bottom"ip><"clear">',
+                initComplete: () => {
+                    console.log('DataTable inicializada correctamente');
+                    this.aplicarVisibilidadColumnas();
+                },
+                drawCallback: () => {
+                    this.aplicarVisibilidadColumnas();
+                }
+            });
+
+            // Event handlers para botones de acción
+            $('#tablaClientes tbody').off('click').on('click', '.btn-editar', (e) => {
+                const data = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+                this.editarRegistro(data);
+            });
+
+            $('#tablaClientes tbody').on('click', '.btn-eliminar', (e) => {
+                const data = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+                this.eliminarRegistro(data);
+            });
+
+        } catch (error) {
+            console.error('Error al inicializar DataTable:', error);
+            throw error;
+        }
+    }
+
+    aplicarFiltros() {
+        if (!this.dataTable) return;
+
+        // Obtener valores de los filtros
+        const fechaInicio = document.getElementById('filterFechaInicio').value;
+        const fechaFin = document.getElementById('filterFechaFin').value;
+        const distrito = document.getElementById('filterDistrito').value;
+        const zona = document.getElementById('filterZona').value;
+        const canal = document.getElementById('filterCanal').value;
+        const linea = document.getElementById('filterLinea').value;
+        const sublinea = document.getElementById('filterSublinea').value;
+        const vendedor = document.getElementById('filterVendedor').value;
+        const cliente = document.getElementById('filterCliente').value.toLowerCase();
+
+        // Filtrar los datos
+        let datosFiltrados = this.todosLosDatos.filter(item => {
+            let cumple = true;
+
+            if (fechaInicio && item.fecha < fechaInicio) cumple = false;
+            if (fechaFin && item.fecha > fechaFin) cumple = false;
+            if (distrito && item.distrito !== distrito) cumple = false;
+            if (zona && item.zona !== zona) cumple = false;
+            if (canal && item.canal !== canal) cumple = false;
+            if (linea && item.linea !== linea) cumple = false;
+            if (sublinea && item.sublinea !== sublinea) cumple = false;
+            if (vendedor && item.vendedor !== vendedor) cumple = false;
+            if (cliente && !(item.cliente || '').toLowerCase().includes(cliente)) cumple = false;
+
+            return cumple;
+        });
+
+        // Actualizar la tabla con los datos filtrados
+        this.dataTable.clear();
+        this.dataTable.rows.add(datosFiltrados);
+        this.dataTable.draw();
+
+        this.mostrarNotificacion('Se encontraron ' + datosFiltrados.length + ' registros', 'info');
+    }
+
+    limpiarFiltros() {
+        document.getElementById('filterFechaInicio').value = '';
+        document.getElementById('filterFechaFin').value = '';
+        document.getElementById('filterDistrito').value = '';
+        document.getElementById('filterZona').value = '';
+        document.getElementById('filterCanal').value = '';
+        document.getElementById('filterLinea').value = '';
+        document.getElementById('filterSublinea').value = '';
+        document.getElementById('filterVendedor').value = '';
+        document.getElementById('filterCliente').value = '';
+
+        if (this.dataTable) {
+            this.dataTable.clear();
+            this.dataTable.rows.add(this.todosLosDatos);
+            this.dataTable.draw();
+        }
+
+        this.mostrarNotificacion('Filtros limpiados', 'info');
     }
 
     setupColumnToggle() {
@@ -20,34 +363,33 @@ class ClienteProcesadoController {
         const btnClose = document.getElementById('btnCloseDropdown');
         const checkboxes = document.querySelectorAll('.column-checkbox');
 
-        // Inicializar estado de columnas
         checkboxes.forEach(checkbox => {
             const columnIndex = parseInt(checkbox.dataset.column);
             this.columnasVisibles[columnIndex] = checkbox.checked;
         });
 
-        // Toggle dropdown
-        btnToggle?.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
+        if (btnToggle) {
+            btnToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+        }
 
-        // Cerrar dropdown
-        btnClose?.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropdown.classList.remove('show');
-        });
+        if (btnClose) {
+            btnClose.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.classList.remove('show');
+            });
+        }
 
-        // Cerrar al hacer clic fuera
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.dropdown-columns')) {
                 dropdown.classList.remove('show');
             }
         });
 
-        // Manejar cambios en checkboxes
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 e.stopPropagation();
@@ -55,220 +397,135 @@ class ClienteProcesadoController {
                 this.columnasVisibles[columnIndex] = e.target.checked;
                 
                 if (this.dataTable) {
-                    const column = this.dataTable.column(columnIndex);
-                    column.visible(e.target.checked);
+                    try {
+                        const column = this.dataTable.column(columnIndex);
+                        if (column) {
+                            column.visible(e.target.checked);
+                        }
+                    } catch (error) {
+                        console.error('Error al cambiar visibilidad de columna:', error);
+                    }
                 }
             });
         });
     }
 
     setupEventListeners() {
-        // Botones acción
-        document.getElementById('btnNuevo')?.addEventListener('click', () => this.mostrarModalNuevo());
-        document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
-        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
+        const btnNuevo = document.getElementById('btnNuevo');
+        const btnExportar = document.getElementById('btnExportar');
+        const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+        const btnETL = document.getElementById('btnETL');
+        const btnCancelarETL = document.getElementById('btnCancelarETL');
+        const btnEjecutarETLConfirm = document.getElementById('btnEjecutarETLConfirm');
+        const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+        const btnGuardar = document.getElementById('btnGuardar');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const btnToggleFiltros = document.getElementById('btnToggleFiltros');
 
-        // ETL
-        document.getElementById('btnETL')?.addEventListener('click', () => this.abrirModalETL());
-        document.getElementById('cancelarETL')?.addEventListener('click', () => this.cerrarModalETL());
-        document.getElementById('confirmarETL')?.addEventListener('click', () => this.ejecutarETL());
+        if (btnNuevo) btnNuevo.addEventListener('click', () => this.mostrarModalNuevo());
+        if (btnExportar) btnExportar.addEventListener('click', () => this.exportarExcel());
+        if (btnLimpiarFiltros) btnLimpiarFiltros.addEventListener('click', () => this.limpiarFiltros());
+        if (btnETL) btnETL.addEventListener('click', () => this.abrirModalETL());
+        if (btnCancelarETL) btnCancelarETL.addEventListener('click', () => this.cerrarModalETL());
+        if (btnEjecutarETLConfirm) btnEjecutarETLConfirm.addEventListener('click', () => this.ejecutarETL());
+        if (btnAplicarFiltros) btnAplicarFiltros.addEventListener('click', () => this.aplicarFiltros());
+        if (btnGuardar) btnGuardar.addEventListener('click', () => this.guardarRegistro());
+        if (btnCancelar) btnCancelar.addEventListener('click', () => this.cerrarModal());
 
-        // Filtro btn
-        document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
-
-        // Modal
-        document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
-        document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
-
-        // Toggle filtros
-        document.getElementById('btnToggleFiltros')?.addEventListener('click', () => this.toggleFiltros());
-    }
-
-    toggleFiltros() {
-        const filterContent = document.getElementById('filterContent');
-        const toggleIcon = document.querySelector('#btnToggleFiltros i');
-        
-        if (filterContent.style.maxHeight) {
-            filterContent.style.maxHeight = null;
-            toggleIcon.classList.remove('fa-chevron-down');
-            toggleIcon.classList.add('fa-chevron-up');
-        } else {
-            filterContent.style.maxHeight = '0';
-            toggleIcon.classList.remove('fa-chevron-up');
-            toggleIcon.classList.add('fa-chevron-down');
+        // Toggle de filtros mejorado
+        if (btnToggleFiltros) {
+            btnToggleFiltros.addEventListener('click', () => {
+                const filterContent = document.getElementById('filterContent');
+                const icon = btnToggleFiltros.querySelector('i');
+                
+                if (filterContent.classList.contains('hidden')) {
+                    filterContent.classList.remove('hidden');
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    filterContent.classList.add('hidden');
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
         }
     }
 
-    renderizarTablaFiltrada() {
-        const table = $('#dataTable');
+    aplicarVisibilidadColumnas() {
+        if (!this.dataTable) return;
         
-        // Destruir cualquier DataTable previo
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
-        }
-
-        // Inicializar DataTable con AJAX y filtros
-        this.dataTable = table.DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: this.service.baseUrl + this.service.config.API.ENDPOINTS.FILTRO,
-                type: 'GET',
-                data: function (d) {
-                    // Extraer filtros desde los inputs del formulario
-                    const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-                    const fechaFin = document.getElementById('filterFechaFin')?.value;
-                    
-                    if (fechaInicio) d.fechaInicio = fechaInicio;
-                    if (fechaFin) d.fechaFin = fechaFin;
-
-                    return d;
-                },
-                dataSrc: function(json) {
-                    return json.data || [];
-                }
-            },
-            columns: [
-                { data: 'id', className: 'text-center text-sm' },
-                { data: 'fecha', className: 'text-center text-sm' },
-                { data: 'distrito', className: 'text-sm' },
-                { data: 'zona', className: 'text-sm' },
-                { data: 'canal', className: 'text-sm' },
-                { data: 'codigo', className: 'text-center text-sm' },
-                { data: 'linea', className: 'text-sm' },
-                { data: 'sublinea', className: 'text-sm' },
-                { data: 'vendedor', className: 'text-sm' },
-                { data: 'cliente', className: 'text-sm' },
-                { data: 'descripcion', className: 'text-sm' },
-                { data: 'ruta', className: 'text-center text-sm' },
-                { data: 'nomruta', className: 'text-sm' },
-                { data: 'unidad', className: 'text-right text-sm' },
-                { data: 'peso', className: 'text-right text-sm' },
-                { data: 'importe', className: 'text-right text-sm' },
-                { data: 'nom_db', className: 'text-center text-sm' },
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center',
-                    render: (data, type, row, meta) => `
-                        <div class="flex gap-1 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `
-                }
-            ],
-            order: [[1, 'desc']],
-            responsive: false,
-            scrollX: true,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            language: {
-                processing: "Procesando...",
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ registros",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                loadingRecords: "Cargando...",
-                zeroRecords: "No se encontraron registros",
-                emptyTable: "No hay datos disponibles",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            drawCallback: () => {
-                // Aplicar visibilidad de columnas después de cada redibujado
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const column = this.dataTable.column(parseInt(columnIndex));
-                    if (column) {
-                        column.visible(this.columnasVisibles[columnIndex]);
-                    }
-                });
-            }
-        });
-
-        // Aplicar visibilidad inicial
         Object.keys(this.columnasVisibles).forEach(columnIndex => {
-            const column = this.dataTable.column(parseInt(columnIndex));
-            if (column) {
-                column.visible(this.columnasVisibles[columnIndex]);
+            try {
+                const column = this.dataTable.column(parseInt(columnIndex));
+                if (column) {
+                    column.visible(this.columnasVisibles[columnIndex]);
+                }
+            } catch (error) {
+                console.error('Error al aplicar visibilidad de columna:', error);
             }
-        });
-
-        // Delegar eventos para los botones de acción
-        $('#dataTable tbody').off('click').on('click', '.edit-btn', (e) => {
-            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            this.modificarSeleccionado();
-        });
-
-        $('#dataTable tbody').on('click', '.delete-btn', async (e) => {
-            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-            this.registroSeleccionado = rowData;
-            await this.eliminarSeleccionado();
         });
     }
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
-        document.getElementById('modalTitle').textContent = 'Nuevo Registro Cliente Procesado';
+        document.getElementById('modalTitle').textContent = 'Nuevo Registro';
         this.limpiarFormulario();
         const modal = document.getElementById('modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
     }
 
-    modificarSeleccionado() {
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
+    editarRegistro(data) {
+        if (!data) {
+            this.mostrarNotificacion('No se pudo obtener los datos del registro', 'error');
             return;
         }
-
-        document.getElementById('modalTitle').textContent = 'Modificar Registro Cliente Procesado';
-        this.cargarDatosEnFormulario();
+        
+        this.registroSeleccionado = data;
+        document.getElementById('modalTitle').textContent = 'Editar Registro';
+        this.cargarDatosEnFormulario(data);
         const modal = document.getElementById('modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
     }
 
-    cargarDatosEnFormulario() {
-        const r = this.registroSeleccionado;
-        console.log('Cargando datos en formulario:', r);
-
-        document.getElementById('modalFecha').value = r.fecha || '';
-        document.getElementById('modalDistrito').value = r.distrito || '';
-        document.getElementById('modalZona').value = r.zona || '';
-        document.getElementById('modalCanal').value = r.canal || '';
-        document.getElementById('modalCodigo').value = r.codigo || '';
-        document.getElementById('modalLinea').value = r.linea || '';
-        document.getElementById('modalSublinea').value = r.sublinea || '';
-        document.getElementById('modalVendedor').value = r.vendedor || '';
-        document.getElementById('modalCliente').value = r.cliente || '';
-        document.getElementById('modalDescripcion').value = r.descripcion || '';
-        document.getElementById('modalRuta').value = r.ruta || '';
-        document.getElementById('modalNomruta').value = r.nomruta || '';
-        document.getElementById('modalUnidad').value = r.unidad || '';
-        document.getElementById('modalPeso').value = r.peso || '';
-        document.getElementById('modalImporte').value = r.importe || '';
+    cargarDatosEnFormulario(data) {
+        document.getElementById('modalFecha').value = data.fecha || '';
+        document.getElementById('modalDistrito').value = data.distrito || '';
+        document.getElementById('modalZona').value = data.zona || '';
+        document.getElementById('modalCanal').value = data.canal || '';
+        document.getElementById('modalCodigo').value = data.codigo || '';
+        document.getElementById('modalLinea').value = data.linea || '';
+        document.getElementById('modalSublinea').value = data.sublinea || '';
+        document.getElementById('modalVendedor').value = data.vendedor || '';
+        document.getElementById('modalCliente').value = data.cliente || '';
+        document.getElementById('modalDescripcion').value = data.descripcion || '';
+        document.getElementById('modalRuta').value = data.ruta || '';
+        document.getElementById('modalNomruta').value = data.nomruta || '';
+        document.getElementById('modalUnidad').value = data.unidad || '';
+        document.getElementById('modalPeso').value = data.peso || '';
+        document.getElementById('modalImporte').value = data.importe || '';
     }
 
-    limpiarFormulario() {
-        document.querySelectorAll('#modalForm input, #modalForm select').forEach(input => {
-            if (input.type === 'date') {
-                input.value = new Date().toISOString().split('T')[0];
-            } else {
-                input.value = '';
-            }
-        });
+    async eliminarRegistro(data) {
+        if (!data || !data.id) {
+            this.mostrarNotificacion('No se pudo obtener el ID del registro', 'error');
+            return;
+        }
+
+        if (!confirm('¿Está seguro de eliminar este registro?')) return;
+
+        try {
+            this.mostrarCargando(true);
+            await this.service.eliminar(data.id);
+            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
+            
+            await this.cargarTodosLosDatos();
+        } catch (error) {
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
+        } finally {
+            this.mostrarCargando(false);
+        }
     }
 
     async guardarRegistro() {
@@ -279,30 +536,18 @@ class ClienteProcesadoController {
         try {
             this.mostrarCargando(true);
 
-            if (this.registroSeleccionado) {
+            if (this.registroSeleccionado && this.registroSeleccionado.id) {
                 data.id = this.registroSeleccionado.id;
-                console.log('Actualizando registro ID:', data.id);
-                console.log('Datos a enviar:', data);
-
-                const resultado = await this.service.actualizar(data);
-                console.log('Resultado actualización:', resultado);
-
+                await this.service.actualizar(data);
                 this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
             } else {
-                console.log('Creando nuevo registro');
-                console.log('Datos a enviar:', data);
-
-                const resultado = await this.service.crear(data);
-                console.log('Resultado creación:', resultado);
-
+                await this.service.crear(data);
                 this.mostrarNotificacion('Registro creado exitosamente', 'success');
             }
 
             this.cerrarModal();
-            this.dataTable.ajax.reload();
-            
+            await this.cargarTodosLosDatos();
         } catch (error) {
-            console.error('Error al guardar:', error);
             this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
@@ -310,7 +555,7 @@ class ClienteProcesadoController {
     }
 
     obtenerDatosFormulario() {
-        const data = {
+        return {
             fecha: document.getElementById('modalFecha').value,
             distrito: document.getElementById('modalDistrito').value,
             zona: document.getElementById('modalZona').value,
@@ -326,12 +571,8 @@ class ClienteProcesadoController {
             unidad: parseFloat(document.getElementById('modalUnidad').value) || 0,
             peso: parseFloat(document.getElementById('modalPeso').value) || 0,
             importe: parseFloat(document.getElementById('modalImporte').value) || 0,
-            nom_db: 'grs',
-            usuarioRegistro: 'admin',
-            fechaHoraRegistro: new Date().toISOString()
+            nom_db: 'grs'
         };
-
-        return data;
     }
 
     validarFormulario(data) {
@@ -346,33 +587,6 @@ class ClienteProcesadoController {
         return true;
     }
 
-    async eliminarSeleccionado() {
-        console.log('=== ELIMINAR REGISTRO CLIENTE PROCESADO ===');
-        console.log('Registro seleccionado:', this.registroSeleccionado);
-
-        if (!this.registroSeleccionado) {
-            this.mostrarNotificacion('Selecciona un registro de la tabla', 'warning');
-            return;
-        }
-
-        if (!confirm('¿Estás seguro de eliminar este registro?')) return;
-
-        try {
-            this.mostrarCargando(true);
-            console.log('Eliminando ID:', this.registroSeleccionado.id);
-
-            await this.service.eliminar(this.registroSeleccionado.id);
-            this.mostrarNotificacion('Registro eliminado exitosamente', 'success');
-            this.registroSeleccionado = null;
-            this.dataTable.ajax.reload();
-        } catch (error) {
-            console.error('Error al eliminar:', error);
-            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
-        } finally {
-            this.mostrarCargando(false);
-        }
-    }
-
     cerrarModal() {
         const modal = document.getElementById('modal');
         modal.classList.add('hidden');
@@ -380,36 +594,34 @@ class ClienteProcesadoController {
         this.registroSeleccionado = null;
     }
 
-    exportarExcel() {
+    limpiarFormulario() {
+        document.querySelectorAll('#modalForm input, #modalForm textarea').forEach(input => {
+            if (input.type === 'date') {
+                input.value = new Date().toISOString().split('T')[0];
+            } else {
+                input.value = '';
+            }
+        });
+    }
+
+    async exportarExcel() {
         try {
-            this.service.exportarCSV();
-            this.mostrarNotificacion('Iniciando descarga de Excel...', 'success');
+            await this.service.exportarExcel();
+            this.mostrarNotificacion('Exportación iniciada', 'success');
         } catch (error) {
             this.mostrarNotificacion('Error al exportar: ' + error.message, 'error');
         }
     }
 
-    async aplicarFiltros() {
-        this.dataTable.ajax.reload();
-        this.mostrarNotificacion('Filtros aplicados', 'info');
-    }
-
-    limpiarFiltros() {
-        document.getElementById('filterFechaInicio').value = '';
-        document.getElementById('filterFechaFin').value = '';
-        this.dataTable.ajax.reload();
-        this.mostrarNotificacion('Filtros limpiados', 'info');
-    }
-
     abrirModalETL() {
-        // Establecer fechas por defecto
         const hoy = new Date();
         const ayer = new Date();
         ayer.setDate(hoy.getDate() - 1);
-        
-        document.getElementById('fechaInicio').value = ayer.toISOString().split('T')[0];
-        document.getElementById('fechaFin').value = hoy.toISOString().split('T')[0];
-        
+
+        const formatDate = (date) => date.toISOString().split('T')[0];
+
+        document.getElementById('etlFechaInicio').value = formatDate(ayer);
+        document.getElementById('etlFechaFin').value = formatDate(hoy);
         document.getElementById('modalETL').classList.remove('hidden');
     }
 
@@ -418,127 +630,36 @@ class ClienteProcesadoController {
     }
 
     async ejecutarETL() {
-        const fechaInicio = document.getElementById('fechaInicio').value;
-        const fechaFin = document.getElementById('fechaFin').value;
-
-        console.log('=== EJECUTANDO ETL CLIENTE PROCESADO (clienteProce) ===');
-        console.log('Fecha Inicio:', fechaInicio);
-        console.log('Fecha Fin:', fechaFin);
-
+        const fechaInicio = document.getElementById('etlFechaInicio').value;
+        const fechaFin = document.getElementById('etlFechaFin').value;
+        
         if (!fechaInicio || !fechaFin) {
-            this.mostrarNotificacion('Debe ingresar ambas fechas inicio y fin.', 'warning');
+            this.mostrarNotificacion('Por favor seleccione ambas fechas', 'warning');
             return;
         }
-
-        // Validar que fecha inicio sea menor o igual a fecha fin
-        if (new Date(fechaInicio) > new Date(fechaFin)) {
-            this.mostrarNotificacion('La fecha inicio debe ser menor o igual a la fecha fin.', 'warning');
-            return;
-        }
-
+        
         try {
             this.mostrarCargando(true);
-
-            const resultado = await this.service.ejecutarETL({ 
-                fechaInicio: fechaInicio, 
-                fechaFin: fechaFin 
-            });
+            const resultado = await this.service.ejecutarETL({ fechaInicio, fechaFin });
             
-            console.log('Resultado ETL clienteProce recibido:', resultado);
-
-            if (resultado && resultado.success) {
-                const total = resultado.resumen?.total || 
-                             resultado.resumen?.insertados || 
-                             resultado.resumen?.total_registros_procesados || 0;
+            if (resultado.success) {
+                this.mostrarNotificacion('ETL ejecutado exitosamente', 'success');
                 
-                this.mostrarAlertaETL(total);
-                this.cerrarModalETL();
-                
-                // Recargar la tabla después del ETL
-                if (this.dataTable) {
-                    this.dataTable.ajax.reload();
+                if (resultado.resumen) {
+                    const mensaje = 'Eliminados: ' + resultado.resumen.eliminados + ', Insertados: ' + resultado.resumen.insertados;
+                    this.mostrarNotificacion(mensaje, 'info');
                 }
             } else {
-                const errorMsg = resultado?.mensaje || resultado?.error || 'Error en la ejecución del ETL';
-                this.mostrarNotificacion(errorMsg, 'error');
+                this.mostrarNotificacion(resultado.mensaje || 'Error en ETL', 'error');
             }
-
+            
+            this.cerrarModalETL();
+            await this.cargarTodosLosDatos();
         } catch (error) {
-            console.error('Error en ETL clienteProce:', error);
             this.mostrarNotificacion('Error al ejecutar ETL: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
-    }
-
-    mostrarAlertaETL(total) {
-        // Crear fondo oscuro
-        const overlay = document.createElement('div');
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100%';
-        overlay.style.height = '100%';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        overlay.style.zIndex = '9999';
-
-        // Crear ventana modal
-        const modal = document.createElement('div');
-        modal.style.backgroundColor = '#fff';
-        modal.style.borderRadius = '12px';
-        modal.style.padding = '25px 35px';
-        modal.style.boxShadow = '0 5px 20px rgba(0, 0, 0, 0.2)';
-        modal.style.textAlign = 'center';
-        modal.style.maxWidth = '400px';
-        modal.style.fontFamily = 'Arial, sans-serif';
-        modal.style.animation = 'fadeIn 0.3s ease';
-
-        // Contenido del mensaje
-        modal.innerHTML = `
-            <h3 style="color: #2e7d32; margin-bottom: 10px;">
-                <i class="fas fa-check-circle" style="font-size: 48px;"></i><br>
-                ETL Cliente Procesado Completado
-            </h3>
-            <p style="margin-bottom: 20px; font-size: 15px; color: #333;">
-                Se procesaron un total de <strong style="color: #2e7d32; font-size: 18px;">${total}</strong> registros.<br><br>
-                El proceso ETL se ejecutó correctamente.
-            </p>
-            <button id="cerrarModalETL" style="
-                background-color: #2e7d32;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                font-size: 15px;
-                cursor: pointer;
-                transition: background-color 0.3s;
-            " onmouseover="this.style.backgroundColor='#1b5e20'" 
-               onmouseout="this.style.backgroundColor='#2e7d32'">
-                Cerrar
-            </button>
-        `;
-
-        // Insertar modal al overlay
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-
-        // Cerrar modal al hacer clic en el botón
-        document.getElementById('cerrarModalETL').addEventListener('click', () => {
-            document.body.removeChild(overlay);
-        });
-
-        // Animación de aparición
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: scale(0.95); }
-                to { opacity: 1; transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     mostrarCargando(mostrar) {
@@ -549,7 +670,8 @@ class ClienteProcesadoController {
     }
 
     mostrarNotificacion(mensaje, tipo = 'info') {
-        console.log(`[${tipo.toUpperCase()}] ${mensaje}`);
+        console.log('[' + tipo + '] ' + mensaje);
+
         let container = document.getElementById('notificaciones-container');
         if (!container) {
             container = document.createElement('div');
@@ -568,20 +690,17 @@ class ClienteProcesadoController {
         const iconos = {
             success: '✅',
             error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️'
+            warning: '⚠',
+            info: 'ℹ'
         };
 
-        notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
+        notif.className = colores[tipo] + ' text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3';
         notif.style.animation = 'slideInRight 0.3s ease';
-        notif.innerHTML = `
-            <span style="font-size: 20px;">${iconos[tipo]}</span>
-            <span>${mensaje}</span>
-        `;
+        notif.innerHTML = '<span style="font-size: 20px;">' + iconos[tipo] + '</span>' +
+                         '<span>' + mensaje + '</span>';
 
         container.appendChild(notif);
 
-        // Auto-eliminar después de 4 segundos
         setTimeout(() => {
             notif.style.animation = 'slideOutRight 0.3s ease';
             setTimeout(() => notif.remove(), 300);
@@ -589,4 +708,5 @@ class ClienteProcesadoController {
     }
 }
 
-window.clienteProcesadoController = new ClienteProcesadoController();
+const clienteProcesadoController = new ClienteProcesadoController();
+

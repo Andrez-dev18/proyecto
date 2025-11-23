@@ -1,4 +1,4 @@
-// js/services/beneficiadoProvincia.service.js (CORREGIDO PARA ARRAY DIRECTO)
+
 class BeneficioProvinciaService {
     constructor() {
         this.config = window.BeneficioProvinciaConfig;

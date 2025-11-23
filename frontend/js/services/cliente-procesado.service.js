@@ -1,252 +1,166 @@
 class ClienteProcesadoService {
     constructor() {
-        this.config = window.ClienteProcesadoConfig;
-        this.baseUrl = this.config.API.BASE_URL;
-    }
-
-    async getAll() {
-        try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ALL}`;
-            console.log('Fetch URL Cliente Procesado:', url);
-            
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`Error ${response.status}: ${errorText}`);
-            }
-
-            const data = await response.json();
-            console.log('Data received from clienteProce:', data);
-            
-            return Array.isArray(data) ? data : [];
-        } catch (error) {
-            console.error('Fetch error:', error);
-            throw new Error(`No se pudo cargar Cliente Procesado: ${error.message}`);
-        }
+        this.baseURL = AppConfig.API.BASE_URL;
     }
 
     async crear(data) {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
-            console.log('Crear Cliente Procesado URL:', url);
-            
-            const response = await fetch(url, {
+            const response = await fetch(`${this.baseURL}/clienteProce/crear`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
+            const responseText = await response.text();
+            
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Error al crear registro');
+                throw new Error(responseText || 'Error al crear registro');
             }
 
-            return await response.json();
+            return JSON.parse(responseText);
         } catch (error) {
-            console.error('Error en crear clienteProce:', error);
+            console.error('Error en crear:', error);
             throw error;
         }
     }
 
     async actualizar(data) {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
+            const url = `${this.baseURL}/clienteProce/actualizar`;
+            console.log('Actualizando registro:', data);
 
-            console.log('=== ACTUALIZAR CLIENTE PROCESADO ===');
-            console.log('URL:', url);
-            console.log('Método: PUT');
-            console.log('Datos enviados:', JSON.stringify(data, null, 2));
-
-            let response = await fetch(url, {
-                method: 'PUT',
+            const response = await fetch(url, {
+                method: 'POST', // Usar POST ya que tu backend acepta ambos
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
-            console.log('Status respuesta:', response.status);
-
             const responseText = await response.text();
-            console.log('Respuesta del servidor:', responseText);
 
             if (!response.ok) {
-                // Retry with POST fallback
-                console.warn('PUT failed, status', response.status, 'retrying with POST fallback');
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const fallbackText = await response.text();
-                console.log('Fallback response:', fallbackText);
-                if (!response.ok) {
-                    let errorMsg = 'Error al actualizar registro';
-                    try {
-                        const errorData = JSON.parse(fallbackText);
-                        errorMsg = errorData.message || errorData.error || errorMsg;
-                    } catch (e) {
-                        errorMsg = fallbackText || errorMsg;
-                    }
-                    throw new Error(errorMsg);
-                }
-                return JSON.parse(fallbackText);
+                throw new Error(responseText || 'Error al actualizar registro');
             }
+            
             return JSON.parse(responseText);
         } catch (error) {
-            console.error('Error en actualizar clienteProce:', error);
+            console.error('Error en actualizar:', error);
             throw error;
         }
     }
 
     async eliminar(id) {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
+            const url = `${this.baseURL}/clienteProce/borrar/${id}`;
+            console.log('Eliminando registro ID:', id);
 
-            console.log('=== ELIMINAR CLIENTE PROCESADO ===');
-            console.log('URL:', url);
-            console.log('Método: DELETE');
-            console.log('ID:', id);
+            // Usar POST como fallback ya que tu backend acepta ambos
+            const response = await fetch(url, { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-            let response = await fetch(url, { method: 'DELETE' });
-
-            console.log('Status respuesta:', response.status);
-
-            let responseText = await response.text();
-            console.log('Respuesta del servidor:', responseText);
-
+            const responseText = await response.text();
+            
             if (!response.ok) {
-                const contentType = response.headers.get('content-type') || '';
-                if (contentType.includes('text/html') || response.status === 405 || response.status === 404) {
-                    console.warn('DELETE returned HTML or failed, retrying with POST fallback');
-                    response = await fetch(url, { method: 'POST' });
-                    responseText = await response.text();
-                    console.log('Fallback (POST) respuesta del servidor:', responseText);
-                }
-
-                if (!response.ok) {
-                    let errorMsg = 'Error al eliminar registro';
-                    try {
-                        const errorData = JSON.parse(responseText);
-                        errorMsg = errorData.message || errorData.error || errorMsg;
-                    } catch (e) {
-                        errorMsg = responseText || errorMsg;
-                    }
-                    throw new Error(errorMsg);
-                }
+                throw new Error(responseText || 'Error al eliminar registro');
             }
 
             return responseText ? JSON.parse(responseText) : { success: true };
         } catch (error) {
-            console.error('Error en eliminar clienteProce:', error);
+            console.error('Error en eliminar:', error);
             throw error;
         }
     }
 
-    async filtrar(filtros) {
+    async filtrar(params = {}) {
         try {
-            const params = new URLSearchParams();
-
-            // Solo añadir los parámetros que tengan valor
-            if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio);
-            if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin);
-            if (filtros.distrito) params.append('distrito', filtros.distrito);
-            if (filtros.zona) params.append('zona', filtros.zona);
-            if (filtros.canal) params.append('canal', filtros.canal);
-            if (filtros.linea) params.append('linea', filtros.linea);
-            if (filtros.vendedor) params.append('vendedor', filtros.vendedor);
-            if (filtros.cliente) params.append('cliente', filtros.cliente);
-
-            // Agregar parámetros de DataTables si existen
-            if (filtros.start !== undefined) params.append('start', filtros.start);
-            if (filtros.length !== undefined) params.append('length', filtros.length);
-            if (filtros.search && filtros.search.value) {
-                params.append('search[value]', filtros.search.value);
+            const queryParams = new URLSearchParams();
+            
+            if (params.start !== undefined) queryParams.append('start', params.start);
+            if (params.length !== undefined) queryParams.append('length', params.length);
+            if (params.draw !== undefined) queryParams.append('draw', params.draw);
+            
+            if (params.search && params.search.value) {
+                queryParams.append('search[value]', params.search.value);
             }
+            
+            if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
+            if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
+            if (params.distrito) queryParams.append('distrito', params.distrito);
+            if (params.zona) queryParams.append('zona', params.zona);
+            if (params.canal) queryParams.append('canal', params.canal);
+            if (params.linea) queryParams.append('linea', params.linea);
+            if (params.sublinea) queryParams.append('sublinea', params.sublinea);
+            if (params.vendedor) queryParams.append('vendedor', params.vendedor);
+            if (params.cliente) queryParams.append('cliente', params.cliente);
 
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
-            console.log('Filtrando clienteProce:', url);
+            const url = `${this.baseURL}/clienteProce/filtro?${queryParams}`;
+            console.log('URL de filtrado:', url);
 
             const response = await fetch(url);
-            console.log('Response status:', response.status);
-
+            
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Error ${response.status}: ${errorText}`);
+                throw new Error(`Error ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('Filtered data received from clienteProce:', result);
-
+            console.log('Respuesta del servidor:', result);
+            
             return result;
         } catch (error) {
-            console.error('Error en filtrar clienteProce:', error);
+            console.error('Error en filtrar:', error);
             throw error;
         }
     }
 
-    async exportarCSV() {
+    async exportarExcel() {
         try {
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXPORTAR}`;
-            console.log('Exportar clienteProce URL:', url);
-            // Abrir en nueva pestaña para descargar
-            window.open(url, '_blank');
+            window.open(`${this.baseURL}/clienteProce/exportar`, '_blank');
+            return { success: true };
         } catch (error) {
-            console.error('Error en exportar clienteProce:', error);
+            console.error('Error en exportar:', error);
+            throw error;
+        }
+    }
+
+    async getAll() {
+        try {
+            const url = `${this.baseURL}/clienteProce/all`;
+            console.log('Fetch URL:', url);
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Error ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+
+            return Array.isArray(data) ? data : [];
+        } catch (error) {
+            console.error('Error al obtener todos:', error);
             throw error;
         }
     }
 
     async ejecutarETL(data) {
         try {
-            // URL correcta según tu API
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ETL}`;
-            
-            console.log('=== EJECUTAR ETL CLIENTE PROCESADO ===');
-            console.log('URL ETL clienteProce:', url);
-            console.log('Datos enviados:', data);
-            
-            const response = await fetch(url, {
+            const response = await fetch(`${this.baseURL}/clienteProce/etl`, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
 
-            console.log('Response status ETL:', response.status);
-
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response ETL:', errorText);
-                
-                // Intentar parsear como JSON si es posible
-                try {
-                    const error = JSON.parse(errorText);
-                    throw new Error(error.message || error.error || 'Error al ejecutar ETL');
-                } catch (e) {
-                    throw new Error('Error al ejecutar ETL clienteProce: ' + errorText);
-                }
+                const error = await response.text();
+                throw new Error(error || 'Error al ejecutar ETL');
             }
 
-            const result = await response.json();
-            console.log('Resultado ETL clienteProce:', result);
-            
-            return result;
+            return await response.json();
         } catch (error) {
-            console.error('Error en ejecutarETL clienteProce:', error);
+            console.error('Error en ejecutarETL:', error);
             throw error;
         }
     }
 }
-
-window.ClienteProcesadoService = ClienteProcesadoService;

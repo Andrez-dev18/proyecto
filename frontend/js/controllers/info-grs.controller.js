@@ -1,7 +1,4 @@
-/**
- * Controller para InfoGRS
- * @class InfoGRSController
- */
+
 class InfoGRSController {
     constructor() {
         this.service = new InfoGRSService();

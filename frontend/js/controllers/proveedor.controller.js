@@ -240,39 +240,42 @@ class ProveedorController {
     }
 
     async guardarRegistro() {
-        const data = this.obtenerDatosFormulario();
+    const data = this.obtenerDatosFormulario();
 
-        if (!this.validarFormulario(data)) return;
+    if (!this.validarFormulario(data)) return;
 
-        try {
-            this.mostrarCargando(true);
+    try {
+        this.mostrarCargando(true);
 
-            if (this.registroSeleccionado) {
-                data.codigo = this.registroSeleccionado.codigo;
-                await this.service.update(data);
-                this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
-            } else {
-                delete data.codigo;
-                await this.service.create(data);
-                this.mostrarNotificacion('Registro creado exitosamente', 'success');
-            }
-
-            this.cerrarModal();
-            
-            await this.cargarDatos();
-            
-            if (this.dataTable) {
-                this.dataTable.destroy();
-            }
-            this.renderizarTablaCliente();
-            
-        } catch (error) {
-            console.error('Error al guardar:', error);
-            this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
-        } finally {
-            this.mostrarCargando(false);
+        if (this.registroSeleccionado) {
+            // ACTUALIZAR
+            data.codigo = this.registroSeleccionado.codigo;
+            console.log('Actualizando proveedor:', data);
+            await this.service.update(data);
+            this.mostrarNotificacion('Registro actualizado exitosamente', 'success');
+        } else {
+            // CREAR - No enviar campo codigo
+            console.log('Creando nuevo proveedor:', data);
+            await this.service.create(data);
+            this.mostrarNotificacion('Registro creado exitosamente', 'success');
         }
+
+        this.cerrarModal();
+        await this.cargarDatos();
+        
+        if (this.dataTable) {
+            this.dataTable.destroy();
+        }
+        this.renderizarTablaCliente();
+        
+    } catch (error) {
+        console.error('Error al guardar:', error);
+        this.mostrarNotificacion(error.message || 'Error al guardar', 'error');
+    } finally {
+        this.mostrarCargando(false);
     }
+}
+
 
     obtenerDatosFormulario() {
         return {

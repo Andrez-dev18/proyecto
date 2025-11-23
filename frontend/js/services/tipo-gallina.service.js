@@ -1,6 +1,4 @@
-/**
- * Service para Tipo Gallina
- */
+
 class TipoGallinaService {
     constructor() {
         this.config = window.TipoGallinaConfig;

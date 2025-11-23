@@ -1,8 +1,8 @@
 class ProductoService {
     constructor() {
         this.config = window.ProductoConfig;
-        this.baseURL = this.config.API.BASE_URL;
-        this.endpoints = this.config.API.ENDPOINTS;
+        this.baseURL = AppConfig.API.BASE_URL; // Usar URL base del config global
+        this.endpoints = this.config.ENDPOINTS;
     }
 
     async getAll() {
@@ -107,8 +107,9 @@ class ProductoService {
     }
 
     async exportarExcel() {
-        window.open(`${this.baseURL}/producto/exportar`, '_blank');
+        window.open(`${this.baseURL}${this.endpoints.EXPORTAR}`, '_blank');
     }
 }
 
 window.ProductoService = ProductoService;
+

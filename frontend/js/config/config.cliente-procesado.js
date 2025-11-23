@@ -1,16 +1,19 @@
-const ClienteProcesadoAppConfig = {
+const AppConfig = {
     API: {
         BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
-            ALL: '/clienteProce/all',
-            CREAR: '/clienteProce/crear',
-            ACTUALIZAR: '/clienteProce/actualizar',
-            ELIMINAR: '/clienteProce/borrar',
-            FILTRO: '/clienteProce/filtro',
-            EXPORTAR: '/clienteProce/exportar',
-            ETL: '/clienteProce/etl'
+            CLIENTES_PROCESADOS: {
+                ALL: '/clienteProce/all',
+                CREAR: '/clienteProce/create',
+                EDITAR: '/clienteProce/update',
+                BORRAR: '/clienteProce/delete',
+                EXPORTAR: '/clienteProce/exportar',
+                ETL_RUN: '/clienteProce/etl/run'
+            }
         }
     }
 };
 
-window.ClienteProcesadoConfig = ClienteProcesadoAppConfig;
+if (typeof window !== 'undefined') {
+    window.AppConfig = AppConfig;
+}

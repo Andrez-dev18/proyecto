@@ -95,6 +95,7 @@ class VendedorController {
             this.mostrarCargando(true);
             
             this.datos = await this.service.getAll();
+            console.log('Datos cargados:', this.datos);
             this.renderizarTabla();
             
         } catch (error) {
@@ -150,6 +151,7 @@ class VendedorController {
                 },
                 responsive: true,
                 order: [[0, 'asc']],
+                dom: '<"top"lf>rt<"bottom"ip><"clear">',
                 drawCallback: () => {
                     // Aplicar visibilidad de columnas
                     Object.keys(this.columnasVisibles).forEach(columnIndex => {
@@ -176,21 +178,21 @@ class VendedorController {
         
         document.getElementById('modalTitle').textContent = 'Editar Vendedor';
         document.getElementById('vendedorId').value = this.vendedorSeleccionado.id;
-        document.getElementById('modalVendedor').value = this.vendedorSeleccionado.vendedor;
-        document.getElementById('modalCanal').value = this.vendedorSeleccionado.canal;
-        document.getElementById('modalZona').value = this.vendedorSeleccionado.zona;
+        document.getElementById('modalVendedor').value = this.vendedorSeleccionado.vendedor || '';
+        document.getElementById('modalCanal').value = this.vendedorSeleccionado.canal || '';
+        document.getElementById('modalZona').value = this.vendedorSeleccionado.zona || '';
         
         this.abrirModal();
     }
 
     async guardarVendedor() {
         const data = {
-            id: document.getElementById('vendedorId').value,
             vendedor: document.getElementById('modalVendedor').value.trim(),
             canal: document.getElementById('modalCanal').value.trim(),
             zona: document.getElementById('modalZona').value.trim()
         };
 
+        // Validación
         if (!data.vendedor || !data.canal || !data.zona) {
             this.mostrarNotificacion('Por favor complete todos los campos', 'warning');
             return;
@@ -199,11 +201,17 @@ class VendedorController {
         try {
             this.mostrarCargando(true);
 
-            if (data.id) {
+            const vendedorId = document.getElementById('vendedorId').value;
+            
+            if (vendedorId) {
+                // Actualizar
+                data.id = vendedorId;
+                console.log('Actualizando vendedor:', data);
                 await this.service.actualizar(data);
                 this.mostrarNotificacion('Vendedor actualizado exitosamente', 'success');
             } else {
-                delete data.id;
+                // Crear nuevo
+                console.log('Creando nuevo vendedor:', data);
                 await this.service.crear(data);
                 this.mostrarNotificacion('Vendedor creado exitosamente', 'success');
             }
@@ -211,14 +219,15 @@ class VendedorController {
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
+            console.error('Error al guardar:', error);
+            this.mostrarNotificacion('Error al guardar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
     }
 
     async eliminarVendedor(id) {
-        if (!confirm(VendedorConfig.MENSAJES.CONFIRMACION.ELIMINAR)) return;
+        if (!confirm('¿Está seguro de eliminar este vendedor?\n\nEsta acción no se puede deshacer.')) return;
 
         try {
             this.mostrarCargando(true);
@@ -226,7 +235,8 @@ class VendedorController {
             this.mostrarNotificacion('Vendedor eliminado exitosamente', 'success');
             await this.cargarDatos();
         } catch (error) {
-            this.mostrarNotificacion(error.message, 'error');
+            console.error('Error al eliminar:', error);
+            this.mostrarNotificacion('Error al eliminar: ' + error.message, 'error');
         } finally {
             this.mostrarCargando(false);
         }
@@ -273,10 +283,17 @@ class VendedorController {
             warning: 'bg-yellow-500',
             info: 'bg-blue-500'
         };
+        const iconos = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
 
         notif.className = `${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-lg mb-2 flex items-center gap-3`;
         notif.style.animation = 'slideInRight 0.3s ease';
         notif.innerHTML = `
+            <span style="font-size: 20px;">${iconos[tipo]}</span>
             <span>${mensaje}</span>
         `;
 

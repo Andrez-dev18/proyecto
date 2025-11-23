@@ -100,14 +100,17 @@ class MercadoResService {
         }
     }
 
-    async exportarCSV() {
+    async exportToExcel(filters = {}) {
         try {
-            console.log(`${this.baseUrl + this.config.API.ENDPOINTS.EXCEL}`, '_blank');
-            // Abrir en nueva pestaña para descargar
-            window.open(`${this.baseUrl + this.config.API.ENDPOINTS.EXCEL}`, '_blank');
+            const params = new URLSearchParams();
+            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
+            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+            if (filters.tipo) params.append('tipo', filters.tipo);
 
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
+            window.open(url, '_blank');
         } catch (error) {
-            console.error('Error en exportar:', error);
+            console.error('Error al exportar:', error);
             throw error;
         }
     }

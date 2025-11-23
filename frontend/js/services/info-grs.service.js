@@ -1,7 +1,4 @@
-/**
- * Service Layer para InfoGRS
- * @class InfoGRSService
- */
+
 class InfoGRSService {
     constructor() {
         this.baseURL = InfoGRSConfig.API.BASE_URL;

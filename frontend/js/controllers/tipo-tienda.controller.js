@@ -84,117 +84,90 @@ class TipoTiendaController {
     }
 
     renderizarTablaCliente() {
-        console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
-        
-        const table = $('#dataTable');
-        
-        if ($.fn.DataTable.isDataTable(table)) {
-            table.DataTable().clear().destroy();
-        }
-
-        $('#tableBody').empty();
-
-        this.dataTable = table.DataTable({
-            data: this.datosFiltrados,
-            processing: false,
-            serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
-            columns: [
-                { 
-                    data: 'codigo', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: ''
-                },
-                { 
-                    data: 'nombre', 
-                    className: 'text-sm px-2',
-                    defaultContent: '-'
-                },
-                { 
-                    data: 'codpro', 
-                    className: 'text-center text-sm px-2',
-                    defaultContent: '-'
-                },
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    className: 'text-center px-2',
-                    defaultContent: '',
-                    render: (data, type, row) => `
-                        <div class="flex gap-1 justify-center">
-                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn text-sm" title="Editar">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn text-sm" title="Eliminar">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `
-                }
-            ],
-            order: [[0, 'desc']],
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-            language: {
-                processing: "Procesando...",
-                search: "Buscar:",
-                lengthMenu: "Mostrar _MENU_ registros",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                loadingRecords: "Cargando...",
-                zeroRecords: "No se encontraron registros",
-                emptyTable: "No hay datos disponibles",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                }
-            },
-            responsive: false,
-            autoWidth: false,
-            dom: '<"flex flex-col sm:flex-row justify-between items-center mb-4"<"flex items-center"l><"flex items-center"f>>rtip',
-            drawCallback: () => {
-                Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                    const index = parseInt(columnIndex);
-                    try {
-                        if (this.dataTable && this.dataTable.column(index)) {
-                            this.dataTable.column(index).visible(this.columnasVisibles[index]);
-                        }
-                    } catch (e) {
-                        // Ignorar errores
-                    }
-                });
-            },
-            initComplete: () => {
-                console.log('✅ Tabla renderizada con', this.datosFiltrados.length, 'registros');
-                $('.dataTables_wrapper').addClass('w-full');
-            }
-        });
-
-        $('#dataTable tbody')
-            .off('click')
-            .on('click', '.edit-btn', (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('📝 Editando:', rowData);
-                this.modificarSeleccionado();
-            })
-            .on('click', '.delete-btn', async (e) => {
-                e.stopPropagation();
-                const row = $(e.currentTarget).closest('tr');
-                const rowData = this.dataTable.row(row).data();
-                this.registroSeleccionado = rowData;
-                console.log('🗑️ Eliminando:', rowData);
-                await this.eliminarSeleccionado();
-            });
+    console.log('Renderizando tabla con', this.datosFiltrados.length, 'registros...');
+    
+    const table = $('#tablaTipoTienda'); // Cambiar aquí el ID
+    
+    if ($.fn.DataTable.isDataTable(table)) {
+        table.DataTable().clear().destroy();
     }
+
+    this.dataTable = table.DataTable({
+        data: this.datosFiltrados,
+        processing: false,
+        serverSide: false,
+        destroy: true,
+        columns: [
+            { 
+                data: 'codigo', 
+                className: 'text-center',
+                defaultContent: ''
+            },
+            { 
+                data: 'nombre', 
+                className: 'text-left',
+                defaultContent: '-'
+            },
+            { 
+                data: 'codpro', 
+                className: 'text-center',
+                defaultContent: '-'
+            },
+            {
+                data: null,
+                orderable: false,
+                searchable: false,
+                className: 'text-center',
+                defaultContent: '',
+                render: (data, type, row) => `
+                    <div class="flex gap-1 justify-center">
+                        <button class="btn-tabla-editar edit-btn" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-tabla-eliminar delete-btn" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `
+            }
+        ],
+        order: [[0, 'desc']],
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+        },
+        responsive: false,
+        autoWidth: false,
+        drawCallback: () => {
+            Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                const index = parseInt(columnIndex);
+                if (this.dataTable && this.dataTable.column(index)) {
+                    this.dataTable.column(index).visible(this.columnasVisibles[index]);
+                }
+            });
+        }
+    });
+
+    // Eventos de botones
+    $('#tablaTipoTienda tbody')
+        .off('click')
+        .on('click', '.edit-btn', (e) => {
+            e.stopPropagation();
+            const row = $(e.currentTarget).closest('tr');
+            const rowData = this.dataTable.row(row).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        })
+        .on('click', '.delete-btn', async (e) => {
+            e.stopPropagation();
+            const row = $(e.currentTarget).closest('tr');
+            const rowData = this.dataTable.row(row).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
+        });
+}
+
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;
