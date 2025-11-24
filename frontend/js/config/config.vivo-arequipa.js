@@ -1,6 +1,6 @@
-const VivoArequipaConfig = {
+/*const VivoArequipaConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: '',
         ENDPOINTS: {
             ALL: '/vivo/arequipa/all',
             FILTRO: '/vivo/arequipa/filtro',
@@ -45,3 +45,4 @@ const VivoArequipaConfig = {
 };
 
 window.VivoArequipaConfig = VivoArequipaConfig;
+*/

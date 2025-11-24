@@ -160,50 +160,102 @@ class GallinaCDController {
         document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
     }
 
-    aplicarFiltros() {
-        console.log('🔍 Aplicando filtros...');
+    async aplicarFiltros() {
+        console.log("🔍 Aplicando filtros desde BACKEND...");
 
-        const fechaInicio = document.getElementById('filterFechaInicio')?.value;
-        const fechaFin = document.getElementById('filterFechaFin')?.value;
-        const tipo = document.getElementById('filterTipo')?.value;
+        const fechaInicio = document.getElementById('filterFechaInicio')?.value || "";
+        const fechaFin = document.getElementById('filterFechaFin')?.value || "";
+        const tipo = document.getElementById('filterTipo')?.value || "";
 
-        console.log('Filtros aplicados:', { fechaInicio, fechaFin, tipo });
+        const filtros = { fechaInicio, fechaFin, tipo };
 
-        // Filtrar datos localmente
-        this.datosFiltrados = this.datos.filter(registro => {
-            let cumple = true;
+        try {
+            const respuesta = await this.service.getFiltered(filtros);
 
-            // Filtro por fecha inicio
-            if (fechaInicio && registro.fecha) {
-                cumple = cumple && registro.fecha >= fechaInicio;
-            }
+            this.datosFiltrados = respuesta.data || [];
+            console.log("📥 Registros filtrados obtenidos del servidor:", this.datosFiltrados.length);
 
-            // Filtro por fecha fin
-            if (fechaFin && registro.fecha) {
-                cumple = cumple && registro.fecha <= fechaFin;
-            }
+            // Actualiza DataTable usando datos desde el servidor
+            this.renderizarTablaClienteDesdeBackend();
 
-            // Filtro por tipo
-            if (tipo && registro.tipo) {
-                cumple = cumple && registro.tipo === tipo;
-            }
+            this.mostrarNotificacion(`${this.datosFiltrados.length} registros encontrados`, 'info');
 
-            return cumple;
-        });
+        } catch (e) {
+            console.error("❌ Error al filtrar desde backend:", e);
+            this.mostrarNotificacion("Error al obtener datos filtrados", "error");
+        }
+    }
 
-        console.log(`✅ Filtrados: ${this.datosFiltrados.length} de ${this.datos.length} registros`);
+    renderizarTablaClienteDesdeBackend() {
 
-        // Actualizar DataTable con los datos filtrados
-        if (this.dataTable) {
-            // Destruir y recrear la tabla para asegurar que se actualice correctamente
-            this.dataTable.destroy();
-            this.renderizarTablaCliente();
-        } else {
-            this.renderizarTablaCliente();
+        const table = $('#dataTable');
+
+        // destruir DT si existe
+        if ($.fn.DataTable.isDataTable(table)) {
+            table.DataTable().clear().destroy();
         }
 
-        this.mostrarNotificacion(`${this.datosFiltrados.length} registros encontrados`, 'info');
+        this.dataTable = table.DataTable({
+            data: this.datosFiltrados,   // ✔ ahora usa datos del backend
+            processing: false,
+            serverSide: false,
+            scrollX: true,
+
+            columns: [
+                { data: "id" },
+                { data: "fecha" },
+                { data: "tipo" },
+                { data: "unidades" },
+                { data: "kilos" },
+                { data: "peso" },
+                { data: "precio_granja_1" },
+                { data: "precio_granja_2" },
+                { data: "precio_granja_3" },
+                { data: "precio_granja_4" },
+                { data: "precio_granja_5" },
+                { data: "precio_cd_1" },
+                { data: "precio_cd_2" },
+                { data: "precio_cd_3" },
+                { data: "precio_cd_4" },
+                { data: "precio_cd_5" },
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row, meta) => `
+                    <div class="flex gap-1 justify-center">
+                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn">✏</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn">🗑</button>
+                    </div>
+                `
+                }
+            ],
+
+            order: [[1, "desc"]],
+            pageLength: 10,
+
+            drawCallback: () => {
+                Object.keys(this.columnasVisibles).forEach(index => {
+                    this.dataTable.column(parseInt(index)).visible(this.columnasVisibles[index]);
+                });
+            }
+        });
+
+        // eventos
+        $('#dataTable tbody')
+            .off('click')
+            .on('click', '.edit-btn', (e) => {
+                const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+                this.registroSeleccionado = rowData;
+                this.modificarSeleccionado();
+            })
+            .on('click', '.delete-btn', async (e) => {
+                const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+                this.registroSeleccionado = rowData;
+                await this.eliminarSeleccionado();
+            });
     }
+
 
 
     limpiarFiltros() {

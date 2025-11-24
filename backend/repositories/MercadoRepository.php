@@ -17,7 +17,16 @@ class MercadoRepository
 
     public function findAll()
     {
-        $query = "SELECT * FROM com_mercado ORDER BY codigo DESC";
+        $query = "
+            SELECT 
+                m.codigo,
+                m.nombre,
+                pv.nombre AS provincia,
+                m.activo
+            FROM com_mercado AS m
+            LEFT JOIN com_provincia AS pv ON m.provincia = pv.codigo
+            ORDER BY m.codigo DESC
+        ";
         return $this->executeQuery($query);
     }
 
@@ -28,28 +37,34 @@ class MercadoRepository
 
             $query = "
             UPDATE com_mercado SET
-                nombre = :nombre
+                nombre    = :nombre,
+                provincia = :provincia,
+                activo    = :activo
             WHERE codigo = :codigo
         ";
 
             $stmt = $this->conn->prepare($query);
 
             return $stmt->execute([
-                ":codigo" => $data["codigo"],
-                ":nombre" => $data["nombre"] ?? ''
+                ":codigo"    => $data["codigo"],
+                ":nombre"    => $data["nombre"] ?? '',
+                ":provincia" => $data["provincia"] ?? 0,
+                ":activo"    => isset($data["activo"]) ? $data["activo"] : 1
             ]);
         }
 
         // ----------------- INSERT -----------------
         $query = "
-        INSERT INTO com_mercado (nombre)
-        VALUES (:nombre)
+        INSERT INTO com_mercado (nombre, provincia, activo)
+        VALUES (:nombre, :provincia, :activo)
     ";
 
         $stmt = $this->conn->prepare($query);
 
         return $stmt->execute([
-            ":nombre" => $data["nombre"] ?? ''
+            ":nombre"    => $data["nombre"] ?? '',
+            ":provincia" => $data["provincia"] ?? 0,
+            ":activo"    => isset($data["activo"]) ? $data["activo"] : 1
         ]);
     }
 

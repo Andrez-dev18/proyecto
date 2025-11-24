@@ -12,7 +12,7 @@ const MercadoDetConfig = {
     },
 
     CATALOGOS: {
-        mercado: '/mercadodos/all',
+        mercado: '/mercado/all',
     },
 
     UI: {

@@ -8,7 +8,10 @@ const MercadoConfig = {
             ELIMINAR: '/mercado/borrar',
             EXCEL: '/mercado/exportar'
         }
-    }
+    },
+    CATALOGOS: {
+        PROVINCIAS: '/provincia/all'
+    },
 };
 
 window.MercadoConfig = MercadoConfig;

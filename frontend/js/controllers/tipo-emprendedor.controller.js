@@ -213,10 +213,6 @@ class TipoEmprendedorController {
             this.mostrarNotificacion('El nombre es obligatorio', 'warning');
             return false;
         }
-        if (!data.linea) {
-            this.mostrarNotificacion('La línea es obligatoria', 'warning');
-            return false;
-        }
         return true;
     }
 

@@ -1,4 +1,4 @@
-class VivoArequipaService {
+/*class VivoArequipaService {
     constructor() {
         // URL base directa
         this.baseUrl = 'http://localhost/proyecto/backend';
@@ -445,3 +445,4 @@ window.findCorrectRoute = async function() {
     console.log('Resultado de búsqueda de rutas:', result);
     return result;
 };
+*/

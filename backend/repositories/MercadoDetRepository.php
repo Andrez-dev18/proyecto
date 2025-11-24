@@ -23,7 +23,7 @@ class MercadoDetRepository
                 a.usuarioTransferencia,
                 a.fechaHoraTransferencia
             FROM com_db_mercado_det a
-            LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
+            LEFT JOIN com_mercado m ON a.mercado = m.codigo
             ORDER BY a.fechaHoraRegistro DESC
         ";
 
@@ -149,7 +149,7 @@ class MercadoDetRepository
             a.usuarioTransferencia,
             a.fechaHoraTransferencia
         FROM com_db_mercado_det a
-        LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
+        LEFT JOIN com_mercado m ON a.mercado = m.codigo
         WHERE 1=1
     ";
 
@@ -205,7 +205,7 @@ class MercadoDetRepository
         $query = "
         SELECT COUNT(*) AS total
         FROM com_db_mercado_det a
-        LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
+        LEFT JOIN com_mercado m ON a.mercado = m.codigo
         WHERE 1=1
     ";
 

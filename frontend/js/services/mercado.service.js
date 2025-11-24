@@ -131,6 +131,19 @@ class MercadoService {
         }
     }
 
+    async getProvincias() {
+        try {
+            const url = `${this.baseUrl}${this.config.CATALOGOS.PROVINCIAS}`;
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al cargar provincias');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en getProvincias:', error);
+            return [];
+        }
+    }
+
     async exportToExcel() {
         try {
             const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`;

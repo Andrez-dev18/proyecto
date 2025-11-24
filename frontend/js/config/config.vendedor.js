@@ -1,6 +1,6 @@
 const VendedorConfig = {
     API: {
-        BASE_URL: 'http://localhost/proyecto/backend',
+        BASE_URL: AppConfig.API.BASE_URL,
         ENDPOINTS: {
             ALL: '/vendedor/all',
             CREAR: '/vendedor/crear',

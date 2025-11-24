@@ -150,7 +150,7 @@ class VendedorController {
                     url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
                 },
                 responsive: true,
-                order: [[0, 'asc']],
+                order: [[0, 'desc']],
                 dom: '<"top"lf>rt<"bottom"ip><"clear">',
                 drawCallback: () => {
                     // Aplicar visibilidad de columnas

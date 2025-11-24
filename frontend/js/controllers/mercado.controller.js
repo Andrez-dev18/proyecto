@@ -9,9 +9,48 @@ class MercadoController {
     }
 
     async init() {
+        await this.cargarCatalogos();
         this.setupEventListeners();
         this.setupColumnToggle();
         await this.cargarDatos();
+    }
+
+    async cargarCatalogos() {
+        try {
+            console.log('Cargando catálogos...');
+
+            const [provincias] = await Promise.all([
+                this.service.getProvincias(),
+            ]);
+
+            this.catalogos = { provincias };
+
+            console.log('Catálogos cargados:', this.catalogos);
+
+            this.poblarSelects();
+        } catch (error) {
+            console.error('Error al cargar catálogos:', error);
+        }
+    }
+
+    poblarSelects() {
+
+        this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
+    }
+
+    poblarSelect(selectId, datos, valueField, textField) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        const opciones = datos.map(item =>
+            `<option value="${item[valueField]}">${item[textField]}</option>`
+        ).join('');
+
+        if (selectId.startsWith('filter')) {
+            select.innerHTML = `<option value="">Todos</option>${opciones}`;
+        } else {
+            select.innerHTML = `<option value="">Seleccionar...</option>${opciones}`;
+        }
     }
 
     setupColumnToggle() {
@@ -44,14 +83,14 @@ class MercadoController {
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', (e) => {
                 const columnIndex = parseInt(e.target.dataset.column);
-                
+
                 if (columnIndex === 2) {
                     e.target.checked = true;
                     return;
                 }
-                
+
                 this.columnasVisibles[columnIndex] = e.target.checked;
-                
+
                 if (this.dataTable) {
                     const column = this.dataTable.column(columnIndex);
                     column.visible(e.target.checked);
@@ -85,7 +124,7 @@ class MercadoController {
 
     renderizarTabla() {
         const table = $('#dataTable');
-        
+
         if ($.fn.DataTable.isDataTable(table)) {
             table.DataTable().clear().destroy();
         }
@@ -93,13 +132,26 @@ class MercadoController {
         this.dataTable = table.DataTable({
             data: this.datos,
             columns: [
-                { 
+                {
                     data: 'codigo',
                     className: 'col-codigo px-4 py-2 text-center'
                 },
-                { 
+                {
                     data: 'nombre',
                     className: 'col-nombre px-4 py-2'
+                },
+                {
+                    data: 'provincia',
+                    className: 'col-nombre px-4 py-2'
+                },
+                {
+                    data: 'activo',
+                    className: 'col-nombre px-4 py-2',
+                    render: (data) => {
+                        if (data == 1) return 'Sí';
+                        if (data == 0) return 'No';
+                        return '-';
+                    }
                 },
                 {
                     data: null,
@@ -163,11 +215,13 @@ class MercadoController {
         const modal = document.getElementById('modal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
+        // Ocultar campo activo cuando es nuevo registro
+        document.getElementById('inputActivo').classList.add('hidden');
     }
 
     modificarSeleccionado() {
         if (!this.registroSeleccionado) return;
-        
+
         document.getElementById('modalTitle').textContent = 'Modificar Mercado';
         this.cargarDatosEnFormulario();
         const modal = document.getElementById('modal');
@@ -194,8 +248,27 @@ class MercadoController {
     }
 
     cargarDatosEnFormulario() {
-        if (!this.registroSeleccionado) return;
-        document.getElementById('modalNombre').value = this.registroSeleccionado.nombre || '';
+        const r = this.registroSeleccionado;
+        if (!r) return;
+
+        console.log("Datos recibidos:", r);
+
+        // Mostrar el campo Activo
+        document.getElementById("inputActivo").classList.remove("hidden");
+
+        // Nombre
+        document.getElementById("modalNombre").value = r.nombre ?? "";
+
+        // Provincia (buscar por nombre → devolver código)
+        const provinciaObj = this.catalogos.provincias.find(
+            p => p.nombre === r.provincia   // <-- tu backend probablemente manda el nombre
+        );
+
+        document.getElementById("modalProvincia").value =
+            provinciaObj ? provinciaObj.codigo : "";
+
+        // Activo (1 o 0)
+        document.getElementById("modalActivo").value = r.activo ?? "";
     }
 
     limpiarFormulario() {
@@ -204,12 +277,12 @@ class MercadoController {
 
     async guardarRegistro() {
         const data = this.obtenerDatosFormulario();
-        
+
         if (!this.validarFormulario(data)) return;
 
         try {
             this.mostrarCargando(true);
-            
+
             if (this.registroSeleccionado) {
                 data.codigo = this.registroSeleccionado.codigo;
                 await this.service.update(data);
@@ -218,7 +291,7 @@ class MercadoController {
                 await this.service.create(data);
                 this.mostrarNotificacion('Registro creado', 'success');
             }
-            
+
             this.cerrarModal();
             await this.cargarDatos();
         } catch (error) {
@@ -231,7 +304,9 @@ class MercadoController {
 
     obtenerDatosFormulario() {
         return {
-            nombre: document.getElementById('modalNombre').value.trim()
+            nombre: document.getElementById('modalNombre').value.trim(),
+            provincia: document.getElementById('modalProvincia').value,
+            activo: document.getElementById('modalActivo').value ?? 1
         };
     }
 
@@ -256,7 +331,7 @@ class MercadoController {
                 this.mostrarNotificacion('No hay datos para exportar', 'warning');
                 return;
             }
-            
+
             window.open(`${this.service.baseUrl}${this.config.API.ENDPOINTS.EXCEL}`, '_blank');
             this.mostrarNotificacion('Descargando Excel...', 'info');
         } catch (error) {

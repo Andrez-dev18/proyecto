@@ -2,7 +2,7 @@ class PVentasVivoArequipaService {
     constructor() {
         // Configuración embebida directamente en el servicio
         this.config = {
-            BASE_URL: 'http://localhost/proyecto/backend',
+            BASE_URL: this.config.BASE_URL,
             ENDPOINTS: {
                 ALL: '/vivo/arequipa/all',
                 FILTRO: '/vivo/arequipa',
