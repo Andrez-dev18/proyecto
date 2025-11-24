@@ -4,37 +4,14 @@ const ClienteProcesadoConfig = {
         ENDPOINTS: {
             FILTRO: '/clienteProce/filtro',
             CREAR: '/clienteProce/crear',
-            ACTUALIZAR: '/clienteProce/actualizar',
-            ELIMINAR: '/clienteProce/borrar',
-            EXCEL: '/clienteProce/exportar',
-            ETL: '/clienteProce/etl',
-            CATALOGOS: {
-                DISTRITOS: '/clienteProce/catalogos/distritos',
-                ZONAS: '/clienteProce/catalogos/zonas',
-                CANALES: '/clienteProce/catalogos/canales',
-                LINEAS: '/clienteProce/catalogos/lineas',
-                SUBLINEAS: '/clienteProce/catalogos/sublineas',
-                VENDEDORES: '/clienteProce/catalogos/vendedores'
-            }
+            EDITAR: '/clienteProce/actualizar',
+            BORRAR: '/clienteProce/borrar',
+            EXPORTA: '/clienteProce/exportar',
+            ETL: '/clienteProce/etl'
         }
     },
     UI: {
-        DATATABLES_LANGUAGE: {
-            processing: "Procesando...",
-            lengthMenu: "Mostrar _MENU_ registros",
-            zeroRecords: "No se encontraron resultados",
-            emptyTable: "Ningún dato disponible en esta tabla",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-            infoEmpty: "Mostrando 0 a 0 de 0 registros",
-            infoFiltered: "(filtrado de _MAX_ registros totales)",
-            search: "Buscar:",
-            paginate: {
-                first: "Primero",
-                last: "Último",
-                next: "Siguiente",
-                previous: "Anterior"
-            }
-        }
+        DATATABLES_LANGUAGE: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
     }
 };
 

@@ -27,55 +27,57 @@ class VivoArequipaController {
     }
 
     setupColumnToggle() {
-        const btnToggle = document.getElementById('btnToggleColumns');
-        const dropdown = document.getElementById('columnDropdown');
-        const btnClose = document.getElementById('btnCloseDropdown');
-        const checkboxes = document.querySelectorAll('.column-checkbox');
+    const btnToggle = document.getElementById('btnToggleColumns');
+    const dropdown = document.getElementById('columnDropdown');
+    const btnClose = document.getElementById('btnCloseDropdown');
+    const checkboxes = document.querySelectorAll('.column-checkbox');
 
-        if (!btnToggle || !dropdown) {
-            console.warn('⚠️ Elementos de toggle de columnas no encontrados');
-            return;
-        }
+    if (!btnToggle || !dropdown) {
+        console.warn('⚠️ Elementos de toggle de columnas no encontrados');
+        return;
+    }
 
-        // Inicializar todas las columnas como visibles
-        checkboxes.forEach(checkbox => {
-            const columnIndex = parseInt(checkbox.dataset.column);
-            checkbox.checked = checkbox.dataset.default !== 'false';
-            this.columnasVisibles[columnIndex] = checkbox.checked;
-        });
+    // Inicializar TODAS las columnas como visibles por defecto
+    checkboxes.forEach(checkbox => {
+        const columnIndex = parseInt(checkbox.dataset.column);
+        // Marcar todos los checkboxes como checked
+        checkbox.checked = true;
+        this.columnasVisibles[columnIndex] = true;
+    });
 
-        btnToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
+    btnToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
 
-        btnClose?.addEventListener('click', (e) => {
-            e.stopPropagation();
+    btnClose?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.remove('show');
+    });
+
+    // Cerrar dropdown al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.dropdown-columns')) {
             dropdown.classList.remove('show');
-        });
+        }
+    });
 
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown-columns')) {
-                dropdown.classList.remove('show');
+    // Manejar cambios en checkboxes
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const columnIndex = parseInt(e.target.dataset.column);
+            this.columnasVisibles[columnIndex] = e.target.checked;
+            
+            if (this.dataTable) {
+                const column = this.dataTable.column(columnIndex);
+                if (column) {
+                    column.visible(e.target.checked);
+                }
             }
         });
+    });
+}
 
-        // Manejar cambios en checkboxes
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const columnIndex = parseInt(e.target.dataset.column);
-                this.columnasVisibles[columnIndex] = e.target.checked;
-                
-                if (this.dataTable) {
-                    const column = this.dataTable.column(columnIndex);
-                    if (column) {
-                        column.visible(e.target.checked);
-                    }
-                }
-            });
-        });
-    }
 
     setupToggleFiltros() {
         const btnToggle = document.getElementById('btnToggleFiltros');
@@ -375,157 +377,156 @@ class VivoArequipaController {
     return [
         { 
             data: 'id', 
+            title: 'ID',
             className: 'text-center text-xs px-2',
-            visible: false,
-            render: (data) => {
-                if (!data) return '';
-                return String(data);
-            }
+            visible: this.columnasVisibles[0] !== false
         },
         { 
             data: 'fecha',
             title: 'Fecha',
             className: 'text-sm px-2',
             defaultContent: '-',
-            render: (data, type, row) => {
-                // Construir fecha desde año y mes
-                if (row.ano && row.mes) {
-                    return `${row.mes}/${row.ano}`;
-                }
-                return data || '-';
+            render: (data) => {
+                if (!data) return '-';
+                return new Date(data).toLocaleDateString('es-PE');
             }
         },
         { 
-            data: 'zona',
+            data: 'mercado',
             title: 'Mercado',
             className: 'text-sm px-2', 
             defaultContent: '-'
         },
         { 
-            data: 'compra',
+            data: 'empresa',
             title: 'Empresa', 
             className: 'text-sm px-2', 
             defaultContent: '-'
         },
         { 
-            data: 'ruc_empresa',
+            data: 'rucEmpresa',
             title: 'RUC Empresa',
             className: 'text-sm px-2', 
             defaultContent: '-', 
-            visible: false 
+            visible: this.columnasVisibles[4] !== false
         },
         { 
-            data: 'tipo_cliente',
+            data: 'condicion',
             title: 'Condición',
             className: 'text-sm px-2', 
             defaultContent: '-'
         },
         { 
-            data: 'nombre',
+            data: 'proveedor',
             title: 'Proveedor',
             className: 'text-sm px-2', 
             defaultContent: '-'
         },
         { 
-            data: 'ruc_proveedor',
+            data: 'rucProveedor',
             title: 'RUC Proveedor',
             className: 'text-sm px-2', 
             defaultContent: '-', 
-            visible: false 
+            visible: this.columnasVisibles[7] !== false
+        },
+        { 
+            data: 'condTipo',
+            title: 'Cond/Tipo',
+            className: 'text-sm px-2',
+            defaultContent: '-'
+        },
+        { 
+            data: 'precioMayMin',
+            title: 'P. Mayor Mín',
+            className: 'text-center text-sm px-2',
+            defaultContent: '0.00',
+            render: (data) => {
+                const valor = parseFloat(data || 0);
+                return `S/ ${valor.toFixed(2)}`;
+            }
+        },
+        { 
+            data: 'precioMayMax',
+            title: 'P. Mayor Máx',
+            className: 'text-center text-sm px-2',
+            defaultContent: '0.00',
+            render: (data) => {
+                const valor = parseFloat(data || 0);
+                return `S/ ${valor.toFixed(2)}`;
+            }
+        },
+        { 
+            data: 'precioPubMin',
+            title: 'P. Público Mín',
+            className: 'text-center text-sm px-2',
+            defaultContent: '0.00',
+            render: (data) => {
+                const valor = parseFloat(data || 0);
+                return `S/ ${valor.toFixed(2)}`;
+            }
+        },
+        { 
+            data: 'precioPubMax',
+            title: 'P. Público Máx',
+            className: 'text-center text-sm px-2',
+            defaultContent: '0.00',
+            render: (data) => {
+                const valor = parseFloat(data || 0);
+                return `S/ ${valor.toFixed(2)}`;
+            }
         },
         { 
             data: null,
-            title: 'Cond/Tipo',
-            className: 'text-sm px-2',
-            defaultContent: '- / -',
-            render: (data, type, row) => {
-                return `${row.tipo_cliente || '-'} / -`;
-            }
-        },
-        { 
-            data: 'grs',
-            title: 'P. Mayor Mín',
-            className: 'text-center text-sm px-2',
-            defaultContent: 'S/ 0.00',
-            render: (data) => {
-                const valor = parseFloat(data || 0);
-                return `S/ ${valor.toFixed(2)}`;
-            }
-        },
-        { 
-            data: 'rp',
-            title: 'P. Mayor Máx',
-            className: 'text-center text-sm px-2',
-            defaultContent: 'S/ 0.00',
-            render: (data) => {
-                const valor = parseFloat(data || 0);
-                return `S/ ${valor.toFixed(2)}`;
-            }
-        },
-        { 
-            data: 'renzo',
-            title: 'P. Público Mín',
-            className: 'text-center text-sm px-2',
-            defaultContent: 'S/ 0.00',
-            render: (data) => {
-                const valor = parseFloat(data || 0);
-                return `S/ ${valor.toFixed(2)}`;
-            }
-        },
-        { 
-            data: 'fafo',
-            title: 'P. Público Máx',
-            className: 'text-center text-sm px-2',
-            defaultContent: 'S/ 0.00',
-            render: (data) => {
-                const valor = parseFloat(data || 0);
-                return `S/ ${valor.toFixed(2)}`;
-            }
-        },
-        { 
-            data: 'santa_angela',
             title: 'Pesos Macho',
             className: 'text-center text-sm px-2',
             defaultContent: '0 - 0',
-            render: (data) => {
-                return `${data || 0} - ${data || 0}`;
+            render: (data, type, row) => {
+                const min = row.pesoMachoMin || 0;
+                const max = row.pesoMachoMax || 0;
+                return `${min} - ${max}`;
             }
         },
         { 
-            data: 'rosario',
+            data: null,
             title: 'Pesos Hembra',
             className: 'text-center text-sm px-2',
             defaultContent: '0 - 0',
-            render: (data) => {
-                return `${data || 0} - ${data || 0}`;
+            render: (data, type, row) => {
+                const min = row.pesoHembMin || 0;
+                const max = row.pesoHembMax || 0;
+                return `${min} - ${max}`;
             }
         },
         { 
-            data: 'pollo_lima',
+            data: null,
             title: 'Prom. Peso Macho',
             className: 'text-center text-sm px-2',
             defaultContent: '0 - 0',
-            render: (data) => {
-                return `${data || 0} - ${data || 0}`;
+            render: (data, type, row) => {
+                const min = row.pesoMachoPromMin || 0;
+                const max = row.pesoMachoPromMax || 0;
+                return `${min} - ${max}`;
             }
         },
         { 
-            data: 'otras_granjas_chicas',
+            data: null,
             title: 'Prom. Peso Hembra',
             className: 'text-center text-sm px-2',
             defaultContent: '0 - 0',
-            render: (data) => {
-                return `${data || 0} - ${data || 0}`;
+            render: (data, type, row) => {
+                const min = row.pesoHembraPromMin || 0;
+                const max = row.pesoHembraPromMax || 0;
+                return `${min} - ${max}`;
             }
         },
         { 
-            data: 'potencial_minimo',
+            data: null,
             title: 'Color',
             className: 'text-center text-sm px-2',
             defaultContent: '0 - 0',
             render: (data, type, row) => {
-                const min = row.potencial_minimo || 0;
-                const max = row.potencial_maximo || 0;
+                const min = row.colorMin || 0;
+                const max = row.colorMax || 0;
                 return `${min} - ${max}`;
             }
         },
@@ -533,11 +534,7 @@ class VivoArequipaController {
             data: 'cantidad',
             title: 'Cantidad',
             className: 'text-center text-sm px-2 font-bold',
-            defaultContent: '0',
-            render: (data) => {
-                // Sumar todos los valores numéricos como cantidad
-                return data || 0;
-            }
+            defaultContent: '0'
         },
         {
             data: null,
@@ -559,6 +556,7 @@ class VivoArequipaController {
         }
     ];
 }
+
 
 
     vincularEventosTabla() {
@@ -828,25 +826,31 @@ class VivoArequipaController {
     }
 
     mostrarModal() {
-        const modal = document.getElementById('modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-            // Enfocar primer campo
-            setTimeout(() => {
-                document.getElementById('modalFecha')?.focus();
-            }, 100);
-        }
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevenir scroll del body
+        
+        // Enfocar primer campo después de un pequeño delay
+        setTimeout(() => {
+            const firstInput = document.getElementById('modalFecha');
+            if (firstInput) firstInput.focus();
+        }, 100);
     }
+}
 
-    cerrarModal() {
-        const modal = document.getElementById('modal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-        this.registroSeleccionado = null;
+cerrarModal() {
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Restaurar scroll del body
     }
+    this.registroSeleccionado = null;
+}
 
     async exportarExcel() {
         try {
