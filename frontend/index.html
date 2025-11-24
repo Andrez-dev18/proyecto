@@ -172,17 +172,19 @@
 
         /* Content area */
         .content-wrapper {
+            margin-left: 300px;
             transition: margin-left 0.3s ease;
         }
 
+        
         @media (min-width: 1024px) {
             .sidebar {
                 transform: translateX(0);
             }
 
-            .content-wrapper {
+           /* .content-wrapper {
                 margin-left: 300px;
-            }
+            }*/
 
             .sidebar-overlay {
                 display: none;
@@ -190,6 +192,12 @@
 
             .menu-toggle-mobile {
                 display: none;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .content-wrapper {
+                margin-left: 0;
             }
         }
 

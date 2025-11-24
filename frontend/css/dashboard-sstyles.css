@@ -147,7 +147,7 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* === TABLA RESPONSIVE === */
+/* === TABLA RESPONSIVE === 
 @media (max-width: 768px) {
     .table-scroll {
         max-height: calc(100vh - 500px);
@@ -159,7 +159,7 @@
         font-size: 0.75rem;
         padding: 0.5rem;
     }
-}
+}*/
 
 /* === MODAL === */
 .modal-backdrop {

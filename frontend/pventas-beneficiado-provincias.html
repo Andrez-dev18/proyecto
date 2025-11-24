@@ -11,168 +11,163 @@
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard-style.css">
-    
+    <link rel="stylesheet" href="css/dashboard-responsive.css">
     <style>
-        .dropdown-columns {
-            position: relative;
-            display: inline-block;
-        }
+    .dropdown-columns {
+        position: relative;
+        display: inline-block;
+    }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 300px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            z-index: 1000;
-            max-height: 500px;
-            overflow-y: auto;
-        }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background-color: white;
+        min-width: 300px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        z-index: 1000;
+        max-height: 500px;
+        overflow-y: auto;
+    }
 
-        .dropdown-content.show {
-            display: block;
-        }
+    .dropdown-content.show {
+        display: block;
+    }
 
-        .column-toggle {
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
+    .column-toggle {
+        padding: 10px 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+    }
 
-        .column-toggle:hover {
-            background-color: #f3f4f6;
-        }
+    .column-toggle:hover {
+        background-color: #f3f4f6;
+    }
 
-        .column-toggle input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
+    .column-toggle input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
 
-        .dropdown-header {
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            border-radius: 8px 8px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .dropdown-header {
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        #btnToggleFiltros {
-            transition: transform 0.3s ease, background-color 0.2s ease;
-        }
+    #btnToggleFiltros {
+        transition: transform 0.3s ease, background-color 0.2s ease;
+    }
 
-        #btnToggleFiltros:hover {
-            background-color: rgba(139, 92, 246, 0.1);
-        }
+    #btnToggleFiltros:hover {
+        background-color: rgba(139, 92, 246, 0.1);
+    }
 
-        #filterContent {
-            max-height: 0;
+    #filterContent {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    }
+
+    #filterContent.show {
+        max-height: 800px;
+        opacity: 1;
+        padding-top: 1rem;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    table.dataTable tbody td {
+        padding: 8px 10px;
+    }
+
+    .modal-field-group {
+        margin-bottom: 1rem;
+    }
+
+    .modal-field-group label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .card-shadow {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-hover-scale {
+        transition: transform 0.2s;
+    }
+
+    .btn-hover-scale:hover {
+        transform: scale(1.05);
+    }
+
+    .slide-down {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
             opacity: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+            transform: translateY(-20px);
         }
-
-        #filterContent.show {
-            max-height: 800px;
+        to {
             opacity: 1;
-            padding-top: 1rem;
+            transform: translateY(0);
         }
+    }
 
-        .dataTables_wrapper {
-            width: 100% !important;
-            overflow-x: auto;
-        }
+    /* Modal styles */
+    #modal {
+        z-index: 9999;
+    }
 
-        .overflow-x-auto::-webkit-scrollbar {
-            height: 8px;
-        }
+    #modal .bg-white {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
 
-        .overflow-x-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        table.dataTable tbody td {
-            padding: 8px 10px;
-        }
-
-        .modal-field-group {
-            margin-bottom: 1rem;
-        }
-
-        .modal-field-group label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 500;
-            color: #374151;
-            font-size: 0.875rem;
-        }
-
-        .card-shadow {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-hover-scale {
-            transition: transform 0.2s;
-        }
-
-        .btn-hover-scale:hover {
-            transform: scale(1.05);
-        }
-
-        .slide-down {
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Modal styles */
-        #modal {
-            z-index: 9999;
-        }
-
-        #modal .bg-white {
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        /* Select styles */
-        #modalForm select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 0.5rem center;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
-        }
-    </style>
+    /* Select styles */
+    #modalForm select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+</style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
