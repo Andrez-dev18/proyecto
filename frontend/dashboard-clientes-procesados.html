@@ -231,19 +231,38 @@
         </section>
 
         <!-- Tabla -->
-        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
-            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
-                <i class="fas fa-table text-purple-600"></i>
-                Registros de Clientes Procesados
-            </h2>
-            <div class="overflow-x-auto">
-                <!-- La tabla debe tener ID tablaClientes para que funcione con el JavaScript -->
-                <table id="tablaClientes" class="min-w-full display" style="width:100%">
-                    <!-- DataTables generará el contenido automáticamente -->
-                </table>
-            </div>
-        </section>
+<section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+    <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <i class="fas fa-table text-purple-600"></i>
+        Registros de Clientes Procesados
+    </h2>
+    <div class="overflow-x-auto">
+        <!-- Tabla con estructura básica que será reemplazada por DataTables -->
+        <table id="tablaClientes" class="min-w-full display" style="width:100%">
+            <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                <tr>
+                    <th>ID</th>
+                    <th>FECHA</th>
+                    <th>DISTRITO</th>
+                    <th>ZONA</th>
+                    <th>CANAL</th>
+                    <th>CÓDIGO</th>
+                    <th>LÍNEA</th>
+                    <th>SUBLÍNEA</th>
+                    <th>VENDEDOR</th>
+                    <th>CLIENTE</th>
+                    <th>OPCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="11" class="text-center py-8 text-gray-500">Cargando datos...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
+</section>
+
 
     <!-- Modal Formulario -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"

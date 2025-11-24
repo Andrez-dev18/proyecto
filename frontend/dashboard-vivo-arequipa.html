@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Vivo Arequipa</title>
-    
-       <!-- Tailwind CSS -->
+
+    <!-- Tailwind CSS -->
     <link rel="stylesheet" href="css/output.css">
     <link rel="stylesheet" href="assets/css/datatables.min.css">
     <!-- Font Awesome para iconos -->
@@ -18,29 +19,31 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
             }
         }
-        
+
         @keyframes fade-out {
             from {
                 opacity: 1;
             }
+
             to {
                 opacity: 0;
             }
         }
-        
+
         .animate-slide-in {
             animation: slide-in 0.3s ease-out;
         }
-        
+
         .animate-fade-out {
             animation: fade-out 0.3s ease-out;
         }
-        
+
         /* Dropdown de columnas */
         .dropdown-columns {
             position: relative;
@@ -101,17 +104,65 @@
             opacity: 1;
             padding-top: 1rem;
         }
-        
+
         /* Tabla responsive */
         .dataTables_wrapper {
             width: 100% !important;
             overflow-x: auto;
         }
+    /* Personalización del scroll */
+    #modalForm::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    #modalForm::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    #modalForm::-webkit-scrollbar-thumb {
+        background: #9333ea;
+        border-radius: 10px;
+    }
+    
+    #modalForm::-webkit-scrollbar-thumb:hover {
+        background: #7c3aed;
+    }
+    
+    /* Animación de entrada del modal */
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    #modal.show > div {
+        animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    /* Focus states mejorados */
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #9333ea;
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+    }
+    
+    /* Hover en labels */
+    label:hover {
+        color: #9333ea;
+        cursor: pointer;
+    }
     </style>
 </head>
+
 <body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
     <div class="container mx-auto px-4 py-6">
-        
+
         <!-- Header -->
         <header class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800">
@@ -130,11 +181,13 @@
             </h2>
             <div class="flex flex-wrap gap-3 items-center justify-between">
                 <div class="flex flex-wrap gap-3">
-                    <button id="btnNuevo" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors">
+                    <button id="btnNuevo"
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors">
                         <i class="fas fa-plus mr-2"></i>
                         Nuevo Registro
                     </button>
-                    <button id="btnExportar" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors">
+                    <button id="btnExportar"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors">
                         <i class="fas fa-file-excel mr-2"></i>
                         Exportar Excel
                     </button>
@@ -142,12 +195,13 @@
                 </div>
 
                 <div class="dropdown-columns">
-                    <button id="btnToggleColumns" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2">
+                    <button id="btnToggleColumns"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2">
                         <i class="fas fa-columns"></i>
                         Mostrar/Ocultar columnas
                         <i class="fas fa-chevron-down text-sm"></i>
                     </button>
-                    
+
                     <div id="columnDropdown" class="dropdown-content">
                         <div class="dropdown-header">
                             <span>Seleccionar Columnas</span>
@@ -157,7 +211,7 @@
                         </div>
                         <div class="p-2">
                             <label class="column-toggle">
-                                <input type="checkbox" class="column-checkbox" data-column="0" data-default="false">
+                                <input type="checkbox" class="column-checkbox" data-column="0" checked>
                                 <span>ID</span>
                             </label>
                             <label class="column-toggle">
@@ -173,7 +227,7 @@
                                 <span>Empresa</span>
                             </label>
                             <label class="column-toggle">
-                                <input type="checkbox" class="column-checkbox" data-column="4" data-default="false">
+                                <input type="checkbox" class="column-checkbox" data-column="4" checked>
                                 <span>RUC Empresa</span>
                             </label>
                             <label class="column-toggle">
@@ -185,7 +239,7 @@
                                 <span>Proveedor</span>
                             </label>
                             <label class="column-toggle">
-                                <input type="checkbox" class="column-checkbox" data-column="7" data-default="false">
+                                <input type="checkbox" class="column-checkbox" data-column="7" checked>
                                 <span>RUC Proveedor</span>
                             </label>
                             <label class="column-toggle">
@@ -233,6 +287,7 @@
                                 <span>Cantidad</span>
                             </label>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -255,66 +310,73 @@
                     </button>
                 </div>
             </div>
-            
+
             <div id="filterContent" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
                         Fecha Inicio
                     </label>
-                    <input type="date" id="filterFechaInicio" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <input type="date" id="filterFechaInicio"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-calendar-alt mr-1 text-purple-600"></i>
                         Fecha Fin
                     </label>
-                    <input type="date" id="filterFechaFin" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <input type="date" id="filterFechaFin"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-store mr-1 text-purple-600"></i>
                         Mercado
                     </label>
-                    <select id="filterMercado" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <select id="filterMercado"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                         <option value="">Todos los mercados</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-building mr-1 text-purple-600"></i>
                         Empresa
                     </label>
-                    <select id="filterEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <select id="filterEmpresa"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                         <option value="">Todas las empresas</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-user mr-1 text-purple-600"></i>
                         Proveedor
                     </label>
-                    <select id="filterProveedor" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <select id="filterProveedor"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                         <option value="">Todos los proveedores</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         <i class="fas fa-check-circle mr-1 text-purple-600"></i>
                         Condición
                     </label>
-                    <select id="filterCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <select id="filterCondicion"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
                         <option value="">Todas las condiciones</option>
                     </select>
                 </div>
-                
+
                 <div class="flex items-end">
-                    <button id="btnAplicarFiltros" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors w-full">
+                    <button id="btnAplicarFiltros"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow transition-colors w-full">
                         <i class="fas fa-filter mr-2"></i>
                         Filtrar
                     </button>
@@ -328,7 +390,7 @@
                 <i class="fas fa-table text-purple-600"></i>
                 Registros de Vivo Arequipa
             </h2>
-            
+
             <div class="overflow-x-auto">
                 <table id="dataTable" class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
@@ -366,160 +428,254 @@
     </div>
 
     <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" style="display: none;">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full my-8">
-            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl">
-                <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
-            </div>
-            
-            <form id="modalForm" class="p-6" style="max-height: calc(100vh - 200px); overflow-y: auto;">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    
-                    <!-- Datos básicos -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha *</label>
-                        <input type="date" id="modalFecha" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
+    style="display: none;">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+        <!-- Header del Modal -->
+        <div class="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 rounded-t-xl flex-shrink-0">
+            <h3 id="modalTitle" class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-edit"></i>
+                Nuevo Registro
+            </h3>
+        </div>
+
+        <!-- Contenido del Modal con Scroll -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <form id="modalForm">
+                <!-- Sección: Información Básica -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-info-circle text-purple-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-700">Información Básica</h4>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Mercado *</label>
-                        <select id="modalMercado" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="">Seleccionar...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
-                        <select id="modalEmpresa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="">Seleccionar...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Condición</label>
-                        <select id="modalCondicion" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="">Seleccionar...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
-                        <select id="modalProveedor" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="">Seleccionar...</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad *</label>
-                        <input type="number" id="modalCantidad" min="1" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <!-- Precios -->
-                    <div class="md:col-span-3">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2 mt-4">Precios</h4>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mayorista Mín</label>
-                        <input type="number" id="modalPrecioMayMin" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Mayorista Máx</label>
-                        <input type="number" id="modalPrecioMayMax" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Público Mín</label>
-                        <input type="number" id="modalPrecioPubMin" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Público Máx</label>
-                        <input type="number" id="modalPrecioPubMax" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <!-- Pesos -->
-                    <div class="md:col-span-3">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2 mt-4">Pesos</h4>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Mín</label>
-                        <input type="number" id="modalPesoMachoMin" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Macho Máx</label>
-                        <input type="number" id="modalPesoMachoMax" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hembra Mín</label>
-                        <input type="number" id="modalPesoHembMin" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Hembra Máx</label>
-                        <input type="number" id="modalPesoHembMax" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <!-- Pesos Promedio -->
-                    <div class="md:col-span-3">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2 mt-4">Pesos Promedio</h4>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Mín</label>
-                        <input type="number" id="modalPesoMachoPromMin" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Macho Máx</label>
-                        <input type="number" id="modalPesoMachoPromMax" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hembra Mín</label>
-                        <input type="number" id="modalPesoHembraPromMin" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Peso Prom. Hembra Máx</label>
-                        <input type="number" id="modalPesoHembraPromMax" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <!-- Color -->
-                    <div class="md:col-span-3">
-                        <h4 class="text-lg font-semibold text-gray-700 mb-2 mt-4">Color</h4>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Mín</label>
-                        <input type="number" id="modalColorMin" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Color Máx</label>
-                        <input type="number" id="modalColorMax" step="0.1" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pl-10">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Año *</label>
+                            <input type="number" id="modalYear" value="2025" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Mes *</label>
+                            <select id="modalMonth" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                                <option value="1">Enero</option>
+                                <option value="2">Febrero</option>
+                                <option value="3">Marzo</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Mayo</option>
+                                <option value="6">Junio</option>
+                                <option value="7">Julio</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Provincia</label>
+                            <select id="modalProvincia"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Zona</label>
+                            <select id="modalZona"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Compra</label>
+                            <select id="modalCompra"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Tipo Cliente</label>
+                            <select id="modalTipoCliente"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Nombre</label>
+                            <input type="text" id="modalNombre"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" id="btnCancelar" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="button" id="btnGuardar" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
-                        <i class="fas fa-save mr-2"></i>
-                        Guardar
-                    </button>
+                <!-- Sección: Información de Granjas -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-warehouse text-purple-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-700">Información de Granjas</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pl-10">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">GRS</label>
+                            <input type="text" id="modalGRS"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">RP</label>
+                            <input type="text" id="modalRP"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Renzo</label>
+                            <input type="text" id="modalRenzo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Fafo</label>
+                            <input type="text" id="modalFafo"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Santa Ángela</label>
+                            <input type="text" id="modalSantaAngela"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Jorge Pan</label>
+                            <input type="text" id="modalJorgePan"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Mirian G</label>
+                            <input type="text" id="modalMirianG"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Vásquez</label>
+                            <input type="text" id="modalVasquez"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">San Joaquín</label>
+                            <input type="text" id="modalSanJoaquin"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Fortunato</label>
+                            <input type="text" id="modalFortunato"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Rosario</label>
+                            <input type="text" id="modalRosario"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Perca</label>
+                            <input type="text" id="modalPerca"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Potenciales y Condiciones -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-700">Potenciales y Condiciones</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-10">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Potencial Mínimo</label>
+                            <input type="number" id="modalPotencialMin" step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Potencial Máximo</label>
+                            <input type="number" id="modalPotencialMax" step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Condición PT Mín</label>
+                            <input type="number" id="modalCondicionPTMin" step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-600 mb-1">Condición PT Máx</label>
+                            <input type="number" id="modalCondicionPTMax" step="0.01"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Observaciones -->
+                <div class="mb-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-comment-alt text-purple-600"></i>
+                        </div>
+                        <h4 class="text-lg font-semibold text-gray-700">Observaciones</h4>
+                    </div>
+                    
+                    <div class="pl-10">
+                        <textarea id="modalObservaciones" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Ingrese observaciones adicionales..."></textarea>
+                    </div>
                 </div>
             </form>
         </div>
+
+        <!-- Footer del Modal -->
+        <div class="flex justify-end gap-3 px-6 py-4 bg-gray-50 rounded-b-xl flex-shrink-0">
+            <button type="button" id="btnCancelar"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                <i class="fas fa-times mr-2"></i>
+                Cancelar
+            </button>
+            <button type="button" id="btnGuardar"
+                class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i>
+                Guardar
+            </button>
+        </div>
     </div>
+</div>
+
 
     <!-- Loading -->
-    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+        style="display: none;">
         <div class="bg-white p-6 rounded-xl shadow-2xl">
             <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
             <p class="text-gray-700">Cargando...</p>
@@ -529,7 +685,7 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
-    
+
     <!-- Configuración y servicios (SIN config.js base) -->
     <script src="js/config/config.vivo-arequipa.js"></script>
     <script src="js/services/vivo-arequipa.service.js"></script>
@@ -537,35 +693,36 @@
 
     <script src="js/controllers/vivo-arequipa.controller.js"></script>
 
-<script>
-    // Esperar a que todo esté cargado
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 Inicializando Vivo Arequipa...');
-        
-        // Verificar que las dependencias estén cargadas
-        if (typeof window.VivoArequipaConfig === 'undefined') {
-            console.error('❌ VivoArequipaConfig no está cargado');
-            return;
-        }
-        
-        if (typeof window.VivoArequipaService === 'undefined') {
-            console.error('❌ VivoArequipaService no está cargado');
-            return;
-        }
-        
-        if (typeof window.VivoArequipaController === 'undefined') {
-            console.error('❌ VivoArequipaController no está cargado');
-            return;
-        }
-        
-        // Inicializar el controlador
-        if (window.vivoArequipaController) {
-            window.vivoArequipaController.init();
-        } else {
-            window.vivoArequipaController = new VivoArequipaController();
-            window.vivoArequipaController.init();
-        }
-    });
-</script>
+    <script>
+        // Esperar a que todo esté cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Inicializando Vivo Arequipa...');
+
+            // Verificar que las dependencias estén cargadas
+            if (typeof window.VivoArequipaConfig === 'undefined') {
+                console.error('❌ VivoArequipaConfig no está cargado');
+                return;
+            }
+
+            if (typeof window.VivoArequipaService === 'undefined') {
+                console.error('❌ VivoArequipaService no está cargado');
+                return;
+            }
+
+            if (typeof window.VivoArequipaController === 'undefined') {
+                console.error('❌ VivoArequipaController no está cargado');
+                return;
+            }
+
+            // Inicializar el controlador
+            if (window.vivoArequipaController) {
+                window.vivoArequipaController.init();
+            } else {
+                window.vivoArequipaController = new VivoArequipaController();
+                window.vivoArequipaController.init();
+            }
+        });
+    </script>
 </body>
+
 </html>
