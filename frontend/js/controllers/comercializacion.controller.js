@@ -291,162 +291,177 @@ class ComercializacionController {
         }
     }
 
-    renderizarTabla() {
-    const table = $('#dataTable');
-    
-    if ($.fn.DataTable.isDataTable('#dataTable')) {
-        $('#dataTable').DataTable().clear().destroy();
-        $('#dataTable').empty();
-    }
-
-    // Crear estructura de tabla con thead estilizado
-    const tableHtml = `
-        <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white sticky top-0">
-            <tr>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">ID</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">AÑO</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">MES</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">PROVINCIA</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">ZONA</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">COMPRA</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">TIPO CLIENTE</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">NOMBRE</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">GRS</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">RP</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">RENZO</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">FAFO</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">S.ANGELA</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">ROSA</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider">OPCIONES</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200"></tbody>
-    `;
-    
-    document.getElementById('dataTable').innerHTML = tableHtml;
-
-    this.dataTable = table.DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: `${this.service.baseURL}${PotencialVentaConfig.API.ENDPOINTS.FILTRO}`,
-            type: 'GET',
-            data: (d) => {
-                const filtros = {};
-                
-                const anio = document.getElementById('filterAnio')?.value;
-                const mes = document.getElementById('filterMes')?.value;
-                const provincia = document.getElementById('filterProvincia')?.value;
-                const zona = document.getElementById('filterZona')?.value;
-                const tipoCliente = document.getElementById('filterTipoCliente')?.value;
-                
-                if (anio) filtros.anio = anio;
-                if (mes) filtros.mes = mes;
-                if (provincia) filtros.provincia = provincia;
-                if (zona) filtros.zona = zona;
-                if (tipoCliente) filtros.tipoCliente = tipoCliente;
-                
-                return Object.assign(d, filtros);
-            },
-            dataSrc: json => json.data || []
-        },
-        columns: [
-            { data: 'id', className: 'text-center' },
-            { data: 'anio' },
-            { 
-                data: 'mes', 
-                render: (data) => {
-                    const mesNombre = PotencialVentaConfig.MESES.find(m => m.id == data)?.nombre || data;
-                    return mesNombre;
-                }
-            },
-            { data: 'provincia' },
-            { data: 'zona' },
-            { 
-                data: 'compra',
-                className: 'text-center',
-                render: (data) => {
-                    if (data === 'SI') {
-                        return '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">SI</span>';
-                    } else {
-                        return '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">NO</span>';
-                    }
-                }
-            },
-            { data: 'tipoCliente' },
-            { data: 'nombre' },
-            { data: 'grs', className: 'text-center' },
-            { data: 'rp', className: 'text-center' },
-            { data: 'renzo', className: 'text-center' },
-            { data: 'fafo', className: 'text-center' },
-            { data: 'santaAngela', className: 'text-center' },
-            { data: 'rosa', className: 'text-center' },
-            {
-                data: null,
-                orderable: false,
-                searchable: false,
-                className: 'text-center',
-                render: () => `
-                    <div class="flex gap-2 justify-center">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `
-            }
-        ],
-        order: [[0, 'desc']],
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-        language: {
-            processing: "Procesando...",
-            lengthMenu: "Mostrar _MENU_ registros",
-            zeroRecords: "No se encontraron resultados",
-            emptyTable: "Ningún dato disponible",
-            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-            infoEmpty: "Mostrando 0 a 0 de 0 registros",
-            infoFiltered: "(filtrado de _MAX_ registros)",
-            search: "Buscar:",
-            paginate: {
-                first: "Primero",
-                last: "Último",
-                next: "Siguiente",
-                previous: "Anterior"
-            }
-        },
-        dom: 'rtip', // Esto elimina los controles por defecto de DataTables
-        initComplete: function() {
-            // Asegurar que las clases de Tailwind se mantengan
-            $('#dataTable_wrapper').find('.dataTables_processing').addClass('bg-white shadow-lg rounded-lg p-4');
-        },
-        drawCallback: () => {
-            // Aplicar visibilidad de columnas
-            Object.keys(this.columnasVisibles).forEach(columnIndex => {
-                const column = this.dataTable.column(parseInt(columnIndex));
-                if (column) {
-                    column.visible(this.columnasVisibles[columnIndex]);
-                }
-            });
+    renderizarTablaServerSide() {
+        const table = $('.min-w-full');
+        const thead = document.querySelector('thead tr');
+        if (!thead) {
+            console.error('❌ Thead no encontrado');
+            return;
         }
-    });
 
-    // Eventos para botones de acción
-    $('#dataTable tbody').off('click').on('click', '.edit-btn', (e) => {
-        const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-        this.registroSeleccionado = rowData;
-        this.modificarSeleccionado();
-    });
+        // Destruir DataTable previo
+        if ($.fn.DataTable.isDataTable(table)) {
+            console.log('🗑️ Destruyendo DataTable anterior');
+            table.DataTable().clear().destroy();
+        }
 
-    $('#dataTable tbody').on('click', '.delete-btn', async (e) => {
-        const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
-        this.registroSeleccionado = rowData;
-        await this.eliminarSeleccionado();
-    });
-}
+        // Definir columnas según tipo actual
+        let columnas = [];
+        let columnasData = [];
 
+        if (this.tipoActual === 'vivo-aqp') {
+            columnas = [
+                'ID', 'Fecha', 'Mercado', 'Empresa', 'RUC Empresa', 'Condición',
+                'Proveedor', 'RUC Proveedor',
+                'P.May Mín', 'P.May Máx', 'P.Púb Mín', 'P.Púb Máx',
+                'Peso Macho Mín', 'Peso Macho Máx', 'Peso Hemb Mín', 'Peso Hemb Máx',
+                'Color Mín', 'Color Máx',
+                'Peso Macho Prom Mín', 'Peso Macho Prom Máx',
+                'Peso Hembra Prom Mín', 'Peso Hembra Prom Máx',
+                'Cantidad', 'Usuario Registro', 'Fecha Registro',
+                'Usuario Transferencia', 'Fecha Transferencia'
+            ];
+
+            columnasData = [
+                'id', 'fecha', 'mercado', 'empresa', 'ruc_empresa', 'condicion',
+                'proveedor', 'ruc_proveedor',
+                'precioMayMin', 'precioMayMax', 'precioPubMin', 'precioPubMax',
+                'pesoMachoMin', 'pesoMachoMax', 'pesoHembMin', 'pesoHembMax',
+                'colorMin', 'colorMax',
+                'pesoMachoPromMin', 'pesoMachoPromMax',
+                'pesoHembraPromMin', 'pesoHembraPromMax',
+                'cantidad', 'usuarioRegistro', 'fechaHoraRegistro',
+                'usuarioTransferencia', 'fechaHoraTransferencia'
+            ];
+        } else if (this.tipoActual === 'vivo-provincia') {
+            columnas = [
+                'ID', 'Fecha', 'Provincia', 'Proveedor', 'RUC Proveedor',
+                'Tipo', 'Línea',
+                'P.May Car Mín', 'P.May Car Máx', 'P.May Bra Mín', 'P.May Bra Máx',
+                'P.Púb Mín', 'P.Púb Máx',
+                'Peso Macho Prom Mín', 'Peso Macho Prom Máx',
+                'Peso Hembra Prom Mín', 'Peso Hembra Prom Máx',
+                'Peso Brasa Prom Mín', 'Peso Brasa Prom Máx',
+                'Color Mín', 'Color Máx', 'Cantidad',
+                'Usuario Registro', 'Fecha Registro',
+                'Usuario Transferencia', 'Fecha Transferencia'
+            ];
+
+            columnasData = [
+                'id', 'fecha', 'provincia', 'proveedor', 'ruc_proveedor',
+                'tipo', 'linea',
+                'precioMayCarMin', 'precioMayCarMax', 'precioMayBraMin', 'precioMayBraMax',
+                'precioPubMin', 'precioPubMax',
+                'pesoMachoPromMin', 'pesoMachoPromMax',
+                'pesoHembraPromMin', 'pesoHembraPromMax',
+                'pesoBrasaPromMin', 'pesoBrasaPromMax',
+                'colorMin', 'colorMax', 'cantidad',
+                'usuarioRegistro', 'fechaHoraRegistro',
+                'usuarioTransferencia', 'fechaHoraTransferencia'
+            ];
+        }
+
+        // Agregar columna de opciones
+        columnas.push('Opciones');
+
+        // Generar checkboxes ANTES de inicializar DataTable
+        this.generarCheckboxesColumnas(columnas);
+
+        // Generar cabeceras
+        thead.innerHTML = columnas
+            .map(c => `<th class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-left">${c}</th>`)
+            .join('');
+
+        console.log('📊 Inicializando DataTable con', columnas.length, 'columnas');
+
+        // Inicializar DataTable
+        this.dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: this.tipoActual === 'vivo-aqp'
+                    ? this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_AQP.FILTRO
+                    : this.service.baseURL + AppConfig.API.ENDPOINTS.VIVO_PROVINCIA.FILTRO,
+                type: 'GET',
+                data: (d) => {
+                    const filtros = {};
+                    const campos = [
+                        'FechaInicio', 'FechaFin', 'Provincia', 'Empresa',
+                        'Proveedor', 'Tipo', 'Linea', 'Condicion', 'Mercado',
+                    ];
+
+                    campos.forEach(campo => {
+                        const el = document.getElementById(`filter${campo}`);
+                        if (el && el.value.trim() !== '') {
+                            const key = campo.charAt(0).toLowerCase() + campo.slice(1);
+                            filtros[key] = el.value.trim();
+                        }
+                    });
+
+                    return Object.assign(d, filtros);
+                },
+                dataSrc: json => {
+                    console.log('📥 Datos recibidos:', json.data?.length || 0, 'registros');
+                    return json.data || [];
+                }
+            },
+            columns: [
+                ...columnasData.map(col => ({ data: col })),
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: (data, type, row, meta) => `
+                        <div class="text-center space-x-2">
+                            <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `
+                }
+            ],
+            order: [[1, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
+            },
+            initComplete: () => {
+                console.log('✅ DataTable inicializado correctamente');
+                
+                // Aplicar visibilidad inicial de columnas
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    column.visible(this.columnasVisibles[columnIndex]);
+                });
+            },
+            drawCallback: () => {
+                // Aplicar visibilidad de columnas en cada redibujado
+                Object.keys(this.columnasVisibles).forEach(columnIndex => {
+                    const column = this.dataTable.column(parseInt(columnIndex));
+                    column.visible(this.columnasVisibles[columnIndex]);
+                });
+            }
+        });
+
+        // Eventos para botones de acción
+        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            this.modificarSeleccionado();
+        });
+
+        $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
+            const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
+            this.registroSeleccionado = rowData;
+            await this.eliminarSeleccionado();
+        });
+
+        console.log('✅ Tabla renderizada completamente');
+    }
 
     mostrarModalNuevo() {
         if (!this.tipoActual) {
