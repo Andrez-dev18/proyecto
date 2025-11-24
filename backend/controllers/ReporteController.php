@@ -84,7 +84,7 @@ class ReporteController
         $this->CtrlClientePV = new ClientePvService($db);
         $this->OficialGRS = new OficialGRSService($db);
         $this->MercadoRes = new MercadoResService($db);
-        $this->MercadoDet = new MercadoDetController($db);
+        $this->MercadoDet = new MercadoDetService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -1569,197 +1569,194 @@ class ReporteController
     }
 
     public function exportarOficialGrsExcel()
-{
-    // 1. Obtener los datos
-    $datos = $this->OficialGRS->getAll();
+    {
+        // 1. Obtener los datos
+        $datos = $this->OficialGRS->getAll();
 
-    // 2. Encabezados del archivo
-    $headers = [
-        'ID',
-        'FECHA',
-        'COD CLIENTE',
-        'COD CLIENTE COMP',
-        'RAZÓN SOCIAL',
-        'GIRO',
-        'DIRECCIÓN',
-        'UBIGEO',
-        'PROVINCIA',
-        'DEPARTAMENTO',
-        'FECHA ALTA',
-        'COD RUTA',
-        'COD VENDEDOR',
-        'NOM VENDEDOR',
-        'FUERZA',
-        'COD PROD DIST',
-        'PRODUCTO',
-        'CATEGORÍA',
-        'LÍNEA',
-        'SUBLÍNEA',
-        'CANTIDAD',
-        'PESO',
-        'PESO FINAL',
-        'IMPORTE IGV',
-        'IMPORTE BASE',
-        'RUC CLIENTE',
-        'DNI CLIENTE',
-        'COD MÓVIL',
-        'DESC MÓVIL',
-        'CANAL',
-        'DÍA VISITA',
-        'FRECUENCIA',
-        'ID PROV',
-        'DAP',
-        'COD PROD SF',
-        'PROD SF',
-        'CATEG SF',
-        'FAMILIA SF',
-        'SUBFAMILIA SF',
-        'COND',
-        'NOM BD',
-        'USUARIO REGISTRO',
-        'FECHA REGISTRO'
-    ];
-
-    // 3. Mapeo de cada fila
-    $mapper = function ($d) {
-        return [
-            $d['id'] ?? '',
-            $d['fecha'] ?? '',
-            $d['ccod_cli'] ?? '',
-            $d['ccod_cli_comp'] ?? '',
-            strtoupper($d['crazn_soci'] ?? ''),
-            strtoupper($d['cdesc_giro'] ?? ''),
-            strtoupper($d['cdireccion'] ?? ''),
-            strtoupper($d['cnom_ubige'] ?? ''),
-            strtoupper($d['provincia'] ?? ''),
-            strtoupper($d['cnom_departamento'] ?? ''),
-            $d['dfec_alta'] ?? '',
-            $d['ccod_ruta'] ?? '',
-            $d['ccod_vend'] ?? '',
-            strtoupper($d['cnom_vend'] ?? ''),
-            $d['ccod_fuerz'] ?? '',
-            $d['ccod_prod_distribuidor'] ?? '',
-            strtoupper($d['cnom_prod'] ?? ''),
-            strtoupper($d['cnom_categ'] ?? ''),
-            strtoupper($d['cnom_lin'] ?? ''),
-            strtoupper($d['cnom_subli'] ?? ''),
-            $d['ncant'] ?? '',
-            $d['npeso'] ?? '',
-            $d['peso_final'] ?? '',
-            $d['impte_igv'] ?? '',
-            $d['impte_base'] ?? '',
-            $d['cruc_cli'] ?? '',
-            $d['cdni_cli'] ?? '',
-            $d['ccod_movil'] ?? '',
-            strtoupper($d['cdesc_movi'] ?? ''),
-            strtoupper($d['cdesc_cana'] ?? ''),
-            strtoupper($d['cdia_visit'] ?? ''),
-            $d['frec'] ?? '',
-            $d['id_prov'] ?? '',
-            $d['dap'] ?? '',
-            $d['ccod_prod_sf'] ?? '',
-            strtoupper($d['cnom_prod_sf'] ?? ''),
-            strtoupper($d['categoria_sf'] ?? ''),
-            strtoupper($d['familia_sf'] ?? ''),
-            strtoupper($d['subfamilia_sf'] ?? ''),
-            $d['cond'] ?? '',
-            strtoupper($d['nom_db'] ?? ''),
-            strtoupper($d['usuarioRegistro'] ?? ''),
-            $d['fechaHoraRegistro'] ?? ''
+        // 2. Encabezados del archivo
+        $headers = [
+            'ID',
+            'FECHA',
+            'COD CLIENTE',
+            'COD CLIENTE COMP',
+            'RAZÓN SOCIAL',
+            'GIRO',
+            'DIRECCIÓN',
+            'UBIGEO',
+            'PROVINCIA',
+            'DEPARTAMENTO',
+            'FECHA ALTA',
+            'COD RUTA',
+            'COD VENDEDOR',
+            'NOM VENDEDOR',
+            'FUERZA',
+            'COD PROD DIST',
+            'PRODUCTO',
+            'CATEGORÍA',
+            'LÍNEA',
+            'SUBLÍNEA',
+            'CANTIDAD',
+            'PESO',
+            'PESO FINAL',
+            'IMPORTE IGV',
+            'IMPORTE BASE',
+            'RUC CLIENTE',
+            'DNI CLIENTE',
+            'COD MÓVIL',
+            'DESC MÓVIL',
+            'CANAL',
+            'DÍA VISITA',
+            'FRECUENCIA',
+            'ID PROV',
+            'DAP',
+            'COD PROD SF',
+            'PROD SF',
+            'CATEG SF',
+            'FAMILIA SF',
+            'SUBFAMILIA SF',
+            'COND',
+            'NOM BD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO'
         ];
-    };
 
-    // 4. Generar CSV final
-    $this->outputCSV(
-        'Oficial_GRS_' . date('Y-m-d') . '.csv',
-        $headers,
-        $datos,
-        $mapper
-    );
-}
+        // 3. Mapeo de cada fila
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                $d['ccod_cli'] ?? '',
+                $d['ccod_cli_comp'] ?? '',
+                strtoupper($d['crazn_soci'] ?? ''),
+                strtoupper($d['cdesc_giro'] ?? ''),
+                strtoupper($d['cdireccion'] ?? ''),
+                strtoupper($d['cnom_ubige'] ?? ''),
+                strtoupper($d['provincia'] ?? ''),
+                strtoupper($d['cnom_departamento'] ?? ''),
+                $d['dfec_alta'] ?? '',
+                $d['ccod_ruta'] ?? '',
+                $d['ccod_vend'] ?? '',
+                strtoupper($d['cnom_vend'] ?? ''),
+                $d['ccod_fuerz'] ?? '',
+                $d['ccod_prod_distribuidor'] ?? '',
+                strtoupper($d['cnom_prod'] ?? ''),
+                strtoupper($d['cnom_categ'] ?? ''),
+                strtoupper($d['cnom_lin'] ?? ''),
+                strtoupper($d['cnom_subli'] ?? ''),
+                $d['ncant'] ?? '',
+                $d['npeso'] ?? '',
+                $d['peso_final'] ?? '',
+                $d['impte_igv'] ?? '',
+                $d['impte_base'] ?? '',
+                $d['cruc_cli'] ?? '',
+                $d['cdni_cli'] ?? '',
+                $d['ccod_movil'] ?? '',
+                strtoupper($d['cdesc_movi'] ?? ''),
+                strtoupper($d['cdesc_cana'] ?? ''),
+                strtoupper($d['cdia_visit'] ?? ''),
+                $d['frec'] ?? '',
+                $d['id_prov'] ?? '',
+                $d['dap'] ?? '',
+                $d['ccod_prod_sf'] ?? '',
+                strtoupper($d['cnom_prod_sf'] ?? ''),
+                strtoupper($d['categoria_sf'] ?? ''),
+                strtoupper($d['familia_sf'] ?? ''),
+                strtoupper($d['subfamilia_sf'] ?? ''),
+                $d['cond'] ?? '',
+                strtoupper($d['nom_db'] ?? ''),
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? ''
+            ];
+        };
 
-public function exportarMercadoResExcel()
-{
-    // 1. Obtener datos
-    $datos = $this->MercadoRes->getAll();
+        // 4. Generar CSV final
+        $this->outputCSV(
+            'Oficial_GRS_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
 
-    // 2. Encabezados del CSV
-    $headers = [
-        'PROVINCIA CODIGO',
-        'PROVINCIA NOMBRE',
-        'NUM. MERCADOS',
-        'TIPO ESTABLECIMIENTO',
-        'TAMAÑO',
-        'TOTAL',
-        'NUM. AVES'
-    ];
+    public function exportarMercadoResExcel()
+    {
+        // 1. Obtener datos
+        $datos = $this->MercadoRes->getAll();
 
-    // 3. Mapeo de cada fila
-    $mapper = function ($d) {
-        return [
-            $d['provincia'] ?? '',
-            strtoupper($d['provincia_nombre'] ?? ''),
-            $d['num_mercados'] ?? '',
-            strtoupper($d['tipo_establecimiento'] ?? ''),
-            strtoupper($d['tamanio'] ?? ''),
-            $d['total'] ?? '',
-            $d['num_aves'] ?? '',
+        // 2. Encabezados del CSV
+        $headers = [
+            'PROVINCIA CODIGO',
+            'PROVINCIA NOMBRE',
+            'NUM. MERCADOS',
+            'TIPO ESTABLECIMIENTO',
+            'TAMAÑO',
+            'TOTAL',
+            'NUM. AVES'
         ];
-    };
 
-    // 4. Generar CSV
-    $this->outputCSV(
-        'Mercado_Resumen_' . date('Y-m-d') . '.csv',
-        $headers,
-        $datos,
-        $mapper
-    );
-}
+        // 3. Mapeo de cada fila
+        $mapper = function ($d) {
+            return [
+                $d['provincia'] ?? '',
+                strtoupper($d['provincia_nombre'] ?? ''),
+                $d['num_mercados'] ?? '',
+                strtoupper($d['tipo_establecimiento'] ?? ''),
+                strtoupper($d['tamanio'] ?? ''),
+                $d['total'] ?? '',
+                $d['num_aves'] ?? '',
+            ];
+        };
 
-public function exportarMercadoDetExcel()
-{
-    // 1. Obtener datos
-    $datos = $this->MercadoDet->getAll();
+        // 4. Generar CSV
+        $this->outputCSV(
+            'Mercado_Resumen_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
 
-    // 2. Encabezados del CSV
-    $headers = [
-        'ID',
-        'FECHA',
-        'MERCADO',
-        'TIPO ESTABLECIMIENTO',
-        'TAMAÑO',
-        'CANTIDAD',
-        'USUARIO REGISTRO',
-        'FECHA REGISTRO',
-        'USUARIO TRANSFERENCIA',
-        'FECHA TRANSFERENCIA'
-    ];
+    public function exportarMercadoDetExcel()
+    {
+        // 1. Obtener los datos completos
+        $datos = $this->MercadoDet->getAll();
 
-    // 3. Mapeo de cada fila
-    $mapper = function ($d) {
-        return [
-            $d['id'] ?? '',
-            $d['fecha'] ?? '',
-            strtoupper($d['mercado'] ?? ''),
-            strtoupper($d['tipo_establecimiento'] ?? ''),
-            strtoupper($d['tamanio'] ?? ''),
-            $d['cantidad'] ?? '',
-            strtoupper($d['usuarioRegistro'] ?? ''),
-            $d['fechaHoraRegistro'] ?? '',
-            strtoupper($d['usuarioTransferencia'] ?? ''),
-            $d['fechaHoraTransferencia'] ?? ''
+        // 2. Encabezados del archivo CSV/Excel
+        $headers = [
+            'ID',
+            'FECHA',
+            'MERCADO',
+            'TIPO ESTABLECIMIENTO',
+            'TAMAÑO',
+            'CANTIDAD',
+            'USUARIO REGISTRO',
+            'FECHA REGISTRO',
+            'USUARIO TRANSFERENCIA',
+            'FECHA TRANSFERENCIA'
         ];
-    };
 
-    // 4. Generar CSV
-    $this->outputCSV(
-        'Mercado_Detallado_' . date('Y-m-d') . '.csv',
-        $headers,
-        $datos,
-        $mapper
-    );
-}
+        // 3. Mapeador de cada fila
+        $mapper = function ($d) {
+            return [
+                $d['id'] ?? '',
+                $d['fecha'] ?? '',
+                strtoupper($d['mercado'] ?? ''),
+                strtoupper($d['tipo_establecimiento'] ?? ''),
+                strtoupper($d['tamanio'] ?? ''),
+                $d['cantidad'] ?? '',
+                strtoupper($d['usuarioRegistro'] ?? ''),
+                $d['fechaHoraRegistro'] ?? '',
+                strtoupper($d['usuarioTransferencia'] ?? ''),
+                $d['fechaHoraTransferencia'] ?? '',
+            ];
+        };
 
-
-
+        // 4. Exportar CSV usando tu función base outputCSV()
+        $this->outputCSV(
+            'Mercado_Detallado_' . date('Y-m-d') . '.csv',
+            $headers,
+            $datos,
+            $mapper
+        );
+    }
 }

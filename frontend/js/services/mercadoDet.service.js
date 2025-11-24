@@ -1,6 +1,6 @@
-class MercadoResService {
+class MercadoDetService {
     constructor() {
-        this.config = window.MercadoResConfig;
+        this.config = window.MercadoDetConfig;
         this.baseUrl = this.config.API.BASE_URL;
     }
 
@@ -49,54 +49,40 @@ class MercadoResService {
         }
     }
 
-    async delete(data) {
-        console.log(`${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}`);
+    async eliminar(id) {
         try {
-            const response = await fetch(
-                `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+            const url = `${this.baseUrl + this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
+
+            let response = await fetch(url, { method: 'DELETE' });
+
+            let responseText = await response.text();
+
+            if (!response.ok) {
+                // If server returned HTML (unexpected) or DELETE not allowed, try POST fallback
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('text/html') || response.status === 405 || response.status === 404) {
+                    console.warn('DELETE returned HTML or failed, retrying with POST fallback');
+                    response = await fetch(url, { method: 'POST' });
+                    responseText = await response.text();
+                    console.log('Fallback (POST) respuesta del servidor:', responseText);
                 }
-            );
 
-            if (!response.ok) throw new Error("Error al eliminar");
+                if (!response.ok) {
+                    let errorMsg = 'Error al eliminar registro';
+                    try {
+                        const errorData = JSON.parse(responseText);
+                        errorMsg = errorData.message || errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = responseText || errorMsg;
+                    }
+                    throw new Error(errorMsg);
+                }
+            }
 
-            return await response.json();
-
+            return responseText ? JSON.parse(responseText) : { success: true };
         } catch (error) {
-            console.error("Error en eliminar:", error);
+            console.error('Error en eliminar:', error);
             throw error;
-        }
-    }
-
-    async getFiltered(filters) {
-        try {
-            const params = new URLSearchParams();
-            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
-            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
-            if (filters.tipo) params.append('tipo', filters.tipo);
-
-            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${params}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error en filtrado');
-            return await response.json();
-        } catch (error) {
-            console.error('Error en getFiltered:', error);
-            throw error;
-        }
-    }
-
-    async getTipos() {
-        try {
-            const url = `${this.baseUrl}${this.config.CATALOGOS.TIPOS}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Error al cargar tipos');
-            return await response.json();
-        } catch (error) {
-            console.error('Error en getTipos:', error);
-            return [];
         }
     }
 
@@ -112,9 +98,9 @@ class MercadoResService {
         }
     }
 
-    async getProvincias() {
+    async getMercados() {
         try {
-            const url = `${this.baseUrl}${this.config.CATALOGOS.PROVINCIAS}`;
+            const url = `${this.baseUrl}${this.config.CATALOGOS.mercado}`;
 
             const response = await fetch(url);
             if (!response.ok) throw new Error('Error al cargar provincias');
@@ -127,4 +113,4 @@ class MercadoResService {
 
 }
 
-window.MercadoResService = MercadoResService;
+window.MercadoDetService = MercadoDetService;

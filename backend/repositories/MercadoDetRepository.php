@@ -133,60 +133,56 @@ class MercadoDetRepository
         $fechaInicio = $params['fechaInicio'] ?? null;
         $fechaFin    = $params['fechaFin'] ?? null;
 
+        $mercado = $params['mercado'] ?? null;
+        $tipo_establecimiento = $params['tipo_establecimiento'] ?? null;
+
         $query = "
         SELECT
-                a.id,
-                a.fecha,
-                m.nombre AS mercado,
-                a.tipo_establecimiento,
-                a.tamanio,
-                a.cantidad,
-                a.usuarioRegistro,
-                a.fechaHoraRegistro,
-                a.usuarioTransferencia,
-                a.fechaHoraTransferencia
-            FROM com_db_mercado_det a
-            LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
+            a.id,
+            a.fecha,
+            m.nombre AS mercado,
+            a.tipo_establecimiento,
+            a.tamanio,
+            a.cantidad,
+            a.usuarioRegistro,
+            a.fechaHoraRegistro,
+            a.usuarioTransferencia,
+            a.fechaHoraTransferencia
+        FROM com_db_mercado_det a
+        LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
         WHERE 1=1
     ";
 
         // FILTRO POR FECHAS
         if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $query .= " AND fecha BETWEEN :fechaInicio AND :fechaFin ";
+            $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin' ";
+        }
+
+        // FILTRO POR MERCADO
+        if (!empty($mercado)) {
+            $query .= " AND a.mercado = $mercado ";
+        }
+
+        // FILTRO POR TIPO ESTABLECIMIENTO
+        if (!empty($tipo_establecimiento)) {
+            $query .= " AND a.tipo_establecimiento = '$tipo_establecimiento' ";
         }
 
         // BÚSQUEDA GENERAL
         if (!empty($search)) {
             $query .= "
             AND (
-                mercado LIKE :search OR
-                tipo_establecimiento LIKE :search OR
-                tamanio LIKE :search
+                m.nombre LIKE '%$search%' OR
+                a.tipo_establecimiento LIKE '%$search%' OR
+                a.tamanio LIKE '%$search%'
             )
         ";
         }
 
         // ORDEN + PAGINACIÓN
-        $query .= " ORDER BY fecha DESC LIMIT :start, :length";
+        $query .= " ORDER BY a.fecha DESC LIMIT $start, $length";
 
-        $stmt = $this->conn->prepare($query);
-
-        // PARAMS SEGUROS
-        if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $stmt->bindValue(':fechaInicio', $fechaInicio);
-            $stmt->bindValue(':fechaFin', $fechaFin);
-        }
-
-        if (!empty($search)) {
-            $stmt->bindValue(':search', "%$search%");
-        }
-
-        $stmt->bindValue(':start', intval($start), PDO::PARAM_INT);
-        $stmt->bindValue(':length', intval($length), PDO::PARAM_INT);
-
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->executeQuery($query);
     }
 
     public function countAll()
@@ -199,47 +195,50 @@ class MercadoDetRepository
     public function countFiltered($params = [])
     {
         $search = $params['search']['value'] ?? '';
+
         $fechaInicio = $params['fechaInicio'] ?? null;
         $fechaFin    = $params['fechaFin'] ?? null;
 
+        $mercado = $params['mercado'] ?? null;
+        $tipo_establecimiento = $params['tipo_establecimiento'] ?? null;
+
         $query = "
         SELECT COUNT(*) AS total
-        FROM com_db_mercado_det
+        FROM com_db_mercado_det a
+        LEFT JOIN com_mercadodos m ON a.mercado = m.codigo
         WHERE 1=1
     ";
 
-        // Filtrar por fecha
+        // Fechas
         if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $query .= " AND fecha BETWEEN :fechaInicio AND :fechaFin ";
+            $query .= " AND a.fecha BETWEEN '$fechaInicio' AND '$fechaFin' ";
         }
 
-        // Filtro de búsqueda
+        // Mercado
+        if (!empty($mercado)) {
+            $query .= " AND a.mercado = $mercado ";
+        }
+
+        // Tipo establecimiento
+        if (!empty($tipo_establecimiento)) {
+            $query .= " AND a.tipo_establecimiento = '$tipo_establecimiento' ";
+        }
+
+        // Búsqueda global
         if (!empty($search)) {
             $query .= "
             AND (
-                mercado LIKE :search OR
-                tipo_establecimiento LIKE :search OR
-                tamanio LIKE :search
+                m.nombre LIKE '%$search%' OR
+                a.tipo_establecimiento LIKE '%$search%' OR
+                a.tamanio LIKE '%$search%'
             )
         ";
         }
 
-        $stmt = $this->conn->prepare($query);
-
-        if (!empty($fechaInicio) && !empty($fechaFin)) {
-            $stmt->bindValue(':fechaInicio', $fechaInicio);
-            $stmt->bindValue(':fechaFin', $fechaFin);
-        }
-
-        if (!empty($search)) {
-            $stmt->bindValue(':search', "%$search%");
-        }
-
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $result['total'] ?? 0;
+        $result = $this->executeQuery($query);
+        return $result[0]['total'] ?? 0;
     }
+
 
 
 

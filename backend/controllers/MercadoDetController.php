@@ -63,6 +63,8 @@ class MercadoDetController
         $params = [
             'fechaInicio' => $_GET['fechaInicio'] ?? null,
             'fechaFin'    => $_GET['fechaFin'] ?? null,
+            'mercado' => $_GET['mercado'] ?? null,
+            'tipo_establecimiento' => $_GET['tipoEstablecimiento'] ?? null,
             'start'       => intval($_GET['start'] ?? 0),
             'length'      => intval($_GET['length'] ?? 10),
             'search'      => $_GET['search'] ?? ['value' => '']
