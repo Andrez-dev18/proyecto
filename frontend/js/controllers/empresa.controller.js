@@ -173,7 +173,7 @@ class EmpresaController {
                     order: [[0, 'desc']],
                     responsive: true,
                     autoWidth: false,
-                    scrollX: true,
+                    scrollX: false,
                     columnDefs: [
                         { width: '10%', targets: 0, className: 'text-center' },
                         { width: '50%', targets: 1 },

@@ -176,7 +176,7 @@ class CondicionController {
         order: [[0, 'desc']],
         responsive: false, // Desactivar responsive para mantener anchos fijos
         autoWidth: false, // Desactivar auto width
-        scrollX: true, // Habilitar scroll horizontal si es necesario
+        scrollX: false, // Habilitar scroll horizontal si es necesario
         pageLength: 10,
         language: {
             url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json'
