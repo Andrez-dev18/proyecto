@@ -232,9 +232,10 @@ class IngresosLimaController {
             data: this.datosFiltrados,
             processing: false,
             serverSide: false,
-            destroy: true,
-            scrollX: true,
-            scrollCollapse: true,
+            destroy: false,
+            scrollX: false,
+            scrollCollapse: false,
+            paging: true,
             columns: [
                 { 
                     data: 'id', 

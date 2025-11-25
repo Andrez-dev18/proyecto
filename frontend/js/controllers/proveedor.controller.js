@@ -100,9 +100,10 @@ class ProveedorController {
             data: this.datosFiltrados,
             processing: false,
             serverSide: false,
-            destroy: true,
-            scrollX: true,
+            destroy: false,
+            scrollX: false,
             scrollCollapse: true,
+paging: true,
             columns: [
                 { 
                     data: 'codigo', 
