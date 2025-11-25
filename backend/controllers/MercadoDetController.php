@@ -17,28 +17,33 @@ class MercadoDetController
     }
 
     public function create()
-    {
-        $data = json_decode(file_get_contents("php://input"), true);
-        if (isset($data["id"]) && !empty(trim($data["id"]))) {
-            http_response_code(400);
-            echo json_encode(["error" => "El ID no debe ser enviado para crear nuevo registro."]);
-            return;
-        }
-        $this->service->save($data);
-        echo json_encode(["message" => "Registro creado correctamente"]);
+{
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (!empty($data["id"])) {
+        http_response_code(400);
+        echo json_encode(["error" => "El ID no debe enviarse al crear"]);
+        return;
     }
 
-    public function update()
-    {
-        $data = json_decode(file_get_contents("php://input"), true);
-        if (!isset($data["id"]) || empty(trim($data["id"]))) {
-            http_response_code(400);
-            echo json_encode(["error" => "ID inválido para actualizar el registro."]);
-            return;
-        }
-        $this->service->save($data);
-        echo json_encode(["message" => "Registro actualizado correctamente"]);
+    $result = $this->service->save($data);
+    echo json_encode($result);
+}
+
+public function update()
+{
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (empty($data["id"])) {
+        http_response_code(400);
+        echo json_encode(["error" => "Falta ID para actualizar"]);
+        return;
     }
+
+    $result = $this->service->save($data);
+    echo json_encode($result);
+}
+
 
     public function delete($id)
     {
@@ -64,7 +69,7 @@ class MercadoDetController
             'fechaInicio' => $_GET['fechaInicio'] ?? null,
             'fechaFin'    => $_GET['fechaFin'] ?? null,
             'mercado' => $_GET['mercado'] ?? null,
-            'tipo_establecimiento' => $_GET['tipoEstablecimiento'] ?? null,
+            'tipoEstablecimiento' => $_GET['tipoEstablecimiento'] ?? null,
             'start'       => intval($_GET['start'] ?? 0),
             'length'      => intval($_GET['length'] ?? 10),
             'search'      => $_GET['search'] ?? ['value' => '']

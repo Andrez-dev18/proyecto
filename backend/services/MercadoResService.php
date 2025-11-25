@@ -45,4 +45,24 @@ class MercadoResService
     {
         return $this->repo->countFiltered($params);
     }
+
+     public function getResumenPorProvincias($fecha = null)
+    {
+        return $this->repo->tablaPorProvincias($fecha);
+    }
+
+    public function getResumenAvesPorProvincias($fecha = null)
+    {
+        return $this->repo->tablaPorAves($fecha);
+    }
+
+    // 📌 TABLA 3: Totales por mercados en una provincia
+    public function getResumenPorMercados($provincia, $fecha = null)
+    {
+        if (!$provincia) {
+            return ["error" => "Provincia requerida"];
+        }
+        return $this->repo->tablaPorMercados($provincia, $fecha);
+    }
+
 }

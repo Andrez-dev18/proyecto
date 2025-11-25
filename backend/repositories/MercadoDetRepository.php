@@ -15,7 +15,7 @@ class MercadoDetRepository
                 a.id,
                 a.fecha,
                 m.nombre AS mercado,
-                a.tipo_establecimiento,
+                a.tipoEstablecimiento,
                 a.tamanio,
                 a.cantidad,
                 a.usuarioRegistro,
@@ -31,89 +31,143 @@ class MercadoDetRepository
     }
 
     public function save($data)
-    {
-        // Si existe ID => actualizar
-        if (!empty($data['id'])) {
+{
+    // 1️⃣ Validar operación (insert o update)
+    $isUpdate = !empty($data['id']);
 
-            $query = "
-            UPDATE com_db_mercado_det SET
-                fecha = :fecha,
-                mercado = :mercado,
-                tipo_establecimiento = :tipo_establecimiento,
-                tamanio = :tamanio,
-                cantidad = :cantidad,
-                usuarioRegistro = :usuarioRegistro,
-                fechaHoraRegistro = :fechaHoraRegistro,
-                usuarioTransferencia = :usuarioTransferencia,
-                fechaHoraTransferencia = :fechaHoraTransferencia
-            WHERE id = :id
-        ";
-
-            $stmt = $this->conn->prepare($query);
-
-            $params = [
-                ':id' => $data['id'],
-                ':fecha' => $data['fecha'] ?? null,
-                ':mercado' => $data['mercado'] ?? null,
-                ':tipo_establecimiento' => $data['tipo_establecimiento'] ?? null,
-                ':tamanio' => $data['tamanio'] ?? null,
-                ':cantidad' => $data['cantidad'] ?? 0,
-                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
-                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
-                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
-                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
-            ];
-        }
-        // Si NO tiene ID => insertar
-        else {
-
-            $query = "
-            INSERT INTO com_db_mercado_det (
-                id,
-                fecha,
-                mercado,
-                tipo_establecimiento,
-                tamanio,
-                cantidad,
-                usuarioRegistro,
-                fechaHoraRegistro,
-                usuarioTransferencia,
-                fechaHoraTransferencia
-            ) VALUES (
-                :id,
-                :fecha,
-                :mercado,
-                :tipo_establecimiento,
-                :tamanio,
-                :cantidad,
-                :usuarioRegistro,
-                :fechaHoraRegistro,
-                :usuarioTransferencia,
-                :fechaHoraTransferencia
-            )
-        ";
-
-            // Generar UUID
-            $data['id'] = $this->generateUuid();
-
-            $stmt = $this->conn->prepare($query);
-
-            $params = [
-                ':id' => $data['id'],
-                ':fecha' => $data['fecha'] ?? null,
-                ':mercado' => $data['mercado'] ?? null,
-                ':tipo_establecimiento' => $data['tipo_establecimiento'] ?? null,
-                ':tamanio' => $data['tamanio'] ?? null,
-                ':cantidad' => $data['cantidad'] ?? 0,
-                ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
-                ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
-                ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
-                ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
-            ];
-        }
-
-        return $stmt->execute($params);
+    if (!$isUpdate) {
+        $data['id'] = $this->generateUuid();
     }
+
+    // 2️⃣ Preparar SQL
+    $sql = $isUpdate ? "
+        UPDATE com_db_mercado_det SET
+            fecha = :fecha,
+            mercado = :mercado,
+            tipoEstablecimiento = :tipoEstablecimiento,
+            tamanio = :tamanio,
+            cantidad = :cantidad,
+            usuarioRegistro = :usuarioRegistro,
+            fechaHoraRegistro = :fechaHoraRegistro,
+            usuarioTransferencia = :usuarioTransferencia,
+            fechaHoraTransferencia = :fechaHoraTransferencia
+        WHERE id = :id
+    " : "
+        INSERT INTO com_db_mercado_det (
+            id, fecha, mercado, tipoEstablecimiento, tamanio,
+            cantidad, usuarioRegistro, fechaHoraRegistro,
+            usuarioTransferencia, fechaHoraTransferencia
+        ) VALUES (
+            :id, :fecha, :mercado, :tipoEstablecimiento, :tamanio,
+            :cantidad, :usuarioRegistro, :fechaHoraRegistro,
+            :usuarioTransferencia, :fechaHoraTransferencia
+        )
+    ";
+
+    $stmt = $this->conn->prepare($sql);
+
+    $params = [
+        ':id' => $data['id'],
+        ':fecha' => $data['fecha'] ?? null,
+        ':mercado' => $data['mercado'] ?? null,
+        ':tipoEstablecimiento' => $data['tipoEstablecimiento'] ?? null,
+        ':tamanio' => $data['tamanio'] ?? null,
+        ':cantidad' => $data['cantidad'] ?? 0,
+        ':usuarioRegistro' => $data['usuarioRegistro'] ?? null,
+        ':fechaHoraRegistro' => $data['fechaHoraRegistro'] ?? null,
+        ':usuarioTransferencia' => $data['usuarioTransferencia'] ?? null,
+        ':fechaHoraTransferencia' => $data['fechaHoraTransferencia'] ?? null,
+    ];
+
+    $successDet = $stmt->execute($params);
+
+    // ❗ Si falla el detalle, no continuar
+    if (!$successDet) {
+        return [
+            "det" => false,
+            "resumen" => "no-ejecutado",
+            "error" => $stmt->errorInfo(),
+            "message" => "Error al registrar Mercado Det"
+        ];
+    }
+
+    // 3️⃣ Actualizar resumen
+    $resultadoResumen = $this->actualizarResumenPDO(
+        $data['mercado'],
+        $data['tipoEstablecimiento'],
+        $data['tamanio']
+    );
+
+    return [
+        "det" => true,
+        "resumen" => $resultadoResumen,
+        "message" => $isUpdate ? "Registro actualizado" : "Registro creado"
+    ];
+}
+
+
+
+private function actualizarResumenPDO($mercado_codigo, $tipoEstablecimiento, $tamanio)
+{
+    try {
+        // Obtener provincia
+        $stmtProv = $this->conn->prepare("SELECT provincia FROM com_mercado WHERE codigo = :codigo");
+        $stmtProv->execute([':codigo' => $mercado_codigo]);
+
+        $provincia = $stmtProv->fetchColumn();
+        if (!$provincia) {
+            return "sin-provincia";
+        }
+
+        // Ejecutar consulta
+        $sql = "
+        INSERT INTO com_db_mercado_res (
+            provincia, tipoEstablecimiento, tamanio,
+            total, numAves, fecha
+        )
+        SELECT 
+            p.codigo,
+            m1.tipoEstablecimiento,
+            m1.tamanio,
+            SUM(m1.cantidad),
+            ROUND(SUM(m1.cantidad) * COALESCE(fp.factor, 1)),
+            CURDATE()
+        FROM com_db_mercado_det m1
+        JOIN com_mercado m ON m1.mercado = m.codigo
+        JOIN com_provincia p ON m.provincia = p.codigo
+        LEFT JOIN com_factor_proyeccion fp ON m1.tamanio = fp.tamanio
+        WHERE 
+            m1.mercado = :mercado
+            AND m1.tipoEstablecimiento = :tipoE
+            AND m1.tamanio = :tamanio
+        GROUP BY p.codigo, m1.tipoEstablecimiento, m1.tamanio
+        ON DUPLICATE KEY UPDATE 
+            total = VALUES(total),
+            numAves = VALUES(numAves),
+            fecha = VALUES(fecha)
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([
+            ':mercado' => $mercado_codigo,
+            ':tipoE' => $tipoEstablecimiento,
+            ':tamanio' => $tamanio
+        ]);
+
+        $rows = $stmt->rowCount();
+
+        if ($rows === 0) return "sin-datos";
+        if ($rows === 1) return "insert";
+        if ($rows === 2) return "update";  
+
+        return "ok";
+
+    } catch (Exception $e) {
+        error_log("Error resumen: " . $e->getMessage());
+        return "error";
+    }
+}
+
 
 
     public function delete($id)
@@ -134,14 +188,14 @@ class MercadoDetRepository
         $fechaFin    = $params['fechaFin'] ?? null;
 
         $mercado = $params['mercado'] ?? null;
-        $tipo_establecimiento = $params['tipo_establecimiento'] ?? null;
+        $tipoEstablecimiento = $params['tipoEstablecimiento'] ?? null;
 
         $query = "
         SELECT
             a.id,
             a.fecha,
             m.nombre AS mercado,
-            a.tipo_establecimiento,
+            a.tipoEstablecimiento,
             a.tamanio,
             a.cantidad,
             a.usuarioRegistro,
@@ -164,8 +218,8 @@ class MercadoDetRepository
         }
 
         // FILTRO POR TIPO ESTABLECIMIENTO
-        if (!empty($tipo_establecimiento)) {
-            $query .= " AND a.tipo_establecimiento = '$tipo_establecimiento' ";
+        if (!empty($tipoEstablecimiento)) {
+            $query .= " AND a.tipoEstablecimiento = '$tipoEstablecimiento' ";
         }
 
         // BÚSQUEDA GENERAL
@@ -173,7 +227,7 @@ class MercadoDetRepository
             $query .= "
             AND (
                 m.nombre LIKE '%$search%' OR
-                a.tipo_establecimiento LIKE '%$search%' OR
+                a.tipoEstablecimiento LIKE '%$search%' OR
                 a.tamanio LIKE '%$search%'
             )
         ";
@@ -200,7 +254,7 @@ class MercadoDetRepository
         $fechaFin    = $params['fechaFin'] ?? null;
 
         $mercado = $params['mercado'] ?? null;
-        $tipo_establecimiento = $params['tipo_establecimiento'] ?? null;
+        $tipoEstablecimiento = $params['tipoEstablecimiento'] ?? null;
 
         $query = "
         SELECT COUNT(*) AS total
@@ -220,8 +274,8 @@ class MercadoDetRepository
         }
 
         // Tipo establecimiento
-        if (!empty($tipo_establecimiento)) {
-            $query .= " AND a.tipo_establecimiento = '$tipo_establecimiento' ";
+        if (!empty($tipoEstablecimiento)) {
+            $query .= " AND a.tipoEstablecimiento = '$tipoEstablecimiento' ";
         }
 
         // Búsqueda global
@@ -229,7 +283,7 @@ class MercadoDetRepository
             $query .= "
             AND (
                 m.nombre LIKE '%$search%' OR
-                a.tipo_establecimiento LIKE '%$search%' OR
+                a.tipoEstablecimiento LIKE '%$search%' OR
                 a.tamanio LIKE '%$search%'
             )
         ";

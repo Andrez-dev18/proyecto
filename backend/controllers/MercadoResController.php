@@ -15,6 +15,33 @@ class MercadoResController
         echo json_encode($this->service->getAll());
     }
 
+    public function resumenProvincias()
+    {
+        $fecha = $_GET['fecha'] ?? null;
+        $data = $this->service->getResumenPorProvincias($fecha);
+
+        echo json_encode($data);
+    }
+
+    public function resumenAvesProvincias()
+    {
+        $fecha = $_GET['fecha'] ?? null;
+        $data = $this->service->getResumenAvesPorProvincias($fecha);
+
+        echo json_encode($data);
+    }
+
+    // 📌 GET /api/resumen/mercados?provincia=7&fecha=2025-11-24
+    public function resumenMercados()
+    {
+        $provincia = $_GET['provincia'] ?? null;
+        $fecha     = $_GET['fecha'] ?? null;
+
+        $data = $this->service->getResumenPorMercados($provincia, $fecha);
+
+        echo json_encode($data);
+    }
+
     public function create()
     {
         try {

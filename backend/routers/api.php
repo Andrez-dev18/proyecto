@@ -120,22 +120,19 @@ $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 if (strpos($path, "/reporte/beneficiado/arequipa/excel") !== false && $request == "GET") {
     $reporteController->exportarArequipaBeneficiadoExcel();
     exit;
-} 
-elseif (strpos($path, "/reporte/beneficiado/provincia/excel") !== false && $request == "GET") {
+} elseif (strpos($path, "/reporte/beneficiado/provincia/excel") !== false && $request == "GET") {
     $reporteController->exportarProvinciaBeneficiadoExcel();
     exit;
-} 
-elseif (strpos($path, "/reporte/vivo/arequipa/excel") !== false && $request == "GET") {
+} elseif (strpos($path, "/reporte/vivo/arequipa/excel") !== false && $request == "GET") {
     $reporteController->exportarArequipaVivoExcel();
     exit;
-} 
-elseif (strpos($path, "/reporte/vivo/provincia/excel") !== false && $request == "GET") {
+} elseif (strpos($path, "/reporte/vivo/provincia/excel") !== false && $request == "GET") {
     $reporteController->exportarProvinciaVivoExcel();
     exit;
-}elseif (strpos($path, "/reporte/vivoProvincia/excel") !== false && $request == "GET") {
+} elseif (strpos($path, "/reporte/vivoProvincia/excel") !== false && $request == "GET") {
     $reporteController->exportarVivoProvinciaExcel();
     exit;
-}elseif (strpos($path, "/reporte/vivoArequipa/excel") !== false && $request == "GET") {
+} elseif (strpos($path, "/reporte/vivoArequipa/excel") !== false && $request == "GET") {
     $reporteController->exportarVivoArequipaExcel();
     exit;
 }
@@ -145,12 +142,11 @@ elseif (strpos($path, "/usuario/login") !== false && $request == "POST") {
     $data = json_decode(file_get_contents("php://input"), true);
     $UserController->login($data);
     exit;
-}// ========== RUTAS SESIÓN ==========
+} // ========== RUTAS SESIÓN ==========
 elseif (strpos($path, "/usuario/validarSesion") !== false && $request == "GET") {
     require_once __DIR__ . '/../controllers/session.php';
     exit;
-}
-elseif (strpos($path, "/usuario/logout") !== false && $request == "GET") {
+} elseif (strpos($path, "/usuario/logout") !== false && $request == "GET") {
     require_once __DIR__ . '/../controllers/logout.php';
     exit;
 }
@@ -282,7 +278,7 @@ elseif (preg_match("/\/vivoArequipa\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches
 elseif (strpos($path, "/vivoProvincia/all") !== false && $request == "GET") {
     $VivoProvinciaController->getAll();
     exit;
-}elseif (strpos($path, "/vivoProvincia/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/vivoProvincia/filtro") !== false && $request == "GET") {
     $VivoProvinciaController->obtenerDatosFiltrados();
     exit;
 }
@@ -304,18 +300,18 @@ elseif (preg_match("/\/vivoProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
 
 
 
- //######### RUTAS CONDICION #########
+//######### RUTAS CONDICION #########
 elseif (strpos($path, "/condicion/all") !== false && $request == "GET") {
     $CondicionController->getAll();
     exit;
 
 
     //########## RUTAS EMPRESA #########
-}elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/empresa/all") !== false && $request == "GET") {
     $EmpresaController->getAll();
     exit;
-//crear
-}elseif (strpos($path, "/empresa/crear") !== false && $request == "POST") {
+    //crear
+} elseif (strpos($path, "/empresa/crear") !== false && $request == "POST") {
     $EmpresaController->create();
     exit;
 }
@@ -328,8 +324,8 @@ elseif (strpos($path, "/empresa/actualizar") !== false && ($request == "PUT" || 
 elseif (preg_match("/\/empresa\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $EmpresaController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/empresa/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/empresa/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 }
@@ -339,8 +335,8 @@ elseif (preg_match("/\/empresa\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
 elseif (strpos($path, "/mercado/all") !== false && $request == "GET") {
     $MercadoController->getAll();
     exit;
-//crear
-}elseif (strpos($path, "/mercado/crear") !== false && $request == "POST") {
+    //crear
+} elseif (strpos($path, "/mercado/crear") !== false && $request == "POST") {
     $MercadoController->create();
     exit;
 }
@@ -353,18 +349,18 @@ elseif (strpos($path, "/mercado/actualizar") !== false && ($request == "PUT" || 
 elseif (preg_match("/\/mercado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $MercadoController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/mercado/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/mercado/exportar") !== false && $request == "GET") {
     $reporteController->exportarMercadoExcel();
     exit;
 
 
     //######### RUTAS PROVEEDOR #########
-}elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/proveedor/all") !== false && $request == "GET") {
     $ProveedorController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/proveedor/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/proveedor/crear") !== false && $request == "POST") {
     $ProveedorController->create();
     exit;
 }
@@ -377,20 +373,20 @@ elseif (strpos($path, "/proveedor/actualizar") !== false && ($request == "PUT" |
 elseif (preg_match("/\/proveedor\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $ProveedorController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/proveedor/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/proveedor/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
 
     ######### RUTAS PROVINCIA #########
-}elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/provincia/all") !== false && $request == "GET") {
     $ProvinciaController->getAll();
     exit;
 
-//crear
-}elseif (strpos($path, "/provincia/crear") !== false && $request == "POST") {
+    //crear
+} elseif (strpos($path, "/provincia/crear") !== false && $request == "POST") {
     $ProvinciaController->create();
     exit;
 }
@@ -403,20 +399,20 @@ elseif (strpos($path, "/provincia/actualizar") !== false && ($request == "PUT" |
 elseif (preg_match("/\/provincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $ProvinciaController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/provincia/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/provincia/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
 
     ######### RUTAS TIPO #########
-}elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipo/all") !== false && $request == "GET") {
     $TipoController->getAll();
     exit;
 
     //crear
-}elseif (strpos($path, "/tipo/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipo/crear") !== false && $request == "POST") {
     $TipoController->create();
     exit;
 }
@@ -429,19 +425,19 @@ elseif (strpos($path, "/tipo/actualizar") !== false && ($request == "PUT" || $re
 elseif (preg_match("/\/tipo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipo/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipo/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
     ######### RUTAS TIPO_TIENDA #########
-}elseif (strpos($path, "/tipoTienda/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoTienda/all") !== false && $request == "GET") {
     $tipoTiendaController->getAll();
     exit;
 
     //crear
-}elseif (strpos($path, "/tipoTienda/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoTienda/crear") !== false && $request == "POST") {
     $tipoTiendaController->create();
     exit;
 }
@@ -454,19 +450,19 @@ elseif (strpos($path, "/tipoTienda/actualizar") !== false && ($request == "PUT" 
 elseif (preg_match("/\/tipoTienda\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $tipoTiendaController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoTienda/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoTienda/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
     ######### RUTAS TIPO HUEVO #########
-}elseif (strpos($path, "/tipoHuevo/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoHuevo/all") !== false && $request == "GET") {
     $TipoHuevoController->getAll();
     exit;
 
     //crear
-}elseif (strpos($path, "/tipoHuevo/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoHuevo/crear") !== false && $request == "POST") {
     $TipoHuevoController->create();
     exit;
 }
@@ -479,19 +475,19 @@ elseif (strpos($path, "/tipoHuevo/actualizar") !== false && ($request == "PUT" |
 elseif (preg_match("/\/tipoHuevo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoHuevoController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoHuevo/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoHuevo/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
     ######### RUTAS TIPO ALTERNO #########
-}elseif (strpos($path, "/tipoAlterno/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoAlterno/all") !== false && $request == "GET") {
     $TipoAlternoController->getAll();
     exit;
 
     //crear
-}elseif (strpos($path, "/tipoAlterno/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoAlterno/crear") !== false && $request == "POST") {
     $TipoAlternoController->create();
     exit;
 }
@@ -504,18 +500,18 @@ elseif (strpos($path, "/tipoAlterno/actualizar") !== false && ($request == "PUT"
 elseif (preg_match("/\/tipoAlterno\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoAlternoController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoAlterno/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoAlterno/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
-        ############### RUTA TIPO EMPRENDEDOR ####################
-}elseif (strpos($path, "/tipoEmpren/all") !== false && $request == "GET") {
+    ############### RUTA TIPO EMPRENDEDOR ####################
+} elseif (strpos($path, "/tipoEmpren/all") !== false && $request == "GET") {
     $TipoEmprendedorController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/tipoEmpren/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoEmpren/crear") !== false && $request == "POST") {
     $TipoEmprendedorController->create();
     exit;
 }
@@ -528,18 +524,18 @@ elseif (strpos($path, "/tipoEmpren/actualizar") !== false && ($request == "PUT" 
 elseif (preg_match("/\/tipoEmpren\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoEmprendedorController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoEmpren/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoEmpren/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
     ############### RUTA TIPO POLLO ####################
-}elseif (strpos($path, "/tipoPollo/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoPollo/all") !== false && $request == "GET") {
     $TipoPolloController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/tipoPollo/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoPollo/crear") !== false && $request == "POST") {
     $TipoPolloController->create();
     exit;
 }
@@ -552,17 +548,17 @@ elseif (strpos($path, "/tipoPollo/actualizar") !== false && ($request == "PUT" |
 elseif (preg_match("/\/tipoPollo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoPolloController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoPollo/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoPollo/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
     ############### RUTA TIPO GALLINA  ####################
-}elseif (strpos($path, "/tipoGallina/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoGallina/all") !== false && $request == "GET") {
     $TipoGallinaController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/tipoGallina/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tipoGallina/crear") !== false && $request == "POST") {
     $TipoGallinaController->create();
     exit;
 }
@@ -575,23 +571,23 @@ elseif (strpos($path, "/tipoGallina/actualizar") !== false && ($request == "PUT"
 elseif (preg_match("/\/tipoGallina\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $TipoGallinaController->delete($matches[1]);
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tipoGallina/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tipoGallina/exportar") !== false && $request == "GET") {
     //$reporteController->exportarProdSustitutoExcel();
     exit;
 
 
     ################ RUTA TIPO POLLO VIVO #########################
-}elseif (strpos($path, "/tipoPolloVivo/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoPolloVivo/all") !== false && $request == "GET") {
     $TipoPolloVivoController->getAll();
     exit;
     ############## RUTA CORTES###################
-}elseif (strpos($path, "/corte/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/corte/all") !== false && $request == "GET") {
     $CorteController->getAll();
     exit;
 }
 
-    ############## RUTA TIPO PRODUCTO SUSTITUTO ###################
+############## RUTA TIPO PRODUCTO SUSTITUTO ###################
 elseif (strpos($path, "/tipoProductoSusti/all") !== false && $request == "GET") {
     $TipoProSutitutoController->getAll();
     exit;
@@ -608,7 +604,7 @@ elseif (strpos($path, "/beneficioProvincia/all") !== false && $request == "GET")
     $BeneficioProvincia->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/beneficioProvincia/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/beneficioProvincia/crear") !== false && $request == "POST") {
     $BeneficioProvincia->create();
     exit;
 }
@@ -622,11 +618,11 @@ elseif (preg_match("/\/beneficioProvincia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $m
     $BeneficioProvincia->delete($matches[1]);
     exit;
     //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&provincia=2&proveedor=5
-}elseif (strpos($path, "/beneficioProvincia/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/beneficioProvincia/filtro") !== false && $request == "GET") {
     $BeneficioProvincia->obtenerDatosFiltrados();
     exit;
     //EXPORTAR EN FORMATO EXCEL
-}elseif (strpos($path, "/beneficioProvincia/exportar") !== false && $request == "GET") {
+} elseif (strpos($path, "/beneficioProvincia/exportar") !== false && $request == "GET") {
     $reporteController->exportarBeneficioProvinciaExcel();
     exit;
 }
@@ -637,7 +633,7 @@ elseif (strpos($path, "/precioVivo/all") !== false && $request == "GET") {
     $PrecioVivoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/precioVivo/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/precioVivo/crear") !== false && $request == "POST") {
     $PrecioVivoController->create();
     exit;
 }
@@ -651,11 +647,11 @@ elseif (preg_match("/\/precioVivo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     $PrecioVivoController->delete($matches[1]);
     exit;
     //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&empresa=2
-}elseif (strpos($path, "/precioVivo/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/precioVivo/filtro") !== false && $request == "GET") {
     $PrecioVivoController->obtenerDatosFiltrados();
     exit;
-  //EXPORTAR EN FORMATO EXCEL
-}elseif (strpos($path, "/precioVivo/exportar") !== false && $request == "GET") {
+    //EXPORTAR EN FORMATO EXCEL
+} elseif (strpos($path, "/precioVivo/exportar") !== false && $request == "GET") {
     $reporteController->exportarPrecioVivoExcel();
     exit;
 }
@@ -666,7 +662,7 @@ elseif (strpos($path, "/precioTrozado/all") !== false && $request == "GET") {
     $PrecioTrozadoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/precioTrozado/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/precioTrozado/crear") !== false && $request == "POST") {
     $PrecioTrozadoController->create();
     exit;
 }
@@ -680,11 +676,11 @@ elseif (preg_match("/\/precioTrozado\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
     $PrecioTrozadoController->delete($matches[1]);
     exit;
     //filtro uso: filtro?fechaInicio=2025-10-01&fechaFin=2025-10-20&empresa=2
-}elseif (strpos($path, "/precioTrozado/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/precioTrozado/filtro") !== false && $request == "GET") {
     $PrecioTrozadoController->obtenerDatosFiltrados();
     exit;
     //EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/precioTrozado/exportar") !== false && $request == "GET") {
+} elseif (strpos($path, "/precioTrozado/exportar") !== false && $request == "GET") {
     $reporteController->exportarPrecioTrozadoExcel();
     exit;
 }
@@ -695,7 +691,7 @@ elseif (strpos($path, "/tienda/all") !== false && $request == "GET") {
     $TiendaController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/tienda/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tienda/crear") !== false && $request == "POST") {
     $TiendaController->create();
     exit;
 }
@@ -709,11 +705,11 @@ elseif (preg_match("/\/tienda\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && (
     $TiendaController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&empresa=2&tipo=3
-}elseif (strpos($path, "/tienda/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/tienda/filtro") !== false && $request == "GET") {
     $TiendaController->obtenerDatosFiltrados();
     exit;
-   //EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/tienda/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/tienda/exportar") !== false && $request == "GET") {
     $reporteController->exportarTiendaExcel();
     exit;
 }
@@ -724,7 +720,7 @@ elseif (strpos($path, "/huevo/all") !== false && $request == "GET") {
     $HuevoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/huevo/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/huevo/crear") !== false && $request == "POST") {
     $HuevoController->create();
     exit;
 }
@@ -738,11 +734,11 @@ elseif (preg_match("/\/huevo\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($
     $HuevoController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&tipo=3&mercado=2&proveedor=2
-}elseif (strpos($path, "/huevo/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/huevo/filtro") !== false && $request == "GET") {
     $HuevoController->obtenerDatosFiltrados();
     exit;
-  //EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/huevo/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/huevo/exportar") !== false && $request == "GET") {
     $reporteController->exportarHuevoExcel();
     exit;
 }
@@ -753,7 +749,7 @@ elseif (strpos($path, "/gallina/all") !== false && $request == "GET") {
     $GallinaController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/gallina/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/gallina/crear") !== false && $request == "POST") {
     $GallinaController->create();
     exit;
 }
@@ -767,11 +763,11 @@ elseif (preg_match("/\/gallina\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     $GallinaController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=3
-}elseif (strpos($path, "/gallina/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/gallina/filtro") !== false && $request == "GET") {
     $GallinaController->obtenerDatosFiltrados();
     exit;
- //EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/gallina/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/gallina/exportar") !== false && $request == "GET") {
     $reporteController->exportarGallinaExcel();
     exit;
 }
@@ -782,7 +778,7 @@ elseif (strpos($path, "/alterno/all") !== false && $request == "GET") {
     $AlternoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/alterno/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/alterno/crear") !== false && $request == "POST") {
     $AlternoController->create();
     exit;
 }
@@ -796,11 +792,11 @@ elseif (preg_match("/\/alterno\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     $AlternoController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&provincia=2&mercado=2tipo=3
-}elseif (strpos($path, "/alterno/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/alterno/filtro") !== false && $request == "GET") {
     $AlternoController->obtenerDatosFiltrados();
     exit;
- //EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/alterno/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/alterno/exportar") !== false && $request == "GET") {
     $reporteController->exportarAlternoExcel();
     exit;
 }
@@ -811,7 +807,7 @@ elseif (strpos($path, "/enteroAutoser/all") !== false && $request == "GET") {
     $EnteroAutoserController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/enteroAutoser/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/enteroAutoser/crear") !== false && $request == "POST") {
     $EnteroAutoserController->create();
     exit;
 }
@@ -825,11 +821,11 @@ elseif (preg_match("/\/enteroAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
     $EnteroAutoserController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
-}elseif (strpos($path, "/enteroAutoser/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/enteroAutoser/filtro") !== false && $request == "GET") {
     $EnteroAutoserController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/enteroAutoser/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/enteroAutoser/exportar") !== false && $request == "GET") {
     $reporteController->exportarEnteroAutoSerExcel();
     exit;
 }
@@ -840,7 +836,7 @@ elseif (strpos($path, "/trozadoAutoser/all") !== false && $request == "GET") {
     $TrozadoAutoserController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/trozadoAutoser/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/trozadoAutoser/crear") !== false && $request == "POST") {
     $TrozadoAutoserController->create();
     exit;
 }
@@ -854,11 +850,11 @@ elseif (preg_match("/\/trozadoAutoser\/borrar\/([a-zA-Z0-9\-]+)/", $path, $match
     $TrozadoAutoserController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&corte=1
-}elseif (strpos($path, "/trozadoAutoser/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/trozadoAutoser/filtro") !== false && $request == "GET") {
     $TrozadoAutoserController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/trozadoAutoser/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/trozadoAutoser/exportar") !== false && $request == "GET") {
     $reporteController->exportarTrozadoAutoserExcel();
     exit;
 }
@@ -869,7 +865,7 @@ elseif (strpos($path, "/criador/all") !== false && $request == "GET") {
     $CriadorEmprendedorController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/criador/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/criador/crear") !== false && $request == "POST") {
     $CriadorEmprendedorController->create();
     exit;
 }
@@ -883,11 +879,11 @@ elseif (preg_match("/\/criador\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     $CriadorEmprendedorController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&corte=1
-}elseif (strpos($path, "/criador/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/criador/filtro") !== false && $request == "GET") {
     $CriadorEmprendedorController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/criador/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/criador/exportar") !== false && $request == "GET") {
     $reporteController->exportarCriadorEmprendedorExcel();
     exit;
 }
@@ -898,7 +894,7 @@ elseif (strpos($path, "/tamamerdia/all") !== false && $request == "POST") {
     $TamaMerDiaController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/tamamerdia/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/tamamerdia/crear") !== false && $request == "POST") {
     $TamaMerDiaController->create();
     exit;
 }
@@ -912,15 +908,15 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     $TamaMerDiaController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&proveedor=1
-}elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/tamamerdia/filtro") !== false && $request == "GET") {
     $TamaMerDiaController->obtenerTodosDatosFiltro();
     exit;
     // EXPORTAR A EXCEL
-}elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
+} elseif (strpos($path, "/tamamerdia/exportar") !== false && $request == "GET") {
     $reporteController->exportarTamanoMercadoExcel();
     exit;
     ################# FUNCION PARA EJECUTAR ETL DE TABLA TAMAÑO MERCADO  ##########################
-}elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
+} elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
     $ETLController->run();
     exit;
 }
@@ -932,7 +928,7 @@ elseif (strpos($path, "/ingresoLima/all") !== false && $request == "GET") {
     $IngresosLimaController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/ingresoLima/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/ingresoLima/crear") !== false && $request == "POST") {
     $IngresosLimaController->create();
     exit;
 }
@@ -946,11 +942,11 @@ elseif (preg_match("/\/ingresoLima\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches)
     $IngresosLimaController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&empresa=1
-}elseif (strpos($path, "/ingresoLima/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/ingresoLima/filtro") !== false && $request == "GET") {
     $IngresosLimaController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/ingresoLima/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/ingresoLima/exportar") !== false && $request == "GET") {
     $reporteController->exportarIngreEmpLimaExcel();
     exit;
 }
@@ -961,7 +957,7 @@ elseif (strpos($path, "/gallinacd/all") !== false && $request == "GET") {
     $GallinaCDController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/gallinacd/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/gallinacd/crear") !== false && $request == "POST") {
     $GallinaCDController->create();
     exit;
 }
@@ -975,14 +971,14 @@ elseif (preg_match("/\/gallinacd\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &
     $GallinaCDController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
-}elseif (strpos($path, "/gallinacd/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/gallinacd/filtro") !== false && $request == "GET") {
     $GallinaCDController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/gallinacd/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/gallinacd/exportar") !== false && $request == "GET") {
     $reporteController->exportarGallinaCdExcel();
     exit;
-}elseif (strpos($path, "/tipoGallina/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/tipoGallina/all") !== false && $request == "GET") {
     $TipoGallinaController->getAll();
     exit;
 }
@@ -994,7 +990,7 @@ elseif (strpos($path, "/productoSusti/all") !== false && $request == "GET") {
     $ProductoSustitutoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/productoSusti/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/productoSusti/crear") !== false && $request == "POST") {
     $ProductoSustitutoController->create();
     exit;
 }
@@ -1008,11 +1004,11 @@ elseif (preg_match("/\/productoSusti\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
     $ProductoSustitutoController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
-}elseif (strpos($path, "/productoSusti/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/productoSusti/filtro") !== false && $request == "GET") {
     $ProductoSustitutoController->obtenerDatosFiltrados();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/productoSusti/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/productoSusti/exportar") !== false && $request == "GET") {
     $reporteController->exportarProdSustitutoExcel();
     exit;
 }
@@ -1023,7 +1019,7 @@ elseif (strpos($path, "/clienteProce/all") !== false && $request == "GET") {
     $ClienteProcesadoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/clienteProce/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/clienteProce/crear") !== false && $request == "POST") {
     $ClienteProcesadoController->create();
     exit;
 }
@@ -1037,11 +1033,11 @@ elseif (preg_match("/\/clienteProce\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches
     $ClienteProcesadoController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
-}elseif (strpos($path, "/clienteProce/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/clienteProce/filtro") !== false && $request == "GET") {
     $ClienteProcesadoController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/clienteProce/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/clienteProce/exportar") !== false && $request == "GET") {
     $reporteController->exportarClienteProcesadosExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL  ##########################
@@ -1056,7 +1052,7 @@ elseif (strpos($path, "/vendedor/all") !== false && $request == "GET") {
     $VendedorController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/vendedor/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/vendedor/crear") !== false && $request == "POST") {
     $VendedorController->create();
     exit;
 }
@@ -1070,11 +1066,11 @@ elseif (preg_match("/\/vendedor\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &&
     $VendedorController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
-}elseif (strpos($path, "/vendedor/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/vendedor/filtro") !== false && $request == "GET") {
     $VendedorController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/vendedor/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/vendedor/exportar") !== false && $request == "GET") {
     $reporteController->exportarVendedoresExcel();
     exit;
 }
@@ -1086,7 +1082,7 @@ elseif (strpos($path, "/producto/all") !== false && $request == "GET") {
     $ProductoController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/producto/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/producto/crear") !== false && $request == "POST") {
     $ProductoController->create();
     exit;
 }
@@ -1100,11 +1096,11 @@ elseif (preg_match("/\/producto\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &&
     $ProductoController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30&tipo=1
-}elseif (strpos($path, "/producto/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/producto/filtro") !== false && $request == "GET") {
     $ProductoController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/producto/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/producto/exportar") !== false && $request == "GET") {
     $reporteController->exportarComProductoExcel();
     exit;
 }
@@ -1117,7 +1113,7 @@ elseif (strpos($path, "/trozadoDiario/all") !== false && $request == "GET") {
     $TrozadoDiarioController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/trozadoDiario/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/trozadoDiario/crear") !== false && $request == "POST") {
     $TrozadoDiarioController->create();
     exit;
 }
@@ -1131,11 +1127,11 @@ elseif (preg_match("/\/trozadoDiario\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matche
     $TrozadoDiarioController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/trozadoDiario/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/trozadoDiario/filtro") !== false && $request == "GET") {
     $TrozadoDiarioController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/trozadoDiario/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/trozadoDiario/exportar") !== false && $request == "GET") {
     $reporteController->exportarTrozadoDiarioExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
@@ -1152,7 +1148,7 @@ elseif (strpos($path, "/infoGRS/all") !== false && $request == "GET") {
     $InfoGRSController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/infoGRS/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/infoGRS/crear") !== false && $request == "POST") {
     $InfoGRSController->create();
     exit;
 }
@@ -1166,11 +1162,11 @@ elseif (preg_match("/\/infoGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && 
     $InfoGRSController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/infoGRS/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/infoGRS/filtro") !== false && $request == "GET") {
     $InfoGRSController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/infoGRS/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/infoGRS/exportar") !== false && $request == "GET") {
     $reporteController->exportarInfoGrsExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
@@ -1187,7 +1183,7 @@ elseif (strpos($path, "/clientePv/all") !== false && $request == "GET") {
     $ClientePvController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/clientePv/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/clientePv/crear") !== false && $request == "POST") {
     $ClientePvController->create();
     exit;
 }
@@ -1201,11 +1197,11 @@ elseif (preg_match("/\/clientePv\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) &
     $ClientePvController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/clientePv/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/clientePv/filtro") !== false && $request == "GET") {
     $ClientePvController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/clientePv/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/clientePv/exportar") !== false && $request == "GET") {
     $reporteController->exportarCtrlClientePVExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL##########################
@@ -1221,7 +1217,7 @@ elseif (strpos($path, "/oficialGRS/all") !== false && $request == "GET") {
     $OficialGRSController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/oficialGRS/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/oficialGRS/crear") !== false && $request == "POST") {
     $OficialGRSController->create();
     exit;
 }
@@ -1235,18 +1231,18 @@ elseif (preg_match("/\/oficialGRS\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
     $OficialGRSController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/oficialGRS/filtro") !== false && $request == "POST") {
+} elseif (strpos($path, "/oficialGRS/filtro") !== false && $request == "POST") {
     $OficialGRSController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/oficialGRS/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/oficialGRS/exportar") !== false && $request == "GET") {
     $reporteController->exportarOficialGRSExcel();
     exit;
 } ################# FUNCION PARA EJECUTAR ETL TROZADO DIARIO  ##########################
 elseif (strpos($path, "/oficialGRS/etl") !== false && $request == "POST") {
     //$OficialGRSController->runETL();
     exit;
-}elseif (strpos($path, "/oficialGRS/autocomplete") !== false && $request == "GET") {
+} elseif (strpos($path, "/oficialGRS/autocomplete") !== false && $request == "GET") {
     $OficialGRSController->autocomplete();
     exit;
 }
@@ -1257,8 +1253,17 @@ elseif (strpos($path, "/oficialGRS/etl") !== false && $request == "POST") {
 elseif (strpos($path, "/mercadores/all") !== false && $request == "GET") {
     $MercadoResController->getAll();
     exit;
+} elseif (strpos($path, "/mercadores/resumen/provincias") !== false && $request == "GET") {
+    $MercadoResController->resumenProvincias();
+    exit;
+} elseif (strpos($path, "/mercadores/resumen/aves") !== false && $request == "GET") {
+    $MercadoResController->resumenAvesProvincias();
+    exit;
+} elseif (strpos($path, "/mercadores/resumen/mercados") !== false && $request == "GET") {
+    $MercadoResController->resumenMercados();
+    exit;
     //crear
-}elseif (strpos($path, "/mercadores/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/mercadores/crear") !== false && $request == "POST") {
     $MercadoResController->create();
     exit;
 }
@@ -1266,16 +1271,16 @@ elseif (strpos($path, "/mercadores/all") !== false && $request == "GET") {
 elseif (strpos($path, "/mercadores/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
     $MercadoResController->update();
     exit;
-}//borrar con regex para ids con caracteres
+} //borrar con regex para ids con caracteres
 elseif (strpos($path, "/mercadores/borrar") !== false && $request == "POST") {
     $MercadoResController->delete();
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/mercadores/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/mercadores/filtro") !== false && $request == "GET") {
     $MercadoResController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/mercadores/exportar") !== false && $request == "GET") {
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/mercadores/exportar") !== false && $request == "GET") {
     $reporteController->exportarMercadoResExcel();
     exit;
 }
@@ -1286,7 +1291,7 @@ elseif (strpos($path, "/mercadodet/all") !== false && $request == "GET") {
     $MercadoDetController->getAll();
     exit;
     //crear
-}elseif (strpos($path, "/mercadodet/crear") !== false && $request == "POST") {
+} elseif (strpos($path, "/mercadodet/crear") !== false && $request == "POST") {
     $MercadoDetController->create();
     exit;
 }
@@ -1294,19 +1299,19 @@ elseif (strpos($path, "/mercadodet/all") !== false && $request == "GET") {
 elseif (strpos($path, "/mercadodet/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
     $MercadoDetController->update();
     exit;
-}//borrar con regex para ids con caracteres
+} //borrar con regex para ids con caracteres
 elseif (preg_match("/\/mercadodet\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
     $MercadoDetController->delete($matches[1]);
     exit;
     //filtro?fechaInicio=2025-05-01&fechaFin=2025-10-30
-}elseif (strpos($path, "/mercadodet/filtro") !== false && $request == "GET") {
+} elseif (strpos($path, "/mercadodet/filtro") !== false && $request == "GET") {
     $MercadoDetController->obtenerTodosDatosFiltro();
     exit;
-//EXPORTAR FORMATO EXCEL
-}elseif (strpos($path, "/mercadodet/exportar") !== false && $request == "GET") {
-    $reporteController->exportarMercadoDetExcel();  
+    //EXPORTAR FORMATO EXCEL
+} elseif (strpos($path, "/mercadodet/exportar") !== false && $request == "GET") {
+    $reporteController->exportarMercadoDetExcel();
     exit;
-}elseif (strpos($path, "/mercadodos/all") !== false && $request == "GET") {
+} elseif (strpos($path, "/mercadodos/all") !== false && $request == "GET") {
     $MercadodosController->getAll();
     exit;
 }
@@ -1320,4 +1325,3 @@ else {
         "method" => $request
     ]);
 }
-?>
