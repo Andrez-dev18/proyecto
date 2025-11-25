@@ -728,11 +728,13 @@ class MercadoResRepository
 
 
 
-    private function executeQuery($query)
-    {
-        $stmt = $this->conn->query($query);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    public function executeQuery($sql, $params = [])
+{
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     private function generateUuid()
     {

@@ -310,9 +310,7 @@ class MercadoResController {
                     searchable: false,
                     render: (data, type, row, meta) => `
                     <div class="text-center space-x-2">
-                        <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded edit-btn" data-index="${meta.row}">
-                            <i class="fas fa-edit"></i>
-                        </button>
+                        
                         <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn" data-index="${meta.row}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -353,11 +351,11 @@ class MercadoResController {
 
 
         // Delegar eventos para los botones de acción
-        $('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
+        /*$('.min-w-full tbody').off('click').on('click', '.edit-btn', (e) => {
             const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
             this.registroSeleccionado = rowData;
             this.modificarSeleccionado();
-        });
+        });*/
 
         $('.min-w-full tbody').on('click', '.delete-btn', async (e) => {
             const rowData = this.dataTable.row($(e.currentTarget).closest('tr')).data();
@@ -385,7 +383,7 @@ class MercadoResController {
 
             const data = await response.json();
 
-            document.querySelector(".text-xl.font-bold").textContent =
+            document.querySelector("#resumenTitulo").textContent =
                 "Resumen por Número de Mercados";
 
             if (!Array.isArray(data) || data.length === 0) {
@@ -421,7 +419,7 @@ class MercadoResController {
         switch (tipo) {
             case "provincias":
                 endpoint = "/mercadores/resumen/provincias";
-                titulo = "Resumen por Provincias";
+                titulo = "Resumen por Puestos";
                 break;
 
             case "aves":
@@ -430,6 +428,7 @@ class MercadoResController {
                 break;
 
             case "mercados":
+                titulo = "Resumen por Número de Mercados";
                 this.cargarMercadosProvincia();
                 return; // salimos porque dependencia es el select provincia
         }
@@ -440,7 +439,7 @@ class MercadoResController {
             const response = await fetch(this.config.API.BASE_URL + endpoint);
             const data = await response.json();
 
-            document.querySelector(".text-xl.font-bold").textContent = titulo;
+            document.querySelector("#resumenTitulo").textContent = titulo;
 
             if (!Array.isArray(data) || data.length === 0) {
                 this.pintarTabla([], []);
