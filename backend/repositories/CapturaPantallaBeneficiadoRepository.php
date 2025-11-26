@@ -12,32 +12,32 @@ class CapturaPantallaBeneficiadoRepository
 
     public function findAll()
     {
-        $query = "SELECT * FROM captura_pantalla_beneficiado ORDER BY id DESC";
+        $query = "SELECT * FROM com_db_pot_venta_bene ORDER BY id DESC";
         return $this->executeQuery($query);
     }
 
     public function findArequipaBeneficiado()
     {
-        $query = "SELECT * FROM captura_pantalla_beneficiado WHERE tipo_proc = 'Arequipa Beneficiado' ORDER BY id DESC";
+        $query = "SELECT * FROM com_db_pot_venta_bene WHERE tipo_proc = 'Arequipa Beneficiado' ORDER BY id DESC";
         return $this->executeQuery($query);
     }
 
     public function findProvinciaBeneficiado()
     {
-        $query = "SELECT * FROM captura_pantalla_beneficiado WHERE tipo_proc = 'Provincia Beneficiado' ORDER BY id DESC";
+        $query = "SELECT * FROM com_db_pot_venta_bene WHERE tipo_proc = 'Provincia Beneficiado' ORDER BY id DESC";
         return $this->executeQuery($query);
     }
 
     public function findById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM captura_pantalla_beneficiado WHERE id = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM com_db_pot_venta_bene WHERE id = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function save($data)
     {
-        $query = "INSERT INTO captura_pantalla_beneficiado (
+        $query = "INSERT INTO com_db_pot_venta_bene (
             tipo_proc, ano, mes, provincia, zona, compra_grs, tipo_cliente, nombre,
             grs, rp, grs_vivo, santa_elena, granjas_chicas, rosario, sanfern_lima, avicola_renzo,
             avelino, peladores, avicruz, rafael, matilde, avirox, julia, simon, yesica,
@@ -97,7 +97,7 @@ class CapturaPantallaBeneficiadoRepository
 
     public function update(array $data)
     {
-        $sql = "UPDATE captura_pantalla_beneficiado SET
+        $sql = "UPDATE com_db_pot_venta_bene SET
             tipo_proc = :tipo_proc,
             ano = :ano,
             mes = :mes,
@@ -183,7 +183,7 @@ class CapturaPantallaBeneficiadoRepository
 
     public function delete($id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM captura_pantalla_beneficiado WHERE id = ?");
+        $stmt = $this->conn->prepare("DELETE FROM com_db_pot_venta_bene WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
@@ -195,7 +195,7 @@ class CapturaPantallaBeneficiadoRepository
 
     public function filtrarArequipa($ano = null, $mes = null, $provincia = null, $zona = null, $tipo_cliente = null)
     {
-        $query = "SELECT * FROM captura_pantalla_beneficiado WHERE tipo_proc = 'Arequipa Beneficiado'";
+        $query = "SELECT * FROM com_db_pot_venta_bene WHERE tipo_proc = 'Arequipa Beneficiado'";
         $params = [];
 
         if (!empty($ano)) {
@@ -227,7 +227,7 @@ class CapturaPantallaBeneficiadoRepository
 
     public function filtrarProvincia($ano = null, $mes = null, $provincia = null, $zona = null, $tipo_cliente = null)
     {
-        $query = "SELECT * FROM captura_pantalla_beneficiado WHERE tipo_proc = 'Provincia Beneficiado'";
+        $query = "SELECT * FROM com_db_pot_venta_bene WHERE tipo_proc = 'Provincia Beneficiado'";
         $params = [];
 
         if (!empty($ano)) {

@@ -12,32 +12,32 @@ class CapturaPantallaVivoRepository
 
     public function findAll()
     {
-        $query = "SELECT * FROM captura_pantalla_vivo";
+        $query = "SELECT * FROM com_db_pot_venta_vivo";
         return $this->executeQuery($query);
     }
 
     public function findArequipaVivo()
     {
-        $query = "SELECT * FROM captura_pantalla_vivo WHERE tipo_proc = 'Arequipa Vivo'";
+        $query = "SELECT * FROM com_db_pot_venta_vivo WHERE tipo_proc = 'Arequipa Vivo'";
         return $this->executeQuery($query);
     }
 
     public function findProvinciaVivo()
     {
-        $query = "SELECT * FROM captura_pantalla_vivo WHERE tipo_proc = 'Provincia Vivo'";
+        $query = "SELECT * FROM com_db_pot_venta_vivo WHERE tipo_proc = 'Provincia Vivo'";
         return $this->executeQuery($query);
     }
 
     public function findById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM captura_pantalla_vivo WHERE id = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM com_db_pot_venta_vivo WHERE id = ?");
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function save($data)
     {
-        $query = "INSERT INTO captura_pantalla_vivo (
+        $query = "INSERT INTO com_db_pot_venta_vivo (
         tipo_proc, ano, mes, provincia, zona, compra, tipo_cliente, nombre,
         grs, rp, renzo, fafo, santa_angela, jorge_pan, mirian_g, vasquez, san_joaquin,
         fortunato, rosario, perca, gamboa, asoc_sondor, pollo_lima, otras_granjas_chicas,
@@ -89,7 +89,7 @@ class CapturaPantallaVivoRepository
 
     public function update(array $vivo)
     {
-        $sql = "UPDATE captura_pantalla_vivo SET
+        $sql = "UPDATE com_db_pot_venta_vivo SET
         ano = :ano,
         mes = :mes,
         provincia = :provincia,
@@ -161,7 +161,7 @@ class CapturaPantallaVivoRepository
 
     public function delete($id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM captura_pantalla_vivo WHERE id = ?");
+        $stmt = $this->conn->prepare("DELETE FROM com_db_pot_venta_vivo WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
@@ -173,7 +173,7 @@ class CapturaPantallaVivoRepository
 
     public function filtrarArequipa($ano = null, $mes = null, $provincia = null, $zona = null, $tipo_cliente = null)
     {
-        $query = "SELECT * FROM captura_pantalla_vivo WHERE tipo_proc = 'Arequipa Vivo'";
+        $query = "SELECT * FROM com_db_pot_venta_vivo WHERE tipo_proc = 'Arequipa Vivo'";
         $params = [];
 
         if (!empty($ano)) {
@@ -204,7 +204,7 @@ class CapturaPantallaVivoRepository
 
     public function filtrarProvincia($ano = null, $mes = null, $provincia = null, $zona = null, $tipo_cliente = null)
     {
-        $query = "SELECT * FROM captura_pantalla_vivo WHERE tipo_proc = 'Provincia Vivo'";
+        $query = "SELECT * FROM com_db_pot_venta_vivo WHERE tipo_proc = 'Provincia Vivo'";
         $params = [];
 
         if (!empty($ano)) {
