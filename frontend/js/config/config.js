@@ -49,6 +49,8 @@ const AppConfig = {
                 BORRAR: '/tamamerdia/borrar',
                 FILTRO: '/tamamerdia/filtro?',
                 EXPORTA: '/tamamerdia/exportar',
+                PDF: '/tamamerdia/pdf',
+
             },
 
             PRECIOVIVO: {
