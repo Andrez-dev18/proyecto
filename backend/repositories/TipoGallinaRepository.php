@@ -35,6 +35,14 @@ class TipoGallinaRepository
         return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_tipo_gallina WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         $nombre = $data["nombre"] ?? null;
@@ -68,9 +76,10 @@ class TipoGallinaRepository
 
         $stmt = $this->conn->prepare($query);
 
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $nombre
         ]);
+        return $data['codigo'];
     }
 
     private function executeQuery($query)

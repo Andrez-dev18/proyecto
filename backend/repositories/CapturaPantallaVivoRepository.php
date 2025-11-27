@@ -84,7 +84,8 @@ class CapturaPantallaVivoRepository
             ':observaciones' => $data['observaciones'] ?? null
         ];
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
     public function update(array $vivo)
@@ -154,7 +155,8 @@ class CapturaPantallaVivoRepository
             ':id' => $vivo['id']
         ];
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $vivo['id'];
     }
 
 

@@ -30,6 +30,14 @@ class MercadoDetRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_mercado_det WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
 {
     // 1️⃣ Validar operación (insert o update)
@@ -92,6 +100,7 @@ class MercadoDetRepository
     }
 
     // 3️⃣ Actualizar resumen
+    $idReturn = $data['id'];
     $resultadoResumen = $this->actualizarResumenPDO(
         $data['mercado'],
         $data['tipoEstablecimiento'],
@@ -101,7 +110,8 @@ class MercadoDetRepository
     return [
         "det" => true,
         "resumen" => $resultadoResumen,
-        "message" => $isUpdate ? "Registro actualizado" : "Registro creado"
+        "message" => $isUpdate ? "Registro actualizado" : "Registro creado",
+        "id" => $idReturn
     ];
 }
 

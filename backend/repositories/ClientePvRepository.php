@@ -154,7 +154,16 @@ class ClientePvRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
+    }
+
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_ctrl_cliente_pv WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function delete($id)

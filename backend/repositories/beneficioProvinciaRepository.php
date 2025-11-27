@@ -40,10 +40,17 @@ class beneficioProvinciaRepository
             FROM com_db_beneficio_provincia b
             LEFT JOIN com_provincia p ON b.provincia = p.codigo
             LEFT JOIN com_proveedor pr ON b.proveedor = pr.codigo
-            WHERE b.fecha BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND CURDATE()
             ORDER BY b.fechaHoraRegistro DESC;
         ";
         return $this->executeQuery($query);
+    }
+
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_beneficio_provincia WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function save($data)
@@ -163,7 +170,8 @@ class beneficioProvinciaRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
     public function delete($id)

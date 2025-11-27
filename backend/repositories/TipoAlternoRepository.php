@@ -15,6 +15,14 @@ class TipoAlternoRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_huevo WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     private function executeQuery($query)
     {
         $stmt = $this->conn->query($query);
@@ -74,9 +82,10 @@ class TipoAlternoRepository
 
         $stmt = $this->conn->prepare($query);
 
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $nombre
         ]);
+        return $data["codigo"];
     }
 
     public function delete($id)

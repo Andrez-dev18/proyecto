@@ -46,7 +46,6 @@ require_once __DIR__ . '/../controllers/InfoGRSController.php';
 require_once __DIR__ . '/../controllers/OficialGRSController.php';
 require_once __DIR__ . '/../controllers/MercadoResController.php';
 require_once __DIR__ . '/../controllers/MercadoDetController.php';
-require_once __DIR__ . '/../controllers/mercadodosController.php';
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -110,7 +109,6 @@ $InfoGRSController = new InfoGRSController($db);
 $OficialGRSController = new OficialGRSController($db);
 $MercadoResController = new MercadoResController($db);
 $MercadoDetController = new MercadoDetController($db);
-$MercadodosController = new mercadodosController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -1311,10 +1309,7 @@ elseif (preg_match("/\/mercadodet\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
 } elseif (strpos($path, "/mercadodet/exportar") !== false && $request == "GET") {
     $reporteController->exportarMercadoDetExcel();
     exit;
-} elseif (strpos($path, "/mercadodos/all") !== false && $request == "GET") {
-    $MercadodosController->getAll();
-    exit;
-}
+} 
 
 // ========== RUTA NO ENCONTRADA ==========
 else {

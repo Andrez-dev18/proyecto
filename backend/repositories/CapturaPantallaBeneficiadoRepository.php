@@ -92,7 +92,8 @@ class CapturaPantallaBeneficiadoRepository
             ':observaciones' => $data['observaciones'] ?? null
         ];
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
     public function update(array $data)
@@ -178,7 +179,8 @@ class CapturaPantallaBeneficiadoRepository
             ':id' => $data['id']
         ];
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
     public function delete($id)

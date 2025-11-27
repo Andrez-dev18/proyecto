@@ -138,9 +138,17 @@ class IngresosLimaRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_ingre_emp_lima WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function delete($id)
     {

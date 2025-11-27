@@ -21,6 +21,14 @@ class EmpresaRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_empresa WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     private function existsNombre($nombre, $codigo = null)
     {
         $sql = "SELECT codigo FROM com_empresa WHERE nombre = :nombre";
@@ -77,11 +85,12 @@ class EmpresaRepository
     ";
 
         $stmt = $this->conn->prepare($query);
-
-        return $stmt->execute([
+        $params = [
             ":nombre" => $nombre,
             ":ruc"    => $data["ruc"] ?? ''
-        ]);
+        ];
+        $stmt->execute($params);
+        return $data['codigo'];
     }
 
     public function delete($id)

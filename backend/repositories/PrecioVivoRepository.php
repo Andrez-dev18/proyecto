@@ -39,6 +39,14 @@ class PrecioVivoRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_precio_vivo WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // Si existe ID, actualizamos
@@ -132,7 +140,8 @@ class PrecioVivoRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
     public function delete($id)

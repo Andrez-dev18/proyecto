@@ -16,6 +16,14 @@ class OficialGRSRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_oficial_grs WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findAll()
     {
         $query = "
@@ -310,7 +318,8 @@ class OficialGRSRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
     public function autocomplete($campo, $query)

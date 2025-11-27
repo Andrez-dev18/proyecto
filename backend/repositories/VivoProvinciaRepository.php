@@ -50,6 +50,13 @@ class VivoProvinciaRepository
         return $this->executeQuery($query);
     }
 
+     public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_vivo_provincia WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function save($data)
     {
@@ -196,7 +203,8 @@ class VivoProvinciaRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
 

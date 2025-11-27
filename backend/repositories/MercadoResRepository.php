@@ -136,7 +136,13 @@ class MercadoResRepository
         return $stmt->execute($data);
     }
 
-
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_mercado_res WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function delete($provincia, $tipoEstablecimiento, $tamanio)
     {

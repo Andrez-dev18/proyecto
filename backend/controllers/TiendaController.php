@@ -36,7 +36,7 @@ class TiendaController
             echo json_encode(["error" => "ID inválido para actualizar el registro."]);
             return;
         }
-        $this->service->save($data);
+        $this->service->update($data);
         echo json_encode(["message" => "Registro actualizado correctamente"]);
     }
 
@@ -54,7 +54,7 @@ class TiendaController
             echo json_encode(["message" => "Registro eliminado correctamente"]);
         } else {
             http_response_code(404);
-            echo json_encode(["error" => "No se encontró el registro con el ID especificado."]);
+            echo json_encode(["error" => "No se encontro el registro con el ID especificado."]);
         }
     }
 

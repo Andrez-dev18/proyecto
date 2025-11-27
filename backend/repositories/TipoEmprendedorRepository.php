@@ -15,6 +15,14 @@ class TipoEmprendedorRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_tipo_emprendedor WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     private function executeQuery($query)
     {
         $stmt = $this->conn->query($query);
@@ -76,10 +84,11 @@ class TipoEmprendedorRepository
 
         $stmt = $this->conn->prepare($query);
 
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $nombre,
             ":linea" => $data['linea']
         ]);
+        return $data['codigo'];
     }
 
     public function delete($id)

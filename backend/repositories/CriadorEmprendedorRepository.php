@@ -44,6 +44,14 @@ class CriadorEmprendedorRepository
         return $result;
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_criador_emprendedor WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // Si existe ID, actualizamos
@@ -132,7 +140,8 @@ class CriadorEmprendedorRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
 

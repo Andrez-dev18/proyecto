@@ -7,7 +7,7 @@ const bdOficialConfig = {
             CREAR: '/oficialGRS/crear',
             EDITAR: '/oficialGRS/actualizar',
             BORRAR: '/oficialGRS/borrar',
-            EXCEL: '/oficialGRS/exportar',
+            EXPORTA: '/oficialGRS/exportar',
             ETL: '/oficialGRS/etl',
             AUTOCOMPLETADO: '/oficialGRS/autocomplete'
         }

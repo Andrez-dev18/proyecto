@@ -21,6 +21,14 @@ class ProveedorRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_proveedor WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function existsNombre($nombre, $codigo = null)
     {
         $sql = "SELECT codigo FROM com_proveedor WHERE nombre = :nombre";
@@ -71,12 +79,13 @@ class ProveedorRepository
             INSERT INTO com_proveedor (nombre, ruc)
             VALUES (:nombre, :ruc)
         ";
-
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([
+        $params = [
             ":nombre" => $nombre,
             ":ruc"    => $data["ruc"] ?? ""
-        ]);
+        ];
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $data['codigo'];
     }
 
     public function delete($id)

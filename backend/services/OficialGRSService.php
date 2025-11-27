@@ -1,14 +1,16 @@
 <?php
 require_once __DIR__ . '/../repositories/OficialGRSRepository.php';
-
+require_once __DIR__ . '/../services/HistorialService.php';
 
 class OficialGRSService
 {
     private $repo;
+    private $historialService;
 
     public function __construct($db)
     {
         $this->repo = new OficialGRSRepository($db);
+        $this->historialService = new HistorialService($db);
     }
 
     public function getAll()
@@ -59,7 +61,9 @@ class OficialGRSService
         // Calculo de cond
         $data['cond'] = ($data['impte_base'] >= 0.70) ? 1 : 0;
 
-        return $this->repo->save($data);
+        $id = $this->repo->save($data);
+        $this->historialService->logAction("INSERTAR", "com_db_oficial_grs", $id, null, $data, "registro creado");
+        return $id;
     }
 
     public function autocomplete($campo, $query)
@@ -133,9 +137,31 @@ class OficialGRSService
         return $dia;
     }
 
+    public function update($data)
+    {
+        $previos = $this->repo->findById($data['id']);
+
+        $this->repo->save($data);
+
+        $this->historialService->logAction("ACTUALIZAR", "com_db_oficial_grs", $data['id'], $previos, $data, "registro actualizado");
+        return $data['id'];
+    }
+
     public function delete($id)
     {
-        return $this->repo->delete($id);
+        $previos = $this->repo->findById($id);
+
+        if(!$previos){
+            return 0;
+        }
+
+        $deletedRows = $this->repo->delete($id);
+
+        if($deletedRows > 0){
+            $this->historialService->logAction("ELIMINAR", "com_db_oficial_grs", $id, $previos, null, "registro ELIMINADO");
+        }
+
+        return $deletedRows;
     }
 
     public function obtenerDatosFiltrados($params = [])
