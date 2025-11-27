@@ -302,6 +302,16 @@ class TamanoMercadoService {
     }
 }
 
+// exportar pdf
+async exportarPDF() {
+    try {
+        console.log('Exportando a PDF...');
+        window.open(`${this.baseURL + AppConfig.API.ENDPOINTS.TAMAMERDIA.PDF}`, '_blank');
+    } catch (error) {
+        console.error('Error en exportar PDF:', error);
+        throw error;
+    }
+}
 
 
 }

@@ -190,7 +190,7 @@ class MercadoDetController {
         return {
             fecha: document.getElementById("modalFecha").value,
             mercado: document.getElementById("modalMercado").value,
-            tipoEstablecimiento: document.getElementById("modaltipo_establecimiento").value,
+            tipo_establecimiento: document.getElementById("modaltipo_establecimiento").value,
             tamanio: document.getElementById("modaltamanio").value,
             cantidad: parseInt(document.getElementById("modalCantidad").value) || 0
         };
@@ -239,7 +239,7 @@ class MercadoDetController {
         // Definir columnas base
         const columnas = [
             "id", "fecha",
-            "mercado", "tipoEstablecimiento", "tamanio", "cantidad"
+            "mercado", "tipo_establecimiento", "tamanio", "cantidad"
         ];
 
         // Diccionario para nombres bonitos
@@ -248,7 +248,7 @@ class MercadoDetController {
             fecha: "Fecha",
             mercado: "Mercados",
 
-            tipoEstablecimiento: "Tipo Establecimiento",
+            tipo_establecimiento: "Tipo Establecimiento",
             tamanio: "Tamaño",
             cantidad: "Cantidad",
         };
@@ -395,7 +395,7 @@ class MercadoDetController {
 
         // Tipo establecimiento
         document.getElementById("modaltipo_establecimiento").value =
-            r.tipoEstablecimiento ?? "";
+            r.tipo_establecimiento ?? "";
 
         // Tamaño
         document.getElementById("modaltamanio").value =

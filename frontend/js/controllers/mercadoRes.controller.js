@@ -88,7 +88,6 @@ class MercadoResController {
     poblarSelects() {
         this.poblarSelect('filterProvincia', this.catalogos.provincias, 'codigo', 'nombre');
         this.poblarSelect('modalProvincia', this.catalogos.provincias, 'codigo', 'nombre');
-        this.poblarSelect('provinciaSelect', this.catalogos.provincias, 'codigo', 'nombre');
     }
 
     poblarSelect(selectId, datos, valueField, textField) {
@@ -142,7 +141,6 @@ class MercadoResController {
         document.getElementById('btnExportar')?.addEventListener('click', () => this.exportarExcel());
         document.getElementById('btnLimpiarFiltros')?.addEventListener('click', () => this.limpiarFiltros());
 
-        document.getElementById('provinciaSelect')?.addEventListener('change', () => this.cargarPivotMercadosProvincia());
         // Filtro btn
         document.getElementById('btnAplicarFiltros')?.addEventListener('click', () => this.aplicarFiltros());
 
@@ -216,7 +214,6 @@ class MercadoResController {
             this.mostrarCargando(true);
 
             this.renderizarTablaFiltrada();
-            this.cargarPivot();
 
             this.mostrarNotificacion(`Datos cargados correctamente`, 'success');
         } catch (error) {
@@ -236,7 +233,7 @@ class MercadoResController {
 
 
     renderizarTablaFiltrada() {
-        const table = $('#tablaRes');
+        const table = $('.min-w-full');
         const thead = document.querySelector('thead tr');
         if (!thead) return;
 
@@ -247,21 +244,21 @@ class MercadoResController {
 
         // Definir columnas base
         const columnas = [
-            "fecha",
-            "provincia", "provincia_nombre", "tipoEstablecimiento", "tamanio", "total",
-            "numAves",
+            "provincia", "provincia_nombre",
+            "num_mercados", "tipo_establecimiento", "tamanio", "total",
+            "num_aves",
         ];
 
         // Diccionario para nombres bonitos
         const nombresColumnas = {
-            fecha: "Fecha",
             provincia: "Provincia",
             provincia_nombre: "Nombre Provincia",
+            num_mercados: "N° Mercados",
 
-            tipoEstablecimiento: "Tipo Establecimiento",
+            tipo_establecimiento: "Tipo Establecimiento",
             tamanio: "Tamaño",
             total: "Total",
-            numAves: "N° Aves",
+            num_aves: "N° Aves",
         };
 
         // Agregar columna de opciones
@@ -365,211 +362,6 @@ class MercadoResController {
             await this.eliminarSeleccionado();
         });
     }
-
-    cargarMercadosProvincia() {
-        const cont = document.getElementById("contentSelectProvincia");
-        cont.classList.remove("hidden");
-    }
-
-
-
-    async cargarPivotMercadosProvincia() {
-        const provincia = document.getElementById("provinciaSelect").value;
-
-        if (!provincia) return;
-
-        try {
-            const response = await fetch(
-                `${this.config.API.BASE_URL}/mercadores/resumen/mercados?provincia=${provincia}`
-            );
-
-            const data = await response.json();
-
-            document.querySelector(".text-xl.font-bold").textContent =
-                "Resumen por Número de Mercados";
-
-            if (!Array.isArray(data) || data.length === 0) {
-                this.pintarTabla([], []);
-                return;
-            }
-
-            const columnas = Object.keys(data[0])
-                .filter(c => !["tipo", "categoria", "tamanio", "Total"].includes(c))
-                .sort();
-
-            this.pintarTabla(data, columnas);
-
-        } catch (err) {
-            console.error("Error obteniendo pivot:", err);
-            this.pintarTabla([], []);
-        }
-    }
-
-
-    async cargarPivot() {
-    const select = document.getElementById("selectTipo");
-    const provinciaBlock = document.getElementById("contentSelectProvincia");
-
-    select.addEventListener("change", async () => {
-        const tipo = select.value;
-
-        provinciaBlock.classList.add("hidden"); // ocultar por defecto
-
-        let endpoint = "";
-        let titulo = "";
-
-        switch (tipo) {
-            case "provincias":
-                endpoint = "/mercadores/resumen/provincias";
-                titulo = "Resumen por Provincias";
-                break;
-
-            case "aves":
-                endpoint = "/mercadores/resumen/aves";
-                titulo = "Resumen por Número de Aves";
-                break;
-
-            case "mercados":
-                this.cargarMercadosProvincia();
-                return; // salimos porque dependencia es el select provincia
-        }
-
-        if (!endpoint) return;
-
-        try {
-            const response = await fetch(this.config.API.BASE_URL + endpoint);
-            const data = await response.json();
-
-            document.querySelector(".text-xl.font-bold").textContent = titulo;
-
-            if (!Array.isArray(data) || data.length === 0) {
-                this.pintarTabla([], []);
-                return;
-            }
-
-            const columnas = Object.keys(data[0])
-                .filter(c => !["tipo", "categoria", "tamanio", "Total"].includes(c))
-                .sort();
-
-            this.pintarTabla(data, columnas);
-
-        } catch (err) {
-            console.error("Error en cargar pivot:", err);
-            this.pintarTabla([], []);
-        }
-    });
-
-    // Valor inicial
-    select.value = "provincias";
-    select.dispatchEvent(new Event("change"));
-}
-
-
-    pintarTabla(data, provincias) {
-
-    const head = document.getElementById("headPivot");
-    const body = document.getElementById("bodyPivot");
-
-    // Reiniciar tabla
-    head.innerHTML = "";
-    body.innerHTML = "";
-
-    // Validación mínima de datos
-    if (!Array.isArray(data) || data.length === 0) {
-        body.innerHTML = `
-            <tr>
-                <td colspan="20" class="text-center py-6 text-gray-500">
-                    No hay datos para mostrar
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    /* ============================
-       CABECERA
-    ============================ */
-    head.innerHTML = `<th class="px-3 py-2 border text-xs uppercase">Categoría</th>`;
-    
-    provincias.forEach(prov => {
-        head.innerHTML += `
-            <th class="px-3 py-2 border text-xs uppercase">${prov}</th>
-        `;
-    });
-
-    head.innerHTML += `
-        <th class="px-3 py-2 border text-xs uppercase">Total</th>
-    `;
-
-    /* ============================
-       ESTRUCTURA (MISMA QUE TENÍAS)
-    ============================ */
-    const estructura = [
-        { titulo: "N° Mercados", indice: 0 },
-        { titulo: "Puesto de mercado", filas: [1, 2, 3], total: 4 },
-        { titulo: "Tiendas y puestos aledaños", filas: [5, 6, 7], total: 8 },
-        { titulo: null, indice: 9 }
-    ];
-
-    /* ============================
-       CONTENIDO
-    ============================ */
-    body.innerHTML = "";
-
-    estructura.forEach(grupo => {
-
-        // GRUPO CON FILAS
-        if (grupo.filas) {
-            body.innerHTML += `
-                <tr class="bg-blue-100">
-                    <td colspan="${provincias.length + 2}" class="px-3 py-2 border text-sm">
-                        ${grupo.titulo}
-                    </td>
-                </tr>
-            `;
-
-            grupo.filas.forEach(i => {
-                if (data[i]) {
-                    body.innerHTML += this.crearFila(data[i], provincias);
-                }
-            });
-
-            // Total del grupo
-            if (data[grupo.total]) {
-                body.innerHTML += this.crearFila(data[grupo.total], provincias, true);
-            }
-
-        } else {
-            // FILA ÚNICA (como total final)
-            const item = data[grupo.indice];
-            if (item) {
-                const clases = grupo.indice === 9 ? "bg-cyan-100 font-bold" : "";
-                body.innerHTML += `
-                    <tr class="${clases}">
-                        ${this.filaHTML(item, provincias)}
-                    </tr>
-                `;
-            }
-        }
-
-    });
-}
-
-
-    crearFila(item, provincias, esTotal = false) {
-        const clases = esTotal ? "font-bold" : "";
-        return `<tr class="${clases}">${this.filaHTML(item, provincias)}</tr>`;
-    }
-
-    filaHTML(item, provincias) {
-        let html = `<td class="px-3 py-2 border text-sm">${item.categoria}</td>`;
-        provincias.forEach(prov => {
-            html += `<td class="px-3 py-2 border text-sm text-right">${item[prov] || 0}</td>`;
-        });
-        html += `<td class="px-3 py-2 border text-sm text-right">${item.Total}</td>`;
-        return html;
-    }
-
 
     exportarExcel() {
 

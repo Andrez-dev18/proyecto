@@ -8,6 +8,7 @@ class TamanoMercadoController {
         this.catalogos = {};
         this.dataTable = null; 
         this.columnasVisibles = {};
+        
     }
 
     async init() {
@@ -198,6 +199,9 @@ class TamanoMercadoController {
         // Modal
         document.getElementById('btnGuardar')?.addEventListener('click', () => this.guardarRegistro());
         document.getElementById('btnCancelar')?.addEventListener('click', () => this.cerrarModal());
+
+        //exportar pdf
+        document.getElementById('btnExportarPDF')?.addEventListener('click', () => this.exportarPDF());
     }
 
     async guardarRegistro() {
@@ -673,6 +677,16 @@ class TamanoMercadoController {
   `;
         document.head.appendChild(style);
     }
+
+//exportar pdf
+    exportarPDF() {
+    try {
+        this.service.exportarPDF();
+        this.mostrarNotificacion('Generando PDF...', 'success');
+    } catch (error) {
+        this.mostrarNotificacion('Error al exportar PDF: ' + error.message, 'error');
+    }
+}
 
 }
 
