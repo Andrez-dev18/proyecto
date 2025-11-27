@@ -15,8 +15,9 @@ class UsuarioController
 
         $usuario = $data['usuario'] ?? '';
         $password = $data['password'] ?? '';
+        $ubicacion = $data['ubicacion_gps'];
 
-        $resultado = $this->service->autenticar($usuario, $password);
+        $resultado = $this->service->autenticar($usuario, $password, $ubicacion);
 
         if ($resultado['success']) {
             // Crear variables de sesión

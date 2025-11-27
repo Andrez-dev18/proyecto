@@ -11,11 +11,11 @@ class UsuarioService {
         $this->historialService = new HistorialService($db);
     }
 
-    public function autenticar($usuario, $password) {
+    public function autenticar($usuario, $password, $ubicacion) {
         $result = $this->repo->login($usuario, $password);
 
         if ($result) {
-            $this->historialService->logActionLogin($result['codigo'], $result['nombre'], "LOGIN", "com_db_trozado_diario", null, null, $result, "INICIO DE SESION DE USUARIO");
+            $this->historialService->logActionLogin($result['codigo'], $result['nombre'], "LOGIN", "USUARIO - CONEMPRE", null, null, $result, "INICIO DE SESION DE USUARIO", $ubicacion);
             return [
                 'success' => true,
                 'data' => $result

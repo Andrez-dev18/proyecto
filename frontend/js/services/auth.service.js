@@ -1,11 +1,11 @@
 class AuthService {
-    static async login(usuario, password) {
+    static async login(usuario, password, ubicacion_gps) {
         const url = `${AppConfig.API.BASE_URL}${AppConfig.API.ENDPOINTS.AUTH.LOGIN}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include', //  necesario para mantener sesión
-            body: JSON.stringify({ usuario, password })
+            body: JSON.stringify({ usuario, password, ubicacion_gps })
         });
         return await response.json();
     }
