@@ -6,8 +6,12 @@ class TamaMerDiaController
 
     private $service;
 
+    private $db;
+
     public function __construct($db)
     {
+
+        $this->db = $db;
         $this->service = new TamaMerDiaService($db);
     }
 
@@ -88,4 +92,19 @@ class TamaMerDiaController
             'recordsFiltered' => $recordsFiltered
         ]);
     }
+
+    // exportarpdf
+public function exportarPDF()
+{
+    require_once __DIR__ . '/../services/PdfService.php';
+    
+    try {
+        $pdfService = new PdfService($this->db);
+        $pdfService->generarReporteTamanoMercado();
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Error al generar PDF: ' . $e->getMessage()]);
+    }
+}
+
 }

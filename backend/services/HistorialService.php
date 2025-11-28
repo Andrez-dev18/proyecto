@@ -36,7 +36,13 @@ class HistorialService
             'datos_previos'  => $previos ? json_encode($previos) : null,
             'datos_nuevos'   => $nuevos ? json_encode($nuevos) : null,
             'descripcion'    => $descripcion,
-            'fechaHora'      => $this->getFechaHora()
+            'fechaHora'      => $this->getFechaHora(),
+            'ip' => "-",
+            'ubicacion_gps' => "-",
+            'dispositivo' => "-",
+            'sistema_operativo' => "-",
+            'navegador' => "-",
+            'user_agent' => "-"
         ];
 
         return $this->repo->registrar($data);

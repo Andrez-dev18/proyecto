@@ -917,6 +917,9 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
 } elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
     $ETLController->run();
     exit;
+}elseif (strpos($path, "/tamamerdia/pdf") !== false && $request == "GET") {
+    $TamaMerDiaController->exportarPDF();
+    exit;
 }
 
 
