@@ -36,7 +36,7 @@ class VivoProvinciaController
             echo json_encode(["error" => "ID inválido para actualizar el registro."]);
             return;
         }
-        $this->service->save($data);
+        $this->service->update($data);
         echo json_encode(["message" => "Registro actualizado correctamente"]);
     }
 

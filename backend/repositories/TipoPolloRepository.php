@@ -15,6 +15,14 @@ class TipoPolloRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_tipo_pollo WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findAll()
     {
         $query = "SELECT * FROM com_tipo_pollo ORDER BY codigo DESC";
@@ -47,9 +55,10 @@ class TipoPolloRepository
         ";
 
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $nombre
         ]);
+        return $data['codigo'];
     }
 
     public function delete($id)

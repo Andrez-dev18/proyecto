@@ -1,13 +1,15 @@
 <?php 
 require_once __DIR__ . '/../repositories/TipoEmprendedorRepository.php';
-
+require_once __DIR__ . '/../services/HistorialService.php';
 class TipoEmprendedorService
 {
     private $repo;
+    private $historialService;
 
     public function __construct($db)
     {
         $this->repo = new TipoEmprendedorRepository($db);
+        $this->historialService = new HistorialService($db);
     }
 
     public function getAll()
@@ -17,12 +19,36 @@ class TipoEmprendedorService
 
     public function save($data)
     {
-        return $this->repo->save($data);
+        $id = $this->repo->save($data);
+        $this->historialService->logAction("INSERTAR", "com_tipo_emprendedor", $id, null, $data, "registro creado");
+        return $id;
+    }
+
+    public function update($data)
+    {
+        $previos = $this->repo->findById($data['codigo']);
+
+        $id = $this->repo->save($data);
+
+        $this->historialService->logAction("ACTUALIZAR", "com_tipo_emprendedor", $id, $previos, $data, "registro actualizado");
+        return $id;
     }
 
     public function delete($id)
     {
-        return $this->repo->delete($id);
+        $previos = $this->repo->findById($id);
+
+        if(!$previos){
+            return 0;
+        }
+
+        $deletedRows = $this->repo->delete($id);
+
+        if($deletedRows > 0){
+            $this->historialService->logAction("ELIMINAR", "com_tipo_emprendedor", $id, $previos, null, "registro ELIMINADO");
+        }
+
+        return $deletedRows;
     }
 
 }

@@ -40,7 +40,7 @@ public function update()
         return;
     }
 
-    $result = $this->service->save($data);
+    $result = $this->service->update($data);
     echo json_encode($result);
 }
 

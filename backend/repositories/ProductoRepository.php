@@ -31,7 +31,13 @@ class ProductoRepository
         return $this->executeQuery($query);
     }
 
-
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_producto WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function save($data)
     {
@@ -74,13 +80,14 @@ class ProductoRepository
         ";
 
         $stmt = $this->conn->prepare($query);
-
-        return $stmt->execute([
+        $params = [
             ":descripcion" => $descripcion,
             ":linea" => $data["linea"] ?? null,
             ":sublinea" => $data["sublinea"] ?? null,
             ":codigo" => $data["codigo"] ?? null
-        ]);
+        ];
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
 

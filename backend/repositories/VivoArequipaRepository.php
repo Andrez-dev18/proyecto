@@ -54,6 +54,13 @@ class VivoArequipaRepository
         return $result;
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_vivo_aqp WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function save($data)
     {
@@ -205,7 +212,8 @@ class VivoArequipaRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $data['id'];
     }
 
 

@@ -48,6 +48,14 @@ class TamaMerDiaRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_tama_mer_dia WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // Si existe ID, actualizamos
@@ -141,7 +149,8 @@ class TamaMerDiaRepository
             ];
         }
 
-        return $stmt->execute($params);
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
     public function delete($id)

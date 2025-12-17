@@ -21,6 +21,14 @@ class TipoProdSutitutoRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_tip_prod_sut WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // ----------------- UPDATE -----------------
@@ -49,9 +57,10 @@ class TipoProdSutitutoRepository
 
         $stmt = $this->conn->prepare($query);
 
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $data["nombre"] ?? ''
         ]);
+        return $data['codigo'];
     }
 
     public function delete($id)

@@ -74,9 +74,18 @@ class ProvinciaRepository
         ";
 
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $nombre
         ]);
+        return $data['codigo'];
+    }
+
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_provincia WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function delete($id)

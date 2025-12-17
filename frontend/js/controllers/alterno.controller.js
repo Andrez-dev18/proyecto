@@ -156,7 +156,7 @@ document.getElementById('btnExportar')?.addEventListener('click', () => this.exp
             this.mostrarCargando(true);
             this.datos = await this.service.getAll();
             this.renderizarTabla();
-            this.actualizarContadorRegistros();
+            //this.actualizarContadorRegistros();
             this.mostrarNotificacion(`${this.datos.length} registros cargados`, 'success');
         } catch (error) {
             console.error('Error:', error);
@@ -202,7 +202,7 @@ document.getElementById('btnExportar')?.addEventListener('click', () => this.exp
             }
 
             this.renderizarTabla();
-            this.actualizarContadorRegistros();
+           // this.actualizarContadorRegistros();
             this.mostrarNotificacion(`Filtrados: ${this.datos.length} registros`, 'success');
             
         } catch (error) {
@@ -315,7 +315,7 @@ document.getElementById('btnExportar')?.addEventListener('click', () => this.exp
     }, 100);
 }
 
-    actualizarContadorRegistros() {
+   /* actualizarContadorRegistros() {
         const btnNuevo = document.getElementById('btnNuevo');
         if (btnNuevo) {
             btnNuevo.innerHTML = `
@@ -323,7 +323,7 @@ document.getElementById('btnExportar')?.addEventListener('click', () => this.exp
                 ${this.datos.length} registros cargados
             `;
         }
-    }
+    }*/
 
     mostrarModalNuevo() {
         this.registroSeleccionado = null;

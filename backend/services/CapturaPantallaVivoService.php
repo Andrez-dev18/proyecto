@@ -2,14 +2,17 @@
 require_once __DIR__ . '/../repositories/CapturaPantallaVivoRepository.php';
 require_once __DIR__ . '/../dto/ArequipaVivo.php';
 require_once __DIR__ . '/../dto/ProvinciaVivo.php';
+require_once __DIR__ . '/../services/HistorialService.php';
 
 class CapturaPantallaVivoService
 {
     private $repo;
+    private $historialService;
 
     public function __construct($db)
     {
         $this->repo = new CapturaPantallaVivoRepository($db);
+        $this->historialService = new HistorialService($db);
     }
 
     public function getAll()
@@ -24,7 +27,12 @@ class CapturaPantallaVivoService
 
     public function updateVivo(array $vivo)
     {
-        return $this->repo->update($vivo);
+        $previos = $this->repo->findById($vivo['id']);
+
+        $id = $this->repo->update($vivo);
+
+        $this->historialService->logAction("ACTUALIZAR", "com_db_pot_venta_vivo", $id, $previos, $vivo, "registro actualizado");
+        return $id;
     }
 
     public function getArequipaVivo()
@@ -39,12 +47,26 @@ class CapturaPantallaVivoService
 
     public function save($data)
     {
-        return $this->repo->save($data);
+        $id = $this->repo->save($data);
+        $this->historialService->logAction("INSERTAR", "com_db_pot_venta_vivo", $id, null, $data, "registro creado");
+        return $id;
     }
 
     public function delete($id)
     {
-        return $this->repo->delete($id);
+         $previos = $this->repo->findById($id);
+
+        if(!$previos){
+            return 0;
+        }
+
+        $deletedRows = $this->repo->delete($id);
+
+        if($deletedRows > 0){
+            $this->historialService->logAction("ELIMINAR", "com_db_pot_venta_vivo", $id, $previos, null, "registro ELIMINADO");
+        }
+
+        return $deletedRows;
     }
 
     public function getListArequipaVivo(): array

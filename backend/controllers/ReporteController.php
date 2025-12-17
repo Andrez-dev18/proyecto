@@ -23,6 +23,7 @@ require_once __DIR__ . '/../services/VendedorService.php';
 require_once __DIR__ . '/../services/ProductoService.php';
 require_once __DIR__ . '/../services/ClientePvService.php';
 require_once __DIR__ . '/../services/InfoGRSService.php';
+require_once __DIR__ . '/../services/HistorialService.php';
 
 class ReporteController
 {
@@ -54,6 +55,7 @@ class ReporteController
     private $OficialGRS;
     private $MercadoRes;
     private $MercadoDet;
+    private $historialService;
 
     public function __construct($db)
     {
@@ -85,6 +87,7 @@ class ReporteController
         $this->OficialGRS = new OficialGRSService($db);
         $this->MercadoRes = new MercadoResService($db);
         $this->MercadoDet = new MercadoDetService($db);
+        $this->historialService = new HistorialService($db);
     }
 
     private function outputCSV($filename, $headers, $data, $dataMapper)
@@ -189,7 +192,7 @@ class ReporteController
                 $d['condicionPtmax'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_pot_venta_bene", null, null, null, "Se exporto registros a un excel");
         $this->outputCSV(
             'Arequipa_Beneficiado_' . date('Y-m-d') . '.csv',
             $headers,
@@ -251,7 +254,7 @@ class ReporteController
                 $d['observaciones'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_pot_venta_bene", null, null, null, "Se exporto registros a un excel");
         $this->outputCSV(
             'Provincia_Beneficiado_' . date('Y-m-d') . '.csv',
             $headers,
@@ -311,6 +314,8 @@ class ReporteController
                 $d['observaciones'] ?? ''
             ];
         };
+
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_pot_venta_vivo", null, null, null, "Se exporto registros a un excel");
 
         $this->outputCSV(
             'Arequipa_Vivo_' . date('Y-m-d') . '.csv',
@@ -383,7 +388,7 @@ class ReporteController
                 $d['observaciones'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_pot_venta_vivo", null, null, null, "Se exporto registros a un excel");
         $this->outputCSV(
             'Provincia_Vivo_' . date('Y-m-d') . '.csv',
             $headers,
@@ -455,6 +460,8 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
+
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_vivo_provincia", null, null, null, "Se exporto registros a un excel");
 
         $this->outputCSV(
             'Vivo_Provincia_' . date('Y-m-d') . '.csv',
@@ -530,6 +537,8 @@ class ReporteController
             ];
         };
 
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_vivo_aqp", null, null, null, "Se exporto registros a un excel");
+
         $this->outputCSV(
             'Vivo_Arequipa_' . date('Y-m-d') . '.csv',
             $headers,
@@ -582,7 +591,7 @@ class ReporteController
                 strtoupper($d['nom_db'] ?? '')
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_tama_mer_dia", null, null, null, "Se exporto registros a un excel");
         // Exportar a CSV
         $this->outputCSV(
             'Tamano_Mercado_' . date('Y-m-d') . '.csv',
@@ -641,7 +650,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_beneficio_provincia", null, null, null, "Se exporto registros a un excel");
         // Llamar a la función genérica de exportación
         $this->outputCSV(
             'Beneficio_Provincia_' . date('Y-m-d') . '.csv',
@@ -692,6 +701,8 @@ class ReporteController
             ];
         };
 
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_precio_vivo", null, null, null, "Se exporto registros a un excel");
+
         // Exportar el archivo CSV (puedes cambiar a Excel si lo prefieres)
         $this->outputCSV(
             'Precio_Vivo_' . date('Y-m-d') . '.csv',
@@ -733,6 +744,8 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
+
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_precio_trozado", null, null, null, "Se exporto registros a un excel");
 
         // Exportar a CSV o Excel
         $this->outputCSV(
@@ -777,6 +790,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_tienda", null, null, null, "Se exporto registros a un excel");
 
         // Llamar a la función genérica de exportación
         $this->outputCSV(
@@ -830,6 +844,9 @@ class ReporteController
             ];
         };
 
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_huevo", null, null, null, "Se exporto registros a un excel");
+
+
         // Exportar como CSV (o Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Huevo_' . date('Y-m-d') . '.csv',
@@ -878,6 +895,8 @@ class ReporteController
             ];
         };
 
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_gallina", null, null, null, "Se exporto registros a un excel");
+
         // Exportar como CSV (usa tu función genérica)
         $this->outputCSV(
             'Gallina_' . date('Y-m-d') . '.csv',
@@ -922,6 +941,8 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
+
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_alterno", null, null, null, "Se exporto registros a un excel");
 
         // Exportar como CSV (puedes adaptar a Excel si usas PhpSpreadsheet)
         $this->outputCSV(
@@ -971,7 +992,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_entero_autoser", null, null, null, "Se exporto registros a un excel");
         // Llamar al método genérico para generar el archivo CSV
         $this->outputCSV(
             'Entero_AutoSer_' . date('Y-m-d') . '.csv',
@@ -1022,7 +1043,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_trozado_autoser", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV (o Excel)
         $this->outputCSV(
             'Trozado_Autoser_' . date('Y-m-d') . '.csv',
@@ -1070,7 +1091,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_criador_emprendedor", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV (o Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Criador_Emprendedor_' . date('Y-m-d') . '.csv',
@@ -1097,7 +1118,7 @@ class ReporteController
             'USUARIO TRANSFERENCIA',
             'FECHA TRANSFERENCIA'
         ];
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_prod_sustituto", null, null, null, "Se exporto registros a un excel");
         // Mapear los datos obtenidos del query
         $mapper = function ($d) {
             return [
@@ -1176,7 +1197,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_gallina_cd", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV (puedes cambiar a Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Gallina_CD_' . date('Y-m-d') . '.csv',
@@ -1230,7 +1251,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_ingre_emp_lima", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV (o Excel si usas PhpSpreadsheet)
         $this->outputCSV(
             'Ingre_Emp_Lima_' . date('Y-m-d') . '.csv',
@@ -1258,7 +1279,7 @@ class ReporteController
                 strtoupper($d['nombre'] ?? '')
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_mercado", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV
         $this->outputCSV(
             'Mercados_' . date('Y-m-d') . '.csv',
@@ -1320,7 +1341,7 @@ class ReporteController
                 $d['fechaHoraRegistro'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_cliente_procesados", null, null, null, "Se exporto registros a un excel");
         // Exportar CSV
         $this->outputCSV(
             'Cliente_Procesados_' . date('Y-m-d') . '.csv',
@@ -1352,7 +1373,7 @@ class ReporteController
                 strtoupper($d['zona'] ?? '')
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_vendedor", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV
         $this->outputCSV(
             'Vendedores_' . date('Y-m-d') . '.csv',
@@ -1386,7 +1407,7 @@ class ReporteController
                 $d['codigo'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_producto", null, null, null, "Se exporto registros a un excel");
         // Exportar como CSV
         $this->outputCSV(
             'Com_Productos_' . date('Y-m-d') . '.csv',
@@ -1438,7 +1459,7 @@ class ReporteController
                 $d['fechaHoraRegistro'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_trozado_diario", null, null, null, "Se exporto registros a un excel");
         // Exportar CSV
         $this->outputCSV(
             'Trozado_Diario_' . date('Y-m-d') . '.csv',
@@ -1498,7 +1519,7 @@ class ReporteController
                 $d['fechaHoraRegistro'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_ctrl_cliente_pv", null, null, null, "Se exporto registros a un excel");
         // Exportar CSV
         $this->outputCSV(
             'Ctrl_Cliente_PV_' . date('Y-m-d') . '.csv',
@@ -1558,7 +1579,7 @@ class ReporteController
                 $d['fechaHoraRegistro'] ?? ''
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_info_grs", null, null, null, "Se exporto registros a un excel");
         // Exportar CSV
         $this->outputCSV(
             'Info_GRS_' . date('Y-m-d') . '.csv',
@@ -1619,7 +1640,7 @@ class ReporteController
             'USUARIO REGISTRO',
             'FECHA REGISTRO'
         ];
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_oficial_grs", null, null, null, "Se exporto registros a un excel");
         // 3. Mapeo de cada fila
         $mapper = function ($d) {
             return [
@@ -1706,7 +1727,7 @@ class ReporteController
                 $d['num_aves'] ?? '',
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_mercado_res", null, null, null, "Se exporto registros a un excel");
         // 4. Generar CSV
         $this->outputCSV(
             'Mercado_Resumen_' . date('Y-m-d') . '.csv',
@@ -1750,7 +1771,7 @@ class ReporteController
                 $d['fechaHoraTransferencia'] ?? '',
             ];
         };
-
+        $this->historialService->logAction("EXPORTAR EXCEL", "com_db_mercado_det", null, null, null, "Se exporto registros a un excel");
         // 4. Exportar CSV usando tu función base outputCSV()
         $this->outputCSV(
             'Mercado_Detallado_' . date('Y-m-d') . '.csv',

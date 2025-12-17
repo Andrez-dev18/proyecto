@@ -136,7 +136,13 @@ class MercadoResRepository
         return $stmt->execute($data);
     }
 
-
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_db_mercado_res WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function delete($provincia, $tipoEstablecimiento, $tamanio)
     {
@@ -728,11 +734,13 @@ class MercadoResRepository
 
 
 
-    private function executeQuery($query)
-    {
-        $stmt = $this->conn->query($query);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    public function executeQuery($sql, $params = [])
+{
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 
     private function generateUuid()
     {

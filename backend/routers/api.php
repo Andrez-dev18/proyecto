@@ -46,7 +46,8 @@ require_once __DIR__ . '/../controllers/InfoGRSController.php';
 require_once __DIR__ . '/../controllers/OficialGRSController.php';
 require_once __DIR__ . '/../controllers/MercadoResController.php';
 require_once __DIR__ . '/../controllers/MercadoDetController.php';
-require_once __DIR__ . '/../controllers/mercadodosController.php';
+require_once __DIR__ . '/../controllers/DetalleAreaController.php';
+
 
 /*header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -110,7 +111,7 @@ $InfoGRSController = new InfoGRSController($db);
 $OficialGRSController = new OficialGRSController($db);
 $MercadoResController = new MercadoResController($db);
 $MercadoDetController = new MercadoDetController($db);
-$MercadodosController = new mercadodosController($db);
+$DetalleAreaController = new DetalleAreaController($db);
 
 $request = $_SERVER["REQUEST_METHOD"];
 // IMPORTANTE: Usar parse_url para separar path de query string
@@ -919,6 +920,9 @@ elseif (preg_match("/\/tamamerdia\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
 } elseif (strpos($path, "/tamamerdia/etl/run") !== false && $request == "POST") {
     $ETLController->run();
     exit;
+}elseif (strpos($path, "/tamamerdia/pdf") !== false && $request == "GET") {
+    $TamaMerDiaController->exportarPDF();
+    exit;
 }
 
 
@@ -1311,10 +1315,39 @@ elseif (preg_match("/\/mercadodet\/borrar\/([a-zA-Z0-9\-]+)/", $path, $matches) 
 } elseif (strpos($path, "/mercadodet/exportar") !== false && $request == "GET") {
     $reporteController->exportarMercadoDetExcel();
     exit;
-} elseif (strpos($path, "/mercadodos/all") !== false && $request == "GET") {
-    $MercadodosController->getAll();
+
+######### RUTAS COM_DETALLE_AREA #########
+// obtener todos
+} elseif (strpos($path, "/detallearea/all") !== false && $request == "GET") {
+    $DetalleAreaController->getAll();
     exit;
 }
+// crear
+elseif (strpos($path, "/detallearea/crear") !== false && $request == "POST") {
+    $DetalleAreaController->create();
+    exit;
+}
+// actualizar
+elseif (strpos($path, "/detallearea/actualizar") !== false && ($request == "PUT" || $request == "POST")) {
+    $DetalleAreaController->update();
+    exit;
+}
+// borrar
+elseif (preg_match("/\/detallearea\/borrar\/([0-9]+)/", $path, $matches) && ($request == "DELETE" || $request == "POST")) {
+    $DetalleAreaController->delete($matches[1]);
+    exit;
+}
+// filtro
+elseif (strpos($path, "/detallearea/filtro") !== false && $request == "GET") {
+    $DetalleAreaController->obtenerDatosFiltrados();
+    exit;
+}
+// exportar
+//elseif (strpos($path, "/detallearea/exportar") !== false && $request == "GET") {
+//    $reporteController->exportarDetalleAreaExcel();
+//    exit;
+//}
+
 
 // ========== RUTA NO ENCONTRADA ==========
 else {

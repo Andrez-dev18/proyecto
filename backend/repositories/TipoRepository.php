@@ -21,6 +21,14 @@ class TipoRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_tipo WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // ----------------- UPDATE -----------------
@@ -50,10 +58,11 @@ class TipoRepository
 
         $stmt = $this->conn->prepare($query);
 
-        return $stmt->execute([
+        $stmt->execute([
             ":nombre" => $data["nombre"] ?? '',
             ":linea"  => $data["linea"] ?? ''
         ]);
+        return $data['codigo'];
     }
 
     public function delete($id)

@@ -24,11 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 			const usuario = document.getElementById('usuario').value.trim();
 			const password = document.getElementById('password').value.trim();
-
+			const ubicacion = await obtenerUbicacion();
 			try {
 				if (loading) loading.style.display = 'flex';
 
-				const data = await AuthService.login(usuario, password);
+				const data = await AuthService.login(usuario, password, ubicacion);
 
 				if (data && data.success) {
 					sessionStorage.setItem('usuario', JSON.stringify(data.data));
@@ -51,3 +51,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.href = "index.html";
     }
 });
+
+function obtenerUbicacion() {
+    return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+            resolve(null);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                resolve(`${pos.coords.latitude},${pos.coords.longitude}`);
+            },
+            err => {
+                resolve(null); // Usuario negó permiso o error
+            }
+        );
+    });
+}
+

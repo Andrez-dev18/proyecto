@@ -30,6 +30,14 @@ class MercadoRepository
         return $this->executeQuery($query);
     }
 
+    public function findById($id)
+    {
+        $query = "SELECT * FROM com_mercado WHERE codigo = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function save($data)
     {
         // ----------------- UPDATE -----------------
@@ -60,12 +68,13 @@ class MercadoRepository
     ";
 
         $stmt = $this->conn->prepare($query);
-
-        return $stmt->execute([
+        $params= [
             ":nombre"    => $data["nombre"] ?? '',
             ":provincia" => $data["provincia"] ?? 0,
             ":activo"    => isset($data["activo"]) ? $data["activo"] : 1
-        ]);
+        ];
+        $stmt->execute($params);
+        return $this->conn->lastInsertId();
     }
 
     public function delete($id)

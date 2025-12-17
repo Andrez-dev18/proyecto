@@ -396,7 +396,7 @@ class GallinaController {
             this.mostrarNotificacion('No hay datos para exportar', 'warning');
             return;
         }
-        window.open(`${this.service.baseURL}/reporte/gallina/exportar`, '_blank');
+        window.open(`${this.service.baseUrl}/gallina/exportar`, '_blank');
     }
 
     mostrarCargando(mostrar) {
