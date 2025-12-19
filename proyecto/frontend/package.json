@@ -1,0 +1,14 @@
+﻿{
+  "name": "frontend-proyecto",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "tailwindcss -o ./css/output.css --watch",
+    "build": "tailwindcss -o ./css/output.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  }
+}

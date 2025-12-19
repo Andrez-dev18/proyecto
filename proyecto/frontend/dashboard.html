@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Monitoreo del Sistema</title>
+    
+    <link rel="stylesheet" href="css/dashboard-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <style>
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .table-scroll table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-scroll thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-scroll th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .table-scroll tbody {
+            background: white;
+        }
+
+        .table-scroll tbody tr {
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-scroll tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .table-scroll td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .activity-item {
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            background: #f9fafb;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .activity-item:hover {
+            background: #f3f4f6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .badge-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .stat-subtitle {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <h1>📊 Dashboard - Monitoreo del Sistema</h1>
+            <p style="color: #666; margin-bottom: 15px;">Análisis de uso y actividad por módulo</p>
+            
+            <div class="filter-section">
+                <label>Fecha Inicio:</label>
+                <input type="date" id="fechaInicio">
+                
+                <label>Fecha Fin:</label>
+                <input type="date" id="fechaFin">
+                
+                <button id="btnFiltrar" class="btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                <button id="btnLimpiar" class="btn-secondary"><i class="fas fa-redo"></i> Limpiar</button>
+                
+                <span style="margin-left: auto; color: #666;">
+                    Última actualización: <strong id="lastUpdate">--:--</strong>
+                </span>
+            </div>
+        </header>
+
+        <!-- Cards Resumen General -->
+        <section class="summary-cards">
+            <div class="card card-blue">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <h3>Total Registros</h3>
+                    <p class="card-value" id="totalRegistros">0</p>
+                    <p class="card-label">Todos los módulos</p>
+                </div>
+            </div>
+
+            <div class="card card-green">
+                <div class="card-icon">👥</div>
+                <div class="card-content">
+                    <h3>Usuarios Activos</h3>
+                    <p class="card-value" id="usuariosActivos">0</p>
+                    <p class="card-label">Último mes</p>
+                </div>
+            </div>
+
+            <div class="card card-orange">
+                <div class="card-icon">📦</div>
+                <div class="card-content">
+                    <h3>Módulos Activos</h3>
+                    <p class="card-value" id="modulosActivos">0</p>
+                    <p class="card-label">De 15 totales</p>
+                </div>
+            </div>
+
+            <div class="card card-purple">
+                <div class="card-icon">🔥</div>
+                <div class="card-content">
+                    <h3>Actividad Hoy</h3>
+                    <p class="card-value" id="actividadHoy">0</p>
+                    <p class="card-label">Registros nuevos</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gráficas Fila 1 -->
+        <section class="charts-row">
+            <div class="chart-container">
+                <h3>📈 Uso por Módulo del Sistema</h3>
+                <canvas id="chartUsoModulos"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <h3>📉 Actividad Últimos 30 Días</h3>
+                <canvas id="chartActividad30Dias"></canvas>
+            </div>
+        </section>
+
+        <!-- Gráfica Ancha -->
+        <section class="charts-row">
+            <div class="chart-container chart-full">
+                <h3>📊 Comparativa de Registros por Módulo</h3>
+                <canvas id="chartComparativaModulos"></canvas>
+            </div>
+        </section>
+
+        <!-- Tabla Detalle -->
+        <section class="table-section">
+            <h3>📋 Detalle de Uso por Área del Sistema</h3>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Módulo</th>
+                            <th>Total Registros</th>
+                            <th>Último Ingreso</th>
+                            <th>Usuario Frecuente</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableDetalleUso">
+                        <tr>
+                            <td colspan="5" class="loading">Cargando datos</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Actividad Reciente -->
+        <section class="table-section">
+            <h3>🕐 Actividad Reciente del Sistema</h3>
+            <div id="actividadReciente">
+                <p class="loading">Cargando actividad</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/config/config.js"></script>
+    <script src="js/config/config.detallearea.js"></script>
+    <script src="js/services/detallearea.service.js"></script>
+    <script>
+        class DashboardSistemaController {
+            constructor() {
+                this.service = new DetalleAreaService();
+                this.charts = {};
+            }
+
+            async init() {
+                this.setupEventListeners();
+                this.establecerFechas();
+                await this.cargarDatos();
+                this.actualizarHora();
+            }
+
+            setupEventListeners() {
+                document.getElementById('btnFiltrar')?.addEventListener('click', () => this.cargarDatos());
+                document.getElementById('btnLimpiar')?.addEventListener('click', () => {
+                    this.establecerFechas();
+                    this.cargarDatos();
+                });
+            }
+
+            establecerFechas() {
+                const hoy = new Date();
+                const hace30dias = new Date(hoy);
+                hace30dias.setDate(hoy.getDate() - 30);
+                document.getElementById('fechaInicio').valueAsDate = hace30dias;
+                document.getElementById('fechaFin').valueAsDate = hoy;
+            }
+
+            actualizarHora() {
+                const ahora = new Date();
+                document.getElementById('lastUpdate').textContent = 
+                    ahora.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            async cargarDatos() {
+                try {
+                    const datos = await this.service.getAll();
+                    this.procesarEstadisticas(datos);
+                    this.actualizarHora();
+                } catch (error) {
+                    console.error('Error al cargar datos:', error);
+                    alert('Error al cargar los datos del sistema');
+                }
+            }
+
+            procesarEstadisticas(datos) {
+                const porArea = {};
+                const porFecha = {};
+                const usuarios = new Set();
+
+                datos.forEach(item => {
+                    const area = item.area || 'Sin área';
+                    const fecha = item.fecha?.split(' ')[0];
+                    const usuario = item.usuarioReporte;
+
+                    porArea[area] = (porArea[area] || 0) + 1;
+                    if (fecha) porFecha[fecha] = (porFecha[fecha] || 0) + 1;
+                    if (usuario) usuarios.add(usuario);
+                });
+
+                document.getElementById('totalRegistros').textContent = datos.length.toLocaleString();
+                document.getElementById('usuariosActivos').textContent = usuarios.size;
+                document.getElementById('modulosActivos').textContent = Object.keys(porArea).length;
+                
+                const hoy = new Date().toISOString().split('T')[0];
+                document.getElementById('actividadHoy').textContent = (porFecha[hoy] || 0);
+
+                this.renderizarGraficaUsoModulos(porArea);
+                this.renderizarGraficaActividad(porFecha);
+                this.renderizarComparativaModulos(porArea);
+                this.renderizarTablaDetalle(porArea, datos);
+                this.renderizarActividadReciente(datos);
+            }
+
+            renderizarGraficaUsoModulos(porArea) {
+                const ctx = document.getElementById('chartUsoModulos');
+                if (this.charts.usoModulos) this.charts.usoModulos.destroy();
+
+                const labels = Object.keys(porArea);
+                const data = Object.values(porArea);
+                const colors = this.generarColores(labels.length);
+
+                this.charts.usoModulos = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: { boxWidth: 12, font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderizarGraficaActividad(porFecha) {
+                const ctx = document.getElementById('chartActividad30Dias');
+                if (this.charts.actividad) this.charts.actividad.destroy();
+
+                const fechasOrdenadas = Object.keys(porFecha).sort();
+                const valores = fechasOrdenadas.map(f => porFecha[f]);
+
+                this.charts.actividad = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: fechasOrdenadas.map(f => {
+                            const [y, m, d] = f.split('-');
+                            return `${d}/${m}`;
+                        }),
+                        datasets: [{
+                            label: 'Registros por día',
+                            data: valores,
+                            borderColor: 'rgb(102, 126, 234)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { precision: 0 } }
+                        }
+                    }
+                });
+            }
+
+            renderizarComparativaModulos(porArea) {
+                const ctx = document.getElementById('chartComparativaModulos');
+                if (this.charts.comparativa) this.charts.comparativa.destroy();
+
+                const areas = Object.keys(porArea).sort((a, b) => porArea[b] - porArea[a]);
+                const valores = areas.map(a => porArea[a]);
+
+                this.charts.comparativa = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: areas,
+                        datasets: [{
+                            label: 'Número de registros',
+                            data: valores,
+                            backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        indexAxis: 'y',
+                        scales: {
+                            x: { beginAtZero: true, ticks: { precision: 0 } }
+                        }
+                    }
+                });
+            }
+
+            renderizarTablaDetalle(porArea, datos) {
+                const tbody = document.getElementById('tableDetalleUso');
+                
+                const detalles = Object.keys(porArea).map(area => {
+                    const registrosArea = datos.filter(d => d.area === area);
+                    const ultimoIngreso = registrosArea.reduce((max, r) => 
+                        r.fechaHoraRegistro > max ? r.fechaHoraRegistro : max, '');
+                    
+                    const usuariosArea = {};
+                    registrosArea.forEach(r => {
+                        const u = r.usuarioReporte;
+                        if (u) usuariosArea[u] = (usuariosArea[u] || 0) + 1;
+                    });
+                    
+                    const usuarioFrecuente = Object.keys(usuariosArea).reduce((a, b) => 
+                        usuariosArea[a] > usuariosArea[b] ? a : b, '-');
+
+                    const total = porArea[area];
+                    let estado = '';
+                    if (total > 50) estado = '<span class="badge badge-success">Muy activo</span>';
+                    else if (total > 20) estado = '<span class="badge badge-warning">Activo</span>';
+                    else estado = '<span class="badge badge-info">Bajo uso</span>';
+
+                    return { area, total, ultimoIngreso, usuarioFrecuente, estado };
+                });
+
+                detalles.sort((a, b) => b.total - a.total);
+
+                tbody.innerHTML = detalles.map(d => `
+                    <tr>
+                        <td><strong>${d.area}</strong></td>
+                        <td>${d.total}</td>
+                        <td>${this.formatearFecha(d.ultimoIngreso)}</td>
+                        <td>${d.usuarioFrecuente}</td>
+                        <td>${d.estado}</td>
+                    </tr>
+                `).join('');
+            }
+
+            renderizarActividadReciente(datos) {
+                const recientes = datos
+                    .sort((a, b) => (b.fechaHoraRegistro || '').localeCompare(a.fechaHoraRegistro || ''))
+                    .slice(0, 10);
+
+                const container = document.getElementById('actividadReciente');
+                
+                if (recientes.length === 0) {
+                    container.innerHTML = '<p class="loading">No hay actividad reciente</p>';
+                    return;
+                }
+
+                container.innerHTML = recientes.map(item => `
+                    <div class="activity-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <p style="font-weight: 600; color: #333; margin-bottom: 5px;">${item.area || 'Sin área'}</p>
+                                <p style="font-size: 14px; color: #666;">${item.motivo || 'Sin descripción'}</p>
+                                <p style="font-size: 12px; color: #999; margin-top: 5px;">
+                                    <i class="fas fa-user"></i> ${item.usuarioReporte || 'Desconocido'}
+                                </p>
+                            </div>
+                            <span style="font-size: 12px; color: #999;">${this.formatearFecha(item.fechaHoraRegistro)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            formatearFecha(fecha) {
+                if (!fecha) return '-';
+                const date = new Date(fecha);
+                return date.toLocaleDateString('es-PE', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            generarColores(cantidad) {
+                const colores = [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(118, 75, 162, 0.8)',
+                    'rgba(17, 153, 142, 0.8)',
+                    'rgba(56, 239, 125, 0.8)',
+                    'rgba(240, 147, 251, 0.8)',
+                    'rgba(245, 87, 108, 0.8)',
+                    'rgba(79, 172, 254, 0.8)',
+                    'rgba(0, 242, 254, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(201, 203, 207, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 99, 132, 0.8)'
+                ];
+                return colores.slice(0, cantidad);
+            }
+        }
+
+        const dashboardController = new DashboardSistemaController();
+        document.addEventListener('DOMContentLoaded', () => {
+            dashboardController.init();
+        });
+
+        function cargarDatos(tipo) {
+            console.log('✅ Dashboard de Monitoreo cargado correctamente');
+        }
+    </script>
+</body>
+</html>
+

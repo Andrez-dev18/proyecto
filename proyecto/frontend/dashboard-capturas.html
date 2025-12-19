@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Gestión de Pollo - Dashboard administrativo">
+    <title>Dashboard - Gestión</title>
+
+      <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/output.css">
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+    <!-- Estilos personalizados -->
+      <link rel="stylesheet" href="css/dashboard-responsive.css">
+    <style>
+        /* Scrollbar personalizado 
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .table-scroll::-webkit-scrollbar,
+        .modal-content-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-scroll::-webkit-scrollbar-track,
+        .modal-content-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb,
+        .modal-content-scroll::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .table-scroll::-webkit-scrollbar-thumb:hover,
+        .modal-content-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }*/
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content-scroll {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-down {
+            animation: slideDown 0.4s ease;
+        }
+
+        /* Mejoras visuales */
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-hover-scale {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-hover-scale:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideInRight 0.3s ease;
+            min-width: 300px;
+        }
+
+        .toast.closing {
+            animation: slideOutRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast-success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast-error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast-warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .toast-info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .toast-close {
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+            padding: 4px;
+        }
+
+        .toast-close:hover {
+            color: #4b5563;
+        }
+
+        /* Estilos para el dropdown de columnas */
+        .dropdown-columns {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 320px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        .column-toggle {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .column-toggle:last-child {
+            border-bottom: none;
+        }
+
+        .column-toggle:hover {
+            background-color: #f9fafb;
+        }
+
+        .column-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #8b5cf6;
+            border-radius: 4px;
+        }
+
+        .column-toggle input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .column-toggle span {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Scrollbar personalizado para el dropdown */
+        .dropdown-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 10px;
+        }
+
+        .dropdown-content::-webkit-scrollbar-thumb:hover {
+            background: #7c3aed;
+        }
+
+        #btnToggleFiltros {
+            transition: transform 0.3s ease, background-color 0.2s ease;
+        }
+
+        #btnToggleFiltros:hover {
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+
+        #filterContent {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+        }
+
+        #filterContent.show {
+            max-height: 600px;
+            opacity: 1;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+
+        <!-- Main Content
+        <main class="max-w-7xl mx-auto"> -->
+            <!-- Botones de acción -->
+            <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="actionButtons" style="display: none;">
+                <div class="flex flex-wrap gap-3 justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 text-gray-700 font-semibold">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            <span>Acciones:</span>
+                        </div>
+                        <button onclick="mostrarModalNuevo()"
+                            class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
+                                </path>
+                            </svg>
+                            Nuevo
+                        </button>
+                        <button id="btnReporte" onclick="generarReporteSeleccionado()"
+                            class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            Reporte
+                        </button>
+                    </div>
+
+                    <!-- Dropdown para columnas -->
+                    <div class="dropdown-columns">
+                        <button id="btnToggleColumns" 
+                            class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-md btn-hover-scale flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0a2 2 0 012 2v8a2 2 0 01-2 2m-6 0h6"></path>
+                            </svg>
+                            Mostrar/Ocultar columnas
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <div id="columnDropdown" class="dropdown-content">
+                            <div class="dropdown-header">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    Seleccionar Columnas
+                                </span>
+                                <button id="btnCloseDropdown" class="text-white hover:text-gray-200 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="columnCheckboxContainer" class="p-2">
+                                <!-- Los checkboxes se generarán dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtros -->
+            <section class="bg-white rounded-2xl card-shadow p-6 mb-6" id="filterSection" style="display: none;">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
+                            </path>
+                        </svg>
+                        Filtros
+                    </h2>
+                    <button id="btnToggleFiltros" class="text-gray-500 hover:text-purple-600 transition">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <button onclick="limpiarFiltros()"
+                        class="text-purple-600 hover:text-purple-700 font-semibold flex items-center gap-1 text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar filtros
+                    </button>
+                </div>
+                <div id="filterContent" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Año</label>
+                        <select id="filterAno" onchange="aplicarFiltros()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Mes</label>
+                        <select id="filterMes" onchange="aplicarFiltros()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                            <option value="">Todos</option>
+                            <option value="Enero">Enero</option>
+                            <option value="Febrero">Febrero</option>
+                            <option value="Marzo">Marzo</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Mayo">Mayo</option>
+                            <option value="Junio">Junio</option>
+                            <option value="Julio">Julio</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Septiembre">Septiembre</option>
+                            <option value="Octubre">Octubre</option>
+                            <option value="Noviembre">Noviembre</option>
+                            <option value="Diciembre">Diciembre</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Provincia</label>
+                        <select id="filterProvincia" onchange="aplicarFiltros()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Zona</label>
+                        <select id="filterZona" onchange="aplicarFiltros()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo Cliente</label>
+                        <select id="filterTipoCliente" onchange="aplicarFiltros()"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-600 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="filterInfo">Mostrando todos los registros</span>
+                </div>
+            </section>
+
+            <!-- Tabla de datos -->
+            <section class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-semibold text-gray-700">Listado de Datos</h2>
+                </div>
+
+                <div class="p-4">
+                    <div class="table-scroll overflow-x-auto">
+                        <table id="dataTable" class="w-full border-collapse text-sm">
+                            <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                                <tr id="tableHeaders">
+                                    <th class="px-6 py-3 text-left font-semibold">Seleccionar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="100" class="px-6 py-16 text-center text-gray-500">
+                                        <svg class="w-20 h-20 mx-auto mb-4 text-gray-400" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-lg font-semibold mb-1">Selecciona una opción para cargar datos
+                                        </p>
+                                        <p class="text-gray-400 text-sm">Usa los botones superiores para comenzar</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+       <!--</main>-->
+
+        <footer class="text-center mt-8 text-gray-600">
+            <p class="text-sm">
+                &copy; <span id="year"></span> |
+                <span class="font-semibold">Granja Rinconada Del Sur S.A.</span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Modal de formulario -->
+    <div id="formModal" class="modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-6xl w-full slide-down">
+                <div
+                    class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-2xl flex justify-between items-center">
+                    <h3 id="modalTitle" class="text-2xl font-bold">Formulario</h3>
+                    <button onclick="cerrarModal()"
+                        class="text-white hover:text-gray-200 text-3xl font-bold transition-transform hover:scale-110">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-content-scroll px-6 py-4">
+                    <form id="registroForm"></form>
+                </div>
+                <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-end gap-3">
+                    <button type="button" onclick="cerrarModal()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2.5 px-6 rounded-lg transition btn-hover-scale">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="guardarRegistro()"
+                        class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-2.5 px-6 rounded-lg transition btn-hover-scale">
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        window.cargarDatos = async function (tipo) {
+            if (window.capturasController && typeof window.capturasController.cargarDatos === 'function') {
+                await window.capturasController.cargarDatos(tipo);
+            } else {
+                console.error("capturasController.cargarDatos no está definido");
+            }
+        };
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Toggle filtros
+        const toggleBtn = document.getElementById('btnToggleFiltros');
+        const filterContent = document.getElementById('filterContent');
+        
+        if (toggleBtn && filterContent) {
+            //filterContent.classList.add('show');
+            
+            toggleBtn.addEventListener('click', () => {
+                const isOpen = filterContent.classList.contains('show');
+                const icon = toggleBtn.querySelector('i');
+                
+                if (isOpen) {
+                    filterContent.classList.remove('show');
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    filterContent.classList.add('show');
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            });
+        }
+    </script>
+
+    <!-- jQuery -->
+    <script src="assets/js/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
+     <link rel="stylesheet" href="assets/css/datatables.min.css">
+    <script src="assets/js/datatables.min.js"></script>
+
+    <!-- Scripts -->
+    <script src="js/config/config.js"></script>
+    <script src="js/config/constants.js"></script>
+    <script src="js/services/api.service.js"></script>
+    <script src="js/views/table.view.js"></script>
+    <script src="js/views/form.view.js"></script>
+    <script src="js/controllers/data.controller.js"></script>
+    <script src="js/controllers/ui.controller.js"></script>
+    <script src="js/controllers/form.controller.js"></script>
+    <script src="js/controllers/view.controller.js"></script>
+    <script src="js/controllers/filter.controller.js"></script>
+    <script src="js/utils/notifications.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="app.js"></script>
+    <script src="js/utils/funcionesVarias.js"></script>
+</body>
+
+</html>
+

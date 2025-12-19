@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tipo Tienda</title>
+
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="css/output.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-responsive.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-hover-scale {
+            transition: transform 0.2s ease;
+        }
+
+        .btn-hover-scale:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-down {
+            animation: slideDown 0.4s ease;
+        }
+
+        /* Estilos para el dropdown de columnas */
+        .dropdown-columns {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .column-toggle {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .column-toggle:hover {
+            background-color: #f3f4f6;
+        }
+
+        .column-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .dropdown-header {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Estilos DataTables */
+        .dataTables_wrapper {
+            padding: 0;
+        }
+
+        .dataTables_scrollBody {
+            max-height: 600px !important;
+        }
+
+        #tablaTipoTienda thead {
+            background: linear-gradient(to right, #2563eb, #1d4ed8) !important;
+        }
+
+        #tablaTipoTienda thead th {
+            color: white !important;
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            padding: 12px 8px !important;
+            border-bottom: none !important;
+        }
+
+        #tablaTipoTienda tbody td {
+            padding: 8px !important;
+            font-size: 0.875rem !important;
+            border-bottom: 1px solid #e5e7eb !important;
+        }
+
+        #tablaTipoTienda tbody tr:hover {
+            background-color: #f3f4f6 !important;
+        }
+
+        #tablaTipoTienda tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        /* Controles de DataTables */
+        .dataTables_length label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .dataTables_length select {
+            padding: 0.375rem 2rem 0.375rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            margin: 0 0.5rem;
+        }
+
+        .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .dataTables_filter input {
+            padding: 0.375rem 0.75rem !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.375rem !important;
+            font-size: 0.875rem !important;
+            width: 200px !important;
+            margin-left: 0.5rem !important;
+        }
+
+        .dataTables_filter input:focus {
+            outline: none !important;
+            border-color: #a855f7 !important;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1) !important;
+        }
+
+        .dataTables_info {
+            font-size: 0.875rem;
+            color: #6b7280;
+            padding: 0.5rem 0;
+        }
+
+        .dataTables_paginate {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem 0;
+        }
+
+        .dataTables_paginate .paginate_button {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dataTables_paginate .paginate_button:hover:not(.disabled) {
+            background: #f3f4f6;
+            border-color: #a855f7;
+        }
+
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .dataTables_paginate .paginate_button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Botones de acción */
+        .btn-tabla-editar {
+            background: #eab308;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-tabla-editar:hover {
+            background: #ca8a04;
+        }
+
+        .btn-tabla-eliminar {
+            background: #ef4444;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-tabla-eliminar:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="container mx-auto px-4 py-4">
+
+        <!-- Acciones -->
+        <section class="bg-white rounded-2xl card-shadow p-4 mb-4 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-tools text-purple-600"></i>
+                Acciones
+            </h2>
+            <div class="flex flex-wrap gap-3 items-center justify-between">
+                <div class="flex flex-wrap gap-3">
+                    <button id="btnNuevo"
+                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale">
+                        <i class="fas fa-plus mr-2"></i>
+                        Nuevo Registro
+                    </button>
+                </div>
+
+                <div class="dropdown-columns">
+                    <button id="btnToggleColumns" 
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg shadow btn-hover-scale flex items-center gap-2">
+                        <i class="fas fa-columns"></i>
+                        Mostrar/Ocultar columnas
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    
+                    <div id="columnDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <span>Seleccionar Columnas</span>
+                            <button id="btnCloseDropdown" class="text-white hover:text-gray-200">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="p-2">
+                            <label class="column-toggle">
+                                <input type="checkbox" class="column-checkbox" data-column="0" checked>
+                                <span>Código</span>
+                            </label>
+                            <label class="column-toggle">
+                                <input type="checkbox" class="column-checkbox" data-column="1" checked>
+                                <span>Nombre</span>
+                            </label>
+                            <label class="column-toggle">
+                                <input type="checkbox" class="column-checkbox" data-column="2" checked>
+                                <span>Cód. Producto</span>
+                            </label>
+                            <label class="column-toggle">
+                                <input type="checkbox" class="column-checkbox" data-column="3" checked disabled>
+                                <span>Opciones (siempre visible)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabla -->
+        <section class="bg-white rounded-2xl card-shadow p-6 slide-down">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-table text-purple-600"></i>
+                Registros de Tipo Tienda
+            </h2>
+            <div class="overflow-x-auto">
+                <!-- IMPORTANTE: Agregar ID a la tabla -->
+                <table id="tablaTipoTienda" class="min-w-full display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>CÓDIGO</th>
+                            <th>NOMBRE</th>
+                            <th>CÓD. PRODUCTO</th>
+                            <th>OPCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- DataTables llenará esto dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4"
+        style="display: none; overflow-y: auto;">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8" style="max-height: calc(100vh - 4rem);">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-t-2xl sticky top-0 z-10">
+                <h3 id="modalTitle" class="text-2xl font-bold text-white">Nuevo Registro</h3>
+            </div>
+            <form id="modalForm" class="p-6" style="max-height: calc(100vh - 12rem); overflow-y: auto;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Tipo *</label>
+                        <input type="text" id="modalNombre" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Código Producto</label>
+                        <input type="text" id="modalCodpro"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" id="btnCancelar"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnGuardar"
+                        class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50"
+        style="display: none;">
+        <div class="bg-white p-6 rounded-xl shadow-2xl">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600 mb-2"></i>
+            <p class="text-gray-700">Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+    <script src="js/config/config.js"></script>
+    <script src="js/config/config.tipo-tienda.js"></script>
+    <script src="js/services/tipo-tienda.service.js"></script>
+    <script src="js/controllers/tipo-tienda.controller.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            tipoTiendaController.init();
+        });
+    </script>
+</body>
+
+</html>

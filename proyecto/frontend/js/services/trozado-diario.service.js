@@ -1,0 +1,120 @@
+class TrozadoDiarioService {
+    constructor() {
+        this.config = window.TrozadoDiarioConfig;
+        this.baseUrl = this.config.API.BASE_URL;
+    }
+
+    async getFiltered(params = {}) {
+        try {
+            const queryParams = new URLSearchParams();
+            
+            // Parámetros de DataTables
+            if (params.draw) queryParams.append('draw', params.draw);
+            if (params.start !== undefined) queryParams.append('start', params.start);
+            if (params.length !== undefined) queryParams.append('length', params.length);
+            if (params.search?.value) queryParams.append('search', params.search.value);
+            
+            // Ordenamiento
+            if (params.order && params.order.length > 0) {
+                const orderColumn = params.columns[params.order[0].column].data;
+                queryParams.append('orderBy', orderColumn);
+                queryParams.append('orderDir', params.order[0].dir);
+            }
+            
+            // Filtros personalizados
+            if (params.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
+            if (params.fechaFin) queryParams.append('fechaFin', params.fechaFin);
+
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.FILTRO}?${queryParams}`;
+            console.log('Fetching:', url);
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error en la petición');
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error en getFiltered:', error);
+            throw error;
+        }
+    }
+
+    async create(data) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.CREAR}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al crear');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en create:', error);
+            throw error;
+        }
+    }
+
+    async update(data) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ACTUALIZAR}`;
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Error al actualizar');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en update:', error);
+            throw error;
+        }
+    }
+
+    async delete(id) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ELIMINAR}/${id}`;
+            const response = await fetch(url, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Error al eliminar');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en delete:', error);
+            throw error;
+        }
+    }
+
+    async exportToExcel(filters = {}) {
+        try {
+            const params = new URLSearchParams();
+            if (filters.fechaInicio) params.append('fechaInicio', filters.fechaInicio);
+            if (filters.fechaFin) params.append('fechaFin', filters.fechaFin);
+
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.EXCEL}?${params}`;
+            window.open(url, '_blank');
+        } catch (error) {
+            console.error('Error al exportar:', error);
+            throw error;
+        }
+    }
+
+    async ejecutarETL(fechaInicio, fechaFin) {
+        try {
+            const url = `${this.baseUrl}${this.config.API.ENDPOINTS.ETL}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fechaInicio, fechaFin })
+            });
+            if (!response.ok) throw new Error('Error al ejecutar ETL');
+            return await response.json();
+        } catch (error) {
+            console.error('Error en ejecutarETL:', error);
+            throw error;
+        }
+    }
+}
+
+window.TrozadoDiarioService = TrozadoDiarioService;
+
